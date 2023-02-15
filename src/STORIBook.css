@@ -1,0 +1,369 @@
+/*-- This stylesheet is only for ---*/
+/* STORI Book pages within Columbia */
+
+#chapters button {
+    height: inherit !important;
+}
+
+.soft-orange-box a {
+	color: #01557F;
+}
+
+.editorOnly {
+	display: none;
+}
+
+.closeBut {
+	display: none;
+}
+
+.tab {
+	border: 1px solid #ccc;
+	background-color: #f1f1f1;
+}
+
+.soft-orange-box p {
+	color: black;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+	background-color: #F1F1F1;
+}
+
+.table-bordered thead td,
+.table-bordered thead th {
+	color: white;
+	background-color: #005E8A;
+}
+
+.smAttribution {
+	width: 90%;
+	margin: auto;
+	text-align: center;
+}
+
+
+.table-hover tbody tr:hover td, .table-hover tbody tr:focus td  {
+	background: inherit;
+}
+
+.bookToolbar {
+	position: relative;
+	border: 1px solid #ccc;
+	border-top: 0;
+	height: 4em;
+	width: 100%;
+	background: #f1f1f1;
+	grid-column: 1 / span 3;
+}
+
+.FullBut {
+	margin: 1em;
+	width: 2em;
+	height: 2em;
+}
+
+.slideToolbar {
+	margin-bottom: 1em;
+}
+
+#tinymce .tabcontent {
+	border: 1px dashed black;
+}
+
+.able-window-toolbar {
+	height: 5em;
+}
+
+.able-window-toolbar .transcript-language-select-wrapper {
+	float: none;
+}
+
+#chapters ul li button svg {
+	stroke: black;
+	height: 2em;
+	width: 2em;
+	margin-right: 1em;
+	margin-left: -3em;
+}
+
+#chapters ul li button {
+	padding-left: 4em;
+}
+
+#chapters ul li button.active svg {
+	stroke: white;
+}
+
+.able-transcript-area {
+	border: none;
+}
+
+#profilePoster img {
+	aspect-ratio: initial;
+	max-height: 275px;
+	display: block;
+	padding: 0;
+	margin: auto;
+}
+
+#profilePoster {
+	margin: auto;
+}
+
+.prevbut {
+	transform: rotate(180deg)
+}
+
+.prevbut,
+.nextbut {
+	margin: 1em 0.25em;
+	width: 2em;
+	height: 2em;
+}
+
+.able {
+	margin: 0;
+}
+
+.able-transcript-area div {
+	width: 100%;
+}
+
+.tab ul {
+	list-style-type: none;
+	/* Remove bullets */
+	padding: 0;
+	/* Remove padding */
+	margin: 0;
+	/* Remove margins */
+}
+
+
+/* Style the buttons that are used to open the tab content */
+
+.tab button {
+	background-color: inherit;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	padding: 14px 16px;
+	transition: 0.3s;
+}
+
+.focusGroup :not(text, g, foreignObject, math, span, nobr) {
+	opacity: 0;
+}
+
+.focusGroup:focus {
+	outline: 0px solid transparent;
+}
+
+.focusGroup:hover :not(text, g, foreignObject, math, span, nobr) {
+	opacity: 0.5;
+}
+
+.focusGroup:focus :not(text, g, foreignObject) {
+	opacity: 1;
+}
+
+
+/* Change background color of buttons on hover */
+/* #ddd */
+
+.tab button:hover, .tab button:focus{
+	background-color: #ddd;
+}
+
+.table-hover tbody tr:hover, .table-hover tbody tr:focus{
+	color: #000;
+	background-color: #F7E8E2;
+}
+
+.tablinks.active {
+	background-color: #464646 !important;
+	color: white;
+}
+
+
+/* Create an active/current tablink class */
+
+.tab button.active {}
+
+#STORIBookParent:fullscreen .FullBut {
+	display: none;
+}
+
+#STORIBookParent:fullscreen #chapters{
+max-height: 100vh;
+	}
+
+
+#STORIBookParent:fullscreen #tabSpace {
+	background: white;
+	height: calc(100vh - 4em);
+}
+
+#STORIBookParent:fullscreen .transcript-box {
+	height: 40vh;
+}
+
+#STORIBookParent:fullscreen .able-transcript-area {
+	margin-bottom: 5em;
+	height: inherit;
+}
+
+#STORIBookParent:fullscreen .able-transcript {
+	height: inherit;
+}
+
+#STORIBookParent:fullscreen .closeBut {
+	margin: 1em;
+	width: 2em;
+	height: 2em;
+	display: inline-block;
+}
+
+.tabcontent svg,
+.tabcontent iframe {
+	width: 100%;
+}
+
+div.able-chapters-div ul li {
+	height: auto !important;
+}
+
+.tab1x2grid {
+	display: grid
+}
+
+.tab1x2grid :first-child {
+	grid-column: 1 / span 2
+}
+
+.tab1x2grid :nth-child(2) {
+	grid-column: 1 / span 1
+}
+
+.tab1x2grid :nth-child(3) {
+	grid-column: 2 / span 1
+}
+
+.print-only {
+	display: none;
+}
+
+@media(min-width: 800px) {
+	#chapters {
+		min-height: 640px;
+		overflow-y: auto;
+		max-height: 800px;
+	}
+	#tabSpace .tabcontent {
+		padding: 1em;
+	}
+	.tab {
+		grid-column: 1 / span 1;
+		border-bottom: 0;
+	}
+	#audiobox {
+		grid-column: 1/ span 1;
+	}
+	.able-transcript-area {
+		grid-column: 2 / span 2;
+	}
+	#tabSpace {
+		grid-column: 2 / span 2;
+	}
+	.gridParent {
+		display: grid;
+		grid-auto-columns: 1fr 1fr 1fr;
+	}
+	#tabSpace {
+		height: 640px;
+		overflow-y: scroll;
+		border: solid #ccc;
+		border-width: 1px 0px;
+	}
+}
+#tabSpace { 
+	overflow-y: auto;
+}
+@media(max-width: 750px) {
+	.FullBut {
+		display: none;
+	}
+}
+
+@media print {
+	.dont-print {
+		display: none;
+	}
+	.row {
+		display: block;
+	}
+	.tabcontent {
+		display: block !important;
+	}
+	.able-wrapper {
+		display: none;
+	}
+	.tabcontent:before {
+		content: attr(title);
+		string-set: title attr(title)
+	}
+	.tabcontent {
+		border: dashed black;
+		border-width: 1px 0px;
+	}
+	a[href^=http]:after {
+		content: " < " attr(href) "> ";
+	}
+	@page {
+		margin: 4em;
+	}
+	.able-transcript {
+		overflow-y: auto
+	}
+	.nextbut,
+	.prevbut {
+		display: none;
+	}
+	.able-transcript-area div {
+		overflow-y: auto;
+		height: auto;
+	}
+	.able-transcript-area {
+		height: auto;
+	}
+	.card,
+	img,
+	box,
+	p,
+	.able-transcript-block,
+	ul,
+	.print-together,
+	.print-only {
+		display: block;
+		page-break-inside: avoid !important;
+	}
+	#longDesc {
+		display: none;
+	}
+}
+
+#tinymce .editorOnly {
+	display: block;
+}
+
+#tinymce #tabSpace {
+	overflow-y: auto;
+	height: 100%;
+}
+
+.gridParent #chapters .able-popup {
+   top: 0px !important;
+}
+.chapter-wrapper  .able-audio .able-button-handler-transcript, .able-chapters-div .able-audio .able-button-handler-transcript {
+	display: none !important;
+	}
