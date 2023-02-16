@@ -8,17 +8,20 @@ import {
 	fastOption,
 	fastPickerList,
 	fastPickerListItem,
-	fastPicker
+	fastPicker,
+	fastProgressRing
 } from '@microsoft/fast-components';
-import { FASTElement, customElement, attr, html, volatile, css, repeat, when, observable, DOM, ref, children, $global } from '@microsoft/fast-element';
-
+import { FASTElement, customElement, attr, html, volatile, css, repeat, when, observable, DOM, ref, children, $global,slotted } from '@microsoft/fast-element';
+ 
 import {NavBar} from "./navbar";
 
 import {styles} from "./navbar-css";
 
 import ableplayercss from  '../ableplayer/build/ableplayer.min.css';
+import { StoriPage } from './StoriPage';
 
 NavBar;
+StoriPage;
 
 provideFASTDesignSystem()
 	.register(
@@ -26,6 +29,7 @@ provideFASTDesignSystem()
 		fastButton(),
 		fastListbox(),
 		fastOption(),
+		fastProgressRing()
 	);
 
 
@@ -87,7 +91,7 @@ const audioTemplate = html<StoriBook>`
 	</div>
 </div>
 `;
-
+ 
 
 const template = html<StoriBook>`
 
@@ -100,7 +104,7 @@ ${when(x=>x.isNarrow, html<StoriBook>`
 					<path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
 				</svg>
 			</fast-button>
-			<span style="width:calc(100% - 40px);flex-grow:1;align-self:center;font-weight:bold;">${x=>x.pagesArray[x.selectedIndex].title}</span>
+			<span style="width:calc(100% - 40px);flex-grow:1;align-self:center;font-weight:bold;">TITLE</span>
 		</nav>
 		<div class="backdrop-container" id="backdrop" @pointerdown="${x=>x.closeNav()}" ${ref('backdrop')}></div>
 		<div class="sidenav-container" ${ref('sidenavContainer')}>
@@ -114,20 +118,13 @@ ${when(x=>x.isNarrow, html<StoriBook>`
 			<label id="tocLabel">Table of Contents:</label>
 			<br/>
 			<fast-listbox aria-labelledby="tocLabel" >
-			${repeat(x => x.pagesArray, html<IPage>`
-				<fast-option id="b${(x,c)=>c.index+1}" selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
-					aria-selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
-					@click="${(x, c) => c.parent.buttonClick(x, c.index)}"
-					value="${(x, c) => c.index}">
-					${x => x.title}
-				</fast-option>
-			`, { positioning: true })}
+			
 			</fast-listbox>
 		</div>		
 
 	<div id="contentWithNavBar" class="isNarrow">
 		<div class="" id="mainContent" style="height: ${x=>x.viewHeight*0.7}px;">
-			<div :innerHTML="${x => x.content}"></div>
+			<slot ></slot>
 		</div>
 	</div>
 	
@@ -147,7 +144,7 @@ ${when(x=>!x.isNarrow, html<StoriBook>`
 			<label id="tocLabel">Table of Contents:</label>
 			<br/>
 			<fast-listbox aria-labelledby="tocLabel" >
-			${repeat(x => x.pagesArray, html<IPage>`
+			${repeat(x => x.pages, html<StoriPage>`
 				<fast-option id="b${(x,c)=>c.index+1}" selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
 					aria-selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
 					@click="${(x, c) => c.parent.buttonClick(x, c.index)}"
@@ -164,7 +161,7 @@ ${when(x=>!x.isNarrow, html<StoriBook>`
 	</div>
 	<div id="contentWithNavBar">
 		<div class="" id="mainContent" style="height: ${x=>x.viewHeight*0.7}px;">
-			<div :innerHTML="${x => x.content}"></div>
+			<slot ${slotted("nodes")}}></slot>
 		</div>
 		${x=>navBarTemplate}		
 	</div>
@@ -197,6 +194,10 @@ export class StoriBook extends FASTElement {
 	ablePlayer: any;
 	chaptersDiv?: HTMLDivElement;
 
+	mainSlot?: HTMLSlotElement;
+	@observable nodes: Node[] = [];
+	@observable pages: StoriPage[] = [];
+
 	canPlayThroughRef?: ()=>void;
 	timeupdateRef?: (ev:Event)=>void;
 	chapterCues: ChapterCue[] = [];
@@ -216,38 +217,35 @@ export class StoriBook extends FASTElement {
 	@attr({ mode: 'boolean' }) overrideChapterNames: boolean = false;
 
 	@observable selectedIndex: number = -1;
-	@observable content: string = '';
-	@attr pages: string = '[]';
-	private _pagesArray: IPage[] = [];
-	@volatile get pagesArray(): IPage[] {
-		if (this.overrideChapterNames){
-			if (this._pagesArray.length == 0){
-				try {
-					this._pagesArray = JSON.parse(this.pages);
-				} catch (err) {
-					console.log(err);
-					console.log(this.pages);
-					this._pagesArray = [];
+
+
+	@attr defaultPageNumber: number=1;
+		
+
+	nodesChanged() {
+		this.selectedIndex = this.defaultPageNumber - 1;
+		if (this.nodes != undefined){
+			let index=0;
+			let pages : StoriPage[] = [];
+			for (const node of this.nodes){
+				if (node.nodeName && node.nodeName.toUpperCase() === "STORI-PAGE"){
+					pages.push(node as StoriPage);
+					if (index == this.selectedIndex){
+						(node as HTMLElement).setAttribute('active', 'true');
+					} else {
+						(node as HTMLElement).removeAttribute('active');
+					}
+					index++;
 				}
 			}
-			return this._pagesArray;
-		} else {
-			try {
-				const a = JSON.parse(this.pages);
-				return a;
-			} catch (err) {
-				console.log(err);
-				console.log(this.pages);
-				return [];
-			}
+			this.pages = pages;
 		}
-	}
+	  }
 
 	connectedCallback(): void {
 		super.connectedCallback();
-		if (this.pagesArray.length > 0){
-			this.buttonClick(this.pagesArray[0],0);
-		}
+		
+
 		const mediaQuery = window.matchMedia('(min-width: 768px)');
 		mediaQuery.addEventListener("change", this.queryChanged.bind(this));
 		this.isNarrow = !mediaQuery.matches;
@@ -331,12 +329,12 @@ export class StoriBook extends FASTElement {
 					title: chapterName,
 					start: startTime
 				});
-				if (this.overrideChapterNames && this.pagesArray.length > c){
-					let page :IPage = {title: chapterName, src: this.pagesArray[c].src};
-					//page.title = chapterName;
-					this.pagesArray.splice(c,1,page);
-					//this.pagesArray[c].title = chapterName;
-				}
+				// if (this.overrideChapterNames && this.pagesArray.length > c){
+				// 	let page :IPage = {title: chapterName, src: this.pagesArray[c].src};
+				// 	//page.title = chapterName;
+				// 	this.pagesArray.splice(c,1,page);
+				// 	//this.pagesArray[c].title = chapterName;
+				// }
 			}
 		}
 	}
@@ -474,9 +472,9 @@ export class StoriBook extends FASTElement {
 		this.isNarrow = !e.matches;
 	}
 
-	pagesChanged(oldval: string, newval: string): void {
-		let d = this.pagesArray;
-	}
+	// pagesChanged(oldval: string, newval: string): void {
+	// 	// let d = this.pagesArray;
+	// }
 
 	setViewportHeight(){
 		if (document.location.ancestorOrigins.length){
@@ -535,35 +533,42 @@ export class StoriBook extends FASTElement {
 				}
 
 				this.selectedIndex = index;
-				const response = await fetch(page.src);
-				const result = await response.text();
-				this.content = result;
+
+				for (let i=0; i<this.pages.length; i++){
+					if (i == this.selectedIndex){
+						this.pages[i].setAttribute('active', 'true');
+					} else {
+						this.pages[i].removeAttribute('active');
+					}
+				}
+				
+				// const response = await fetch(page.src);
+				// const result = await response.text();
+				// this.content = result;
 				//this.videoElement?.addEventListener('timeupdate', this.timeupdateRef!);
 				
 			}
 		} catch (ex) {
 			console.log(ex);
-			this.content = "";
+			// this.content = "";
 		}
 	}
 
 	nextButton(){
-		if (this.pagesArray.length > 0){
-			if (this.selectedIndex < this.pagesArray.length -1){
-				const index = this.selectedIndex+1;
-				this.buttonClick(this.pagesArray[index],index);
+		if (this.pages.length > 0){
+			if (this.selectedIndex < this.pages.length - 1){
+				const index = this.selectedIndex + 1;
+				this.buttonClick(this.pages[index], index);
 			}
-			
 		}
 	}
 
 	prevButton(){
-		if (this.pagesArray.length > 0){
+		if (this.pages.length > 0){
 			if (this.selectedIndex > 0){
-				const index = this.selectedIndex-1;
-				this.buttonClick(this.pagesArray[index],index);
+				const index = this.selectedIndex - 1;
+				this.buttonClick(this.pages[index], index);
 			}
-			
 		}
 	}
 
