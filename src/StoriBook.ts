@@ -80,32 +80,17 @@ const audioTemplate = html<StoriBook>`
 
 const template = html<StoriBook>`
 
-<div id="rootContainer" class="rootContainer" ${ref('rootContainer')}>
-${when(x=>x.isNarrow, html<StoriBook>`
-	<div style="display:flex; flex-direction:column;width:100%;">
-		<nav style="display:flex;background:#EEE;" >
-			<fluent-button @click=${x=>x.openNav()}>
-				<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-					<path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
-				</svg>
-			</fluent-button>
-			<span style="width:calc(100% - 40px);flex-grow:1;align-self:center;font-weight:bold;">${x=>x.pages !== null && x.pages.length > 0 ? x.pages[x.selectedIndex].title : ""}</span>
-		</nav>
-		<div class="backdrop-container" id="backdrop" @pointerdown="${x=>x.closeNav()}" ${ref('backdrop')}></div>
-		<div class="sidenav-container" ${ref('sidenavContainer')}>
-			<span class="drawer-close-button">
-			<fluent-button  @click="${x=>x.closeNav()}">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-					<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-				</svg>
-			</fluent-button>
-			</span>
-			<label id="tocLabel">Table of Contents:</label>
-
-			<fluent-listbox
-				@keyup="${(x,c)=>x.buttonClick((c.event.target as Listbox).selectedIndex)}"
-				style="width:100%;"
-				>
+<div id="root" class="root" ${ref('rootContainer')}>
+	<div id="container" class="container ${x=> x.menuOpen ? "menu_open" : ""}">
+		<div class="toc ${x=> x.menuOpen ? "toc_menu_open" : ""}" id="toc" @click=${x=>x.closeNav()}>
+			<div>
+				<label id="tocLabel">Table of Contents:</label>
+				
+				<br/>
+				<fluent-listbox aria-labelledby="tocLabel" 
+					@keyup="${(x,c)=>x.buttonClick((c.event.target as Listbox).selectedIndex)}"
+					style="width:100%;"
+					>
 				${repeat(x => x.pages, html<StoriPage>`
 					<fluent-option id="b${(x,c)=>c.index+1}" 
 						@click="${(x, c) =>c.parent.buttonClick(c.index)}"
@@ -117,65 +102,35 @@ ${when(x=>x.isNarrow, html<StoriBook>`
 						<div style="word-wrap:break-word;white-space:pre-wrap;">${x => x.title}</div>
 					</fluent-option>
 				`, { positioning: true })}
-			</fluent-listbox>
-			HHH
+				</fluent-listbox>
 
-		</div>		
-
-	<div id="contentWithNavBar" class="isNarrow">
-		<div class="" id="mainContent" style="height: ${x=>x.viewHeight*0.7}px;">
-			<slot ${slotted("nodes")}}></slot>
+				<div style="max-width:300px; max-height:200px;">
+				${x=>audioTemplate}
+				</div>
+			</div>			
 		</div>
-	</div>
-	
-	${x=>navBarTemplate}		
 
-	<div style="width:40px; height:40px;">
-	${x=>audioTemplate}
-	</div>
-
-</div>	
-
-`)}
-
-${when(x=>!x.isNarrow, html<StoriBook>`
-	<div class="" id="toc">
-		<div>
-			<label id="tocLabel">Table of Contents:</label>
-			
-			<br/>
-			<fluent-listbox aria-labelledby="tocLabel" 
-				@keyup="${(x,c)=>x.buttonClick((c.event.target as Listbox).selectedIndex)}"
-				style="width:100%;"
-				>
-			${repeat(x => x.pages, html<StoriPage>`
-				<fluent-option id="b${(x,c)=>c.index+1}" 
-					@click="${(x, c) =>c.parent.buttonClick(c.index)}"
-					selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
-					aria-selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
-					role="button"
-					value="${(x, c) => c.index}"
-					style="height:auto; min-height: calc((var(--base-height-multiplier) + var(--density)) * var(--design-unit) * 1px);">
-					<div style="word-wrap:break-word;white-space:pre-wrap;">${x => x.title}</div>
-				</fluent-option>
-			`, { positioning: true })}
-			</fluent-listbox>
-
-			<div style="max-width:300px; max-height:200px;">
-			${x=>audioTemplate}
+		<div id="contentWithNavBarOverlay">
+			<div class="overlay ${x=> x.menuOpen ? "overlay_active" : ""}" @click=${x=>x.closeNav()}></div>
+			<div id="contentWithNavBar" >
+				<div id="topMenuBar" >
+					<fluent-button @click=${x=>x.openNav()}>
+						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+							<path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+						</svg>
+					</fluent-button>
+					<span style="width:calc(100% - 40px);flex-grow:1;align-self:center;font-weight:bold;">${x=>x.pages !== null && x.pages.length > 0 ? x.pages[x.selectedIndex].title : ""}</span>
+				</div>
+				<div class="" id="mainContent" >
+					<slot ${slotted("nodes")}}></slot>
+				</div>
+				${x=>navBarTemplate}		
 			</div>
-		</div>			
-	</div>
-	<div id="contentWithNavBar">
-		<div class="" id="mainContent" style="height: ${x=>x.viewHeight*0.7}px;">
-			<slot ${slotted("nodes")}}></slot>
 		</div>
-		${x=>navBarTemplate}		
 	</div>
-
 
 </div>
-`)}
+
 	
 
 </div>
@@ -189,7 +144,6 @@ ${when(x=>!x.isNarrow, html<StoriBook>`
 })
 export class StoriBook extends FASTElement {
 	rootContainer?: HTMLDivElement;
-	backdrop?: HTMLDivElement;
 	sidenavContainer?: HTMLDivElement;
 	videoElement?: HTMLVideoElement;
 
@@ -200,6 +154,7 @@ export class StoriBook extends FASTElement {
 	@observable nodes: Node[] = [];
 	@observable pages: StoriPage[] = [];
 	@observable listItems: ListboxOption[] = []; 
+	@observable menuOpen:boolean=false;
 
 	canPlayThroughRef?: ()=>void;
 	timeupdateRef?: (ev:Event)=>void;
@@ -265,7 +220,7 @@ export class StoriBook extends FASTElement {
 
 		const mediaQuery = window.matchMedia('(min-width: 768px)');
 		mediaQuery.addEventListener("change", this.queryChanged.bind(this));
-		this.isNarrow = !mediaQuery.matches;
+		//this.isNarrow = !mediaQuery.matches;
 
 		//if this is inside an iframe, probably need to get the parent's view height
 		if (document.location.ancestorOrigins.length){
@@ -486,7 +441,7 @@ export class StoriBook extends FASTElement {
 
 	queryChanged(e: MediaQueryListEvent){
 		console.log(e);
-		this.isNarrow = !e.matches;
+		//this.isNarrow = !e.matches;
 	}
 
 	// pagesChanged(oldval: string, newval: string): void {
@@ -512,29 +467,31 @@ export class StoriBook extends FASTElement {
 	}
 
 	openNav():void{
-		if (this.backdrop!=null && this.sidenavContainer!= null && this.rootContainer != null){
-			const bb = this.rootContainer.getBoundingClientRect();
-			console.log(bb);
-			this.backdrop.style.display = "block";
-			this.sidenavContainer.style.width="50%";
-			 this.sidenavContainer.style.top = bb.top+"px";
-			 this.sidenavContainer.style.left = bb.left + "px";
-			 this.sidenavContainer.style.height = bb.height + "px";
+		this.menuOpen=true;
+		// if (this.overlay!=null && this.sidenavContainer!= null && this.rootContainer != null){
+		// 	const bb = this.rootContainer.getBoundingClientRect();
+		// 	console.log(bb);
+		// 	this.overlay.style.display = "block";
+		// 	// this.sidenavContainer.style.width="50%";
+		// 	//  this.sidenavContainer.style.top = bb.top+"px";
+		// 	//  this.sidenavContainer.style.left = bb.left + "px";
+		// 	//  this.sidenavContainer.style.height = bb.height + "px";
 
-			const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    		const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-			// window.addEventListener("scroll", (ev:Event)=>{
-			// 	ev.preventDefault();
-			// 	window.scrollTo(scrollLeft, scrollTop);
-			// });
-			//this.sidenavContainer.style.height = bb.height + "px";
-		}
+		// 	const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    	// 	const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+		// 	// window.addEventListener("scroll", (ev:Event)=>{
+		// 	// 	ev.preventDefault();
+		// 	// 	window.scrollTo(scrollLeft, scrollTop);
+		// 	// });
+		// 	//this.sidenavContainer.style.height = bb.height + "px";
+		// }
 	}
 	closeNav():void{
-		if (this.backdrop!=null && this.sidenavContainer!= null){
-			this.backdrop.style.display = "none";
-			this.sidenavContainer.style.width="0";
-		}
+		this.menuOpen=false;
+		// if (this.backdrop!=null && this.sidenavContainer!= null){
+		// 	this.backdrop.style.display = "none";
+		// 	this.sidenavContainer.style.width="0";
+		// }
 	}
 
 	keydown(event:KeyboardEvent, page: StoriPage, index:number){

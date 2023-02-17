@@ -4,31 +4,38 @@ import ableplayercss from  '../ableplayer/build/ableplayer.min.css';
 export const styles = css`
 
 ${ableplayercss.toString()}
-
-#rootContainer{
-	display:flex;
+#root{
+	width:100%;
+	height: 80vh;
+}
+.container{
+	display:grid;
+	grid-template-columns: 300px auto;
+	grid-template-rows: auto 32px;
+	height:100%;
 	
 }
-#toc{
-	flex-grow:1;
-	flex-shrink:0;
-	max-width:340px;
+.toc{
 	background:#EEE;
+	grid-column-start: 1;
+	grid-column-end: 1;
 }
-#toc fast-listbox{
-	width:100%;
+#contentWithNavBarOverlay{
+	position:relative;
 }
-.sidenav-container fast-listbox{
-	width:100%;
-}
+
 #contentWithNavBar{
 	flex-grow: 8;
 	display:flex;
 	flex-direction:column;
 	width:100%;
+	height:100%;
 }
 #mainContent{
+	grid-column-start: 2;
+	grid-column-end: 2;
 	padding:5px;
+	height:100%;
 	/*height:70vh;*/
 	width:calc(100% - 10px);
 }
@@ -38,6 +45,64 @@ ${ableplayercss.toString()}
 	flex-direction:row;
 	justify-content:flex-end;
 	background:#EEE;
+}
+#topMenuBar{
+	display:none; 
+	flex-direction:row;
+	width:100%;
+	background: #EEE;
+}
+
+.overlay{
+	display:none;
+}
+
+@media screen and (max-width: 767px){
+	.toc {
+		opacity:0;
+	}
+	.toc_menu_open{
+		opacity:1;
+	}
+	.container{
+		margin: 0 -300px;
+		width: calc(100% + 300px);
+	}
+	.menu_open{
+		margin: 0;
+		width: calc(100%);
+	}
+
+	#mainContent {
+		
+	}
+	#topMenuBar{
+		display:flex;
+	}
+	.overlay{
+		opacity: 0;
+		display: block;
+		position: absolute;
+		width:100%;
+		height:100%;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		background: #1C1C1C;
+		transition: opacity 0.2s ease-in-out;
+	}
+	.overlay_active{
+		opacity:0.85;
+		z-index:2;
+	}
+}
+
+#toc fast-listbox{
+	width:100%;
+}
+.sidenav-container fast-listbox{
+	width:100%;
 }
 
 .backdrop-container{
@@ -124,22 +189,22 @@ ${ableplayercss.toString()}
 @media (min-width:1025px) { /* big landscape tablets, laptops, and desktops */ }
 @media (min-width:1281px) { /* hi-res laptops and desktops */ }
 */
-#rootContainer:fullscreen {
+#root:fullscreen {
 	max-height: 100vh;
 }
-#rootContainer:fullscreen #contentWithNavBar{
+#root:fullscreen #contentWithNavBar{
 	max-height: 100vh;
 	height: 100vh;
 }
-#rootContainer:fullscreen #contentWithNavBar.isNarrow{
+#root:fullscreen #contentWithNavBar.isNarrow{
 	max-height: 100vh;
 	height: calc(100vh - 80px);
 }
-#rootContainer:fullscreen #toc {
+#root:fullscreen #toc {
 	max-height: 100vh;
 	height: 100vh;
 }
-#rootContainer:fullscreen #mainContent{
+#root:fullscreen #mainContent{
 	background:#FFF;
 	max-height:none;
 	height:100% !important;
