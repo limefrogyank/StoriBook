@@ -9,6 +9,7 @@ ${when(x=>x.active, html<StoriPage>`
 	${when(x=>x.loading, html<StoriPage>`
 	<div style="display:flex;align-items:center;justify-content:center;"><fast-progress-ring></fast-progress-ring></div>
 	`)}
+	${when(x=>x.error !== "", html<StoriPage>`${x=>x.error}`)}
 	<div :innerHTML="${x => x.content}"></div>
 `)}
 
@@ -26,6 +27,7 @@ export class StoriPage extends FASTElement {
 	@attr({ mode: 'boolean' }) active: boolean=false;
 
 	@observable content:string = "";
+	@observable error:string= "";
 	loadPromise:Promise<string> | null = null;
 
 	@observable loading:boolean = true;
@@ -37,15 +39,30 @@ export class StoriPage extends FASTElement {
 
 	activeChanged(){
 		if (this.active && this.loadPromise == null && this.content === ""){
-			this.loadPromise = fetch(this.src).then(response =>{
-				return response.text();
-			}).then(result=>{
-				this.loading=false;
-				this.content = result;
-				return result;
-			});
-			
-			
+			this.loadPageAsync();
+			// this.loadPromise = fetch(this.src).then(response =>{
+			// 	return response.text();
+			// }).then(result=>{
+			// 	this.loading=false;
+			// 	this.content = result;
+			// 	return result;
+			// });
+		}
+	}
+
+	public async loadPageAsync():Promise<boolean> {
+		try {
+			this.loading=true;
+			const response = await fetch(this.src);
+			const result = await response.text();
+			this.content = result;
+			this.loading=false;
+			return true;
+		} catch (ex){
+			console.log(ex);
+			this.error="Error loading page!";
+			this.loading=false;
+			return false;
 		}
 	}
 
