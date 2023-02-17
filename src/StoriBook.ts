@@ -1,36 +1,23 @@
-import {
-	provideFASTDesignSystem,
-	fastCard,
-	fastButton,
-	StandardLuminance,
-	baseLayerLuminance,
-	fastListbox,
-	fastOption,
-	fastPickerList,
-	fastPickerListItem,
-	fastPicker,
-	fastProgressRing
-} from '@microsoft/fast-components';
+
+import { provideFluentDesignSystem, fluentOption, fluentListbox, fluentButton, Listbox, StandardLuminance, baseLayerLuminance  } from '@fluentui/web-components';
 import { FASTElement, customElement, attr, html, volatile, css, repeat, when, observable, DOM, ref, children, $global,slotted } from '@microsoft/fast-element';
  
 import {NavBar} from "./navbar";
 
-import {styles} from "./navbar-css";
+import {styles} from "./StoriBook-css";
 
 import ableplayercss from  '../ableplayer/build/ableplayer.min.css';
 import { StoriPage } from './StoriPage';
+import { FoundationElement, ListboxOption } from '@microsoft/fast-foundation';
 
 NavBar;
 StoriPage;
 
-provideFASTDesignSystem()
-	.register(
-		fastCard(),
-		fastButton(),
-		fastListbox(),
-		fastOption(),
-		fastProgressRing()
-	);
+provideFluentDesignSystem().register(
+	fluentListbox(),
+	fluentOption(),
+	fluentButton()
+);
 
 
 const myPolicy = (window as any).trustedTypes.createPolicy('my-policy', {
@@ -48,31 +35,29 @@ window.addEventListener('DOMContentLoaded', () => baseLayerLuminance.setValueFor
 const navBarTemplate= html<StoriBook>`
 
 <nav id="navbar" >
-	<fast-button @click="${x => x.prevButton()}">
-		<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-caret-left-square" viewBox="0 0 16 16">
-			<path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-			<path d="M10.205 12.456A.5.5 0 0 0 10.5 12V4a.5.5 0 0 0-.832-.374l-4.5 4a.5.5 0 0 0 0 .748l4.5 4a.5.5 0 0 0 .537.082z"/>
+	<fluent-button style="width:40;height:40;" @click="${x => x.prevButton()}" appearance="accent">
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+			<path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
 		</svg>
-	</fast-button>
-	<fast-button @click="${x => x.nextButton()}">
-		<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-caret-right-square" viewBox="0 0 16 16">
-			<path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-			<path d="M5.795 12.456A.5.5 0 0 1 5.5 12V4a.5.5 0 0 1 .832-.374l4.5 4a.5.5 0 0 1 0 .748l-4.5 4a.5.5 0 0 1-.537.082z"/>
+	</fluent-button>
+	<fluent-button @click="${x => x.nextButton()}" appearance="accent">
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+			<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
 		</svg>
-	</fast-button>
-	<fast-button @click="${x => x.fullScreenButton()}">
+	</fluent-button>
+	<fluent-button @click="${x => x.fullScreenButton()}" appearance="accent">
 		${when(x => x.isFullscreen, html<StoriBook>`
-		<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-fullscreen-exit" viewBox="0 0 16 16">
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen-exit" viewBox="0 0 16 16">
 			<path d="M5.5 0a.5.5 0 0 1 .5.5v4A1.5 1.5 0 0 1 4.5 6h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 10 4.5v-4a.5.5 0 0 1 .5-.5zM0 10.5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 6 11.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zm10 1a1.5 1.5 0 0 1 1.5-1.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4z"/>
 		</svg>
 		`)}
 		${when(x => !x.isFullscreen, html<StoriBook>`
-		<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-fullscreen" viewBox="0 0 16 16">
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen" viewBox="0 0 16 16">
 			<path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
 		</svg>
 		`)}					
 		
-	</fast-button>
+	</fluent-button>
 		
 </nav>
 `
@@ -99,40 +84,55 @@ const template = html<StoriBook>`
 ${when(x=>x.isNarrow, html<StoriBook>`
 	<div style="display:flex; flex-direction:column;width:100%;">
 		<nav style="display:flex;background:#EEE;" >
-			<fast-button @click=${x=>x.openNav()}>
+			<fluent-button @click=${x=>x.openNav()}>
 				<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
 					<path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
 				</svg>
-			</fast-button>
-			<span style="width:calc(100% - 40px);flex-grow:1;align-self:center;font-weight:bold;">TITLE</span>
+			</fluent-button>
+			<span style="width:calc(100% - 40px);flex-grow:1;align-self:center;font-weight:bold;">${x=>x.pages !== null && x.pages.length > 0 ? x.pages[x.selectedIndex].title : ""}</span>
 		</nav>
 		<div class="backdrop-container" id="backdrop" @pointerdown="${x=>x.closeNav()}" ${ref('backdrop')}></div>
 		<div class="sidenav-container" ${ref('sidenavContainer')}>
 			<span class="drawer-close-button">
-			<fast-button  @click="${x=>x.closeNav()}">
+			<fluent-button  @click="${x=>x.closeNav()}">
 				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
 					<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
 				</svg>
-			</fast-button>
+			</fluent-button>
 			</span>
 			<label id="tocLabel">Table of Contents:</label>
-			<br/>
-			<fast-listbox aria-labelledby="tocLabel" >
-			
-			</fast-listbox>
+
+			<fluent-listbox
+				@keyup="${(x,c)=>x.buttonClick((c.event.target as Listbox).selectedIndex)}"
+				style="width:100%;"
+				>
+				${repeat(x => x.pages, html<StoriPage>`
+					<fluent-option id="b${(x,c)=>c.index+1}" 
+						@click="${(x, c) =>c.parent.buttonClick(c.index)}"
+						selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
+						aria-selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
+						role="button"
+						value="${(x, c) => c.index}"
+						style="height:auto; min-height: calc((var(--base-height-multiplier) + var(--density)) * var(--design-unit) * 1px);">
+						<div style="word-wrap:break-word;white-space:pre-wrap;">${x => x.title}</div>
+					</fluent-option>
+				`, { positioning: true })}
+			</fluent-listbox>
+			HHH
+
 		</div>		
 
 	<div id="contentWithNavBar" class="isNarrow">
 		<div class="" id="mainContent" style="height: ${x=>x.viewHeight*0.7}px;">
-			<slot ></slot>
+			<slot ${slotted("nodes")}}></slot>
 		</div>
 	</div>
 	
-${x=>navBarTemplate}		
+	${x=>navBarTemplate}		
 
-<div style="width:40px; height:40px;">
-${x=>audioTemplate}
-</div>
+	<div style="width:40px; height:40px;">
+	${x=>audioTemplate}
+	</div>
 
 </div>	
 
@@ -142,17 +142,24 @@ ${when(x=>!x.isNarrow, html<StoriBook>`
 	<div class="" id="toc">
 		<div>
 			<label id="tocLabel">Table of Contents:</label>
+			
 			<br/>
-			<fast-listbox aria-labelledby="tocLabel" >
+			<fluent-listbox aria-labelledby="tocLabel" 
+				@keyup="${(x,c)=>x.buttonClick((c.event.target as Listbox).selectedIndex)}"
+				style="width:100%;"
+				>
 			${repeat(x => x.pages, html<StoriPage>`
-				<fast-option id="b${(x,c)=>c.index+1}" selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
+				<fluent-option id="b${(x,c)=>c.index+1}" 
+					@click="${(x, c) =>c.parent.buttonClick(c.index)}"
+					selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
 					aria-selected="${(x,c) => c.parent.selectedIndex == c.index ? "true":"false"}" 
-					@click="${(x, c) => c.parent.buttonClick(x, c.index)}"
-					value="${(x, c) => c.index}">
-					${x => x.title}
-				</fast-option>
+					role="button"
+					value="${(x, c) => c.index}"
+					style="height:auto; min-height: calc((var(--base-height-multiplier) + var(--density)) * var(--design-unit) * 1px);">
+					<div style="word-wrap:break-word;white-space:pre-wrap;">${x => x.title}</div>
+				</fluent-option>
 			`, { positioning: true })}
-			</fast-listbox>
+			</fluent-listbox>
 
 			<div style="max-width:300px; max-height:200px;">
 			${x=>audioTemplate}
@@ -175,11 +182,6 @@ ${when(x=>!x.isNarrow, html<StoriBook>`
 `;
 
 
-interface IPage {
-	title: string,
-	src: string
-}
-
 @customElement({
 	name: 'stori-book',
 	template,
@@ -197,6 +199,7 @@ export class StoriBook extends FASTElement {
 	mainSlot?: HTMLSlotElement;
 	@observable nodes: Node[] = [];
 	@observable pages: StoriPage[] = [];
+	@observable listItems: ListboxOption[] = []; 
 
 	canPlayThroughRef?: ()=>void;
 	timeupdateRef?: (ev:Event)=>void;
@@ -242,8 +245,22 @@ export class StoriBook extends FASTElement {
 		}
 	  }
 
+	listItemsChanged(){
+		for (const listItem of this.listItems){
+			if (listItem.shadowRoot != null){
+				// var style = document.createElement('style');
+				// style.innerHTML = `
+				// .content { text-overflow: unset !important; height:auto; min-height: calc((var(--base-height-multiplier) + var(--density)) * var(--design-unit) * 1px);} 
+				// :host { height:auto; min-height: calc((var(--base-height-multiplier) + var(--density)) * var(--design-unit) * 1px); }`;
+				// listItem.shadowRoot.appendChild( style );
+			}
+		}
+	}
+
+	
 	connectedCallback(): void {
 		super.connectedCallback();
+		
 		
 
 		const mediaQuery = window.matchMedia('(min-width: 768px)');
@@ -520,7 +537,14 @@ export class StoriBook extends FASTElement {
 		}
 	}
 
-	async buttonClick(page: IPage, index: number) {
+	keydown(event:KeyboardEvent, page: StoriPage, index:number){
+		//if (event.code == "32" || event.code == "13"){
+			event.preventDefault();
+			this.buttonClick(index);
+		//}
+	}
+
+	async buttonClick(index: number) {
 		this.closeNav();
 		try {
 			if (this.selectedIndex != index){
@@ -558,7 +582,7 @@ export class StoriBook extends FASTElement {
 		if (this.pages.length > 0){
 			if (this.selectedIndex < this.pages.length - 1){
 				const index = this.selectedIndex + 1;
-				this.buttonClick(this.pages[index], index);
+				this.buttonClick(index);
 			}
 		}
 	}
@@ -567,7 +591,7 @@ export class StoriBook extends FASTElement {
 		if (this.pages.length > 0){
 			if (this.selectedIndex > 0){
 				const index = this.selectedIndex - 1;
-				this.buttonClick(this.pages[index], index);
+				this.buttonClick(index);
 			}
 		}
 	}
