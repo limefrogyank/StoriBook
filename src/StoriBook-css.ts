@@ -57,6 +57,7 @@ ${ableplayercss.toString()}
 	flex-direction:row;
 	width:100%;
 	background: #EEE;
+	align-items:center;
 }
 
 .overlay{
