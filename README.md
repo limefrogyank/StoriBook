@@ -26,13 +26,13 @@ The `title` attribute on each `<stori-page>` is required for the menu label and 
 
 `viewHeight` is a special attribute that lets you use viewheight css (e.g. 'height: 80vh') inside an iframe.  For example, on D2L Brightspace, applying height: 80vh will not work on an element in a Content page, because that content page is inside an iframe and the iframe is set to expand as much as the content.  This setting lets you use that feature inside an iframe as if it was not in one.  The default value is 80 (as in 80vh).  If you want a different view height you can change it here.  If you want to use a fixed height such as '500px', you can instead use plain css or add it to the `<stori-book>` style tag.
 
-### Files in your LMS ###
+## Files in your LMS ##
 
 On D2L, you could simply make a regular Content page that is visible to students and put the `<stori-book>` in that page.  Then, you make several more Content pages that will be the content for your `<stori-page>`s.  Make them invisible so students won't be able to see them.  If your links are relative, they will still be visible to the students when they visit the main page with the `<stori-book>`.
 
 ![image](https://user-images.githubusercontent.com/7821384/220493796-aab4f184-d6dc-4ceb-a307-5940d60f6f1d.png)
 
 
-### Credits ###
+## Credits ##
 This is based on design work started by Jennifer Lucas.
 
