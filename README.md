@@ -24,7 +24,7 @@ The `title` attribute on each `<stori-page>` is required for the menu label and 
 
 `default-page-number` can adjust the starting page that is shown when this element loads.  It uses a one-based index and the starting page will always be page 1 (the first one) if the attribute is not used.
 
-`viewHeight` is a special attribute that lets you use viewheight css (e.g. 'height: 80vh') inside an iframe.  For example, on D2L Brightspace, applying height: 80vh will not work on an element in a Content page, because that content page is inside an iframe and the iframe is set to expand as much as the content.  This setting lets you use that feature inside an iframe as if it was not in one.  The default value is 80 (as in 80vh).  If you want a different view height you can change it here.  If you want to use a fixed height such as '500px', you can instead use plain css or add it to the `<stori-book>` style tag.
+`view-height` is a special attribute that lets you use view height css (e.g. 'height: 80vh') inside an iframe.  For example, on D2L Brightspace, applying height: 80vh will not work on an element in a Content page, because that content page is inside an iframe and the iframe is set to expand as much as the content.  This setting lets you use that feature inside an iframe as if it was not in one.  The default value is 80 (as in 80vh).  If you want a different view height you can change it here.  If you want to use a fixed height such as '500px', you can instead use plain css or add it to the `<stori-book>` style tag.
 
 ## Files in your LMS ##
 
