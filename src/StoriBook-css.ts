@@ -1,27 +1,57 @@
-import { css } from '@microsoft/fast-element';
+import { Behavior, css, CSSDirective  } from '@microsoft/fast-element';
 import ableplayercss from  '../ableplayer/build/ableplayer.min.css';
 
-export const styles = css`
+// class RootHeight extends CSSDirective {
+// 	private widthProperty = "--root-width";
+// 	createCSS() {
+// 		return `height: var(${this.widthProperty});`
+// 	}
+// 	createBehavior(): Behavior | undefined {
+// 		return {
+// 			bind(el:HTMLElement) {
+// 				el.style.setProperty(this.property)
+// 			},
+// 			unbind(el:HTMLElement){
+
+// 			}
+// 		}
+// 	}
+
+// }
+
+
+export const mainStyles = css`
+
+:host{
+	display:block;
+	width:100%;
+	height: var(--view-height);
+}
 
 ${ableplayercss.toString()}
 #root{
 	width:100%;
-	height: 80vh;
+	height: 100%;
+	overflow:hidden;
 }
 .container{
 	display:grid;
-	grid-template-columns: 300px auto;
+	grid-template-columns: var(--menu-width) auto;
 	grid-template-rows: auto 32px;
 	height:100%;
-	
+	overflow:hidden;
 }
 .toc{
 	background:#EEE;
 	grid-column-start: 1;
 	grid-column-end: 1;
+	overflow:auto;
+	height:100%;
 }
 #contentWithNavBarOverlay{
 	position:relative;
+	height:100%;
+	overflow:hidden;
 }
 
 #contentWithNavBar{
@@ -30,6 +60,7 @@ ${ableplayercss.toString()}
 	flex-direction:column;
 	width:100%;
 	height:100%;
+	overflow:hidden;
 }
 #mainContent{
 	grid-column-start: 2;
@@ -38,6 +69,7 @@ ${ableplayercss.toString()}
 	height:100%;
 	/*height:70vh;*/
 	width:calc(100% - 10px);
+	overflow:auto;
 }
 #navbar{
 	width:100%;
@@ -72,8 +104,8 @@ ${ableplayercss.toString()}
 		opacity:1;
 	}
 	.container{
-		margin: 0 -300px;
-		width: calc(100% + 300px);
+		margin: 0 calc(-1 * var(--menu-width));
+		width: calc(100% + var(--menu-width));
 	}
 	.menu_open{
 		margin: 0;
@@ -113,16 +145,23 @@ ${ableplayercss.toString()}
 }
 
 @media print {
+	:host{
+		height:max-content !important;
+	}
+	#root{
+		height:100%;
+	}
 	.toc {
 		opacity:0;
 	}
 	.toc_menu_open{
-		opacity:1;
+		opacity:0;
 	}
 	.container{
-		margin: 0 -300px;
-		width: calc(100% + 300px);
+		margin: 0 calc(-1 * var(--menu-width));
+		width: calc(100% + var(--menu-width));
 	}
+
 }
 
 
@@ -131,16 +170,10 @@ ${ableplayercss.toString()}
 }
 @media (min-width:481px)  { /* portrait e-readers (Nook/Kindle), smaller tablets @ 600 or @ 640 wide. */ }
 @media (min-width:641px)  { /* portrait tablets, portrait iPad, landscape e-readers, landscape 800x480 or 854x480 phones */ 
-	#contentWithNavBar, #toc{
-		
-		max-height: 800px;
-	}
-}
-/*
 @media (min-width:961px)  { /* tablet, landscape iPad, lo-res laptops ands desktops */ }
 @media (min-width:1025px) { /* big landscape tablets, laptops, and desktops */ }
 @media (min-width:1281px) { /* hi-res laptops and desktops */ }
-*/
+
 #root:fullscreen {
 	max-height: 100vh;
 }

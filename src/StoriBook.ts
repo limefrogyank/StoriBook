@@ -1,14 +1,8 @@
-
 import { provideFluentDesignSystem, fluentOption, fluentListbox, fluentButton, Listbox, StandardLuminance, baseLayerLuminance } from '@fluentui/web-components';
 import { FASTElement, customElement, attr, html, volatile, css, repeat, when, observable, DOM, ref, children, $global, slotted } from '@microsoft/fast-element';
-
 import { NavBar } from "./navbar";
-
-import { styles } from "./StoriBook-css";
-
-import ableplayercss from '../ableplayer/build/ableplayer.min.css';
+import { mainStyles } from "./StoriBook-css";
 import { StoriPage } from './StoriPage';
-import { FoundationElement, ListboxOption } from '@microsoft/fast-foundation';
 
 NavBar;
 StoriPage;
@@ -88,7 +82,7 @@ const audioTemplate = html<StoriBook>`
 
 const template = html<StoriBook>`
 
-<div id="root" class="root" ${ref('rootContainer')}>
+<div id="root" class="root" ${ref('rootContainer')} style="--menu-width: ${x=> x.menuWidth}; --view-height: ${x=>x.viewHeight}">
 	<div id="container" class="container ${x => x.menuOpen ? "menu_open" : ""}">
 		<div class="toc ${x => x.menuOpen ? "toc_menu_open" : ""}" id="toc" @click=${x => x.closeNav()}>
 			<div>
@@ -113,7 +107,7 @@ const template = html<StoriBook>`
 				</fluent-listbox>
 
 				<div style="max-width:300px; max-height:200px;">
-				${x => audioTemplate}
+					${when((x,c)=> x.video !== "", html<StoriBook>`${x => audioTemplate}`)}				
 				</div>
 			</div>			
 		</div>
@@ -129,8 +123,8 @@ const template = html<StoriBook>`
 					</fluent-button>
 					<span style="margin-left:5px;width:calc(100% - 40px);flex-grow:1;align-self:center;font-weight:bold;">${x => x.pages !== null && x.pages.length > 0 ? x.pages[x.selectedIndex].title : ""}</span>
 				</div>
-				<div class="" id="mainContent" >
-					<slot ${slotted("nodes")}}></slot>
+				<div class="" id="mainContent" tabindex="0">
+					<slot ${slotted("nodes")}></slot>
 				</div>
 				${x => navBarTemplate}		
 			</div>
@@ -144,6 +138,9 @@ const template = html<StoriBook>`
 </div>
 `;
 
+const styles = css`
+${mainStyles}
+`;
 
 @customElement({
 	name: 'stori-book',
@@ -168,8 +165,7 @@ export class StoriBook extends FASTElement {
 
 	@observable isFullscreen: boolean = false;
 	@observable isNarrow: boolean = false;
-	@observable viewHeight: number = 320;
-
+	
 	@attr ablepath: string = '';
 	@attr video: string = '';
 	@attr captions: string = '';
@@ -177,6 +173,10 @@ export class StoriBook extends FASTElement {
 	@attr chapters: string = '';
 
 	@attr aspectRatio: number = 0;
+
+	@attr({ attribute: 'menu-width'}) menuWidth: string = '300px';
+	@attr({attribute: 'view-height'}) viewHeight: number = 80;
+
 
 	@attr({ mode: 'boolean' }) overrideChapterNames: boolean = false;
 
@@ -186,6 +186,7 @@ export class StoriBook extends FASTElement {
 	@attr defaultPageNumber: number = 1;
 
 
+	// This reacts to pages being added and sets the appropriate active state on the correct page.
 	nodesChanged() {
 		this.selectedIndex = this.defaultPageNumber - 1;
 		if (this.nodes != undefined) {
@@ -206,6 +207,7 @@ export class StoriBook extends FASTElement {
 		}
 	}
 
+	// Downloads all pages and shows them in sequence when printing.  Also undos this state when done.
 	async preparePrintAsync() {
 		for (const page of this.pages) {
 			if (page.content === "") {
@@ -224,27 +226,49 @@ export class StoriBook extends FASTElement {
 				}
 			}
 		};
-		requestAnimationFrame(() => {
-			window.print();
-		});
+		setTimeout(()=> window.print(), 100);
+		// requestAnimationFrame(() => {
+		// 	window.print();
+		// });
 
 
 	}
 
+	// method to get viewheight of parent if in an iframe 
+	resetViewHeight(){
+		if (window.parent != null){
+			//gets 1% of viewheight
+			const vh = window.parent.innerHeight/100;
+			const viewHeight = vh*this.viewHeight + 'px';
+			// const styleHeight = this.style.getPropertyValue('height');
+			// if (styleHeight.endsWith('vh')){
+			// 	const heightValue = styleHeight.substring(0, styleHeight.length-2);
+
+			// } else {
+				// use the default.
+			this.style.setProperty('--view-height', viewHeight);
+			// }
+		}
+	}
+
 	connectedCallback(): void {
 		super.connectedCallback();
-
+		// attempt to get view height of parent if element is in an iframe.  
+		
+		this.style.setProperty('--view-height', '80vh');
 		const mediaQuery = window.matchMedia('(min-width: 768px)');
 		mediaQuery.addEventListener("change", this.queryChanged.bind(this));
 		//this.isNarrow = !mediaQuery.matches;
 
 		//if this is inside an iframe, probably need to get the parent's view height
 		if (document.location.ancestorOrigins.length) {
-			parent.window.addEventListener("resize", this.setViewportHeight.bind(this));
+			window.addEventListener("resize", this.resetViewHeight.bind(this));
+			this.resetViewHeight();
 		} else {
-			window.addEventListener("resize", this.setViewportHeight.bind(this));
+			//window.addEventListener("resize", this.setViewportHeight.bind(this));
 		}
-		this.setViewportHeight();
+		
+		//this.setViewportHeight();
 
 		document.addEventListener('fullscreenchange', (event) => {
 			// document.fullscreenElement will point to the element that
@@ -464,23 +488,23 @@ export class StoriBook extends FASTElement {
 	// 	// let d = this.pagesArray;
 	// }
 
-	setViewportHeight() {
-		if (document.location.ancestorOrigins.length) {
-			if (parent.window.visualViewport != null) {
-				this.viewHeight = parent.window.visualViewport?.height;
-				console.log("Visual viewport height: " + this.viewHeight);
-			} else {
-				console.log("parent's visual viewport was null");
-			}
-		} else {
-			if (window.visualViewport != null) {
-				this.viewHeight = window.visualViewport?.height;
-				console.log("Visual viewport height: " + this.viewHeight);
-			} else {
-				console.log("visual viewport was null");
-			}
-		}
-	}
+	// setViewportHeight() {
+	// 	if (document.location.ancestorOrigins.length) {
+	// 		if (parent.window.visualViewport != null) {
+	// 			this.viewHeight = parent.window.visualViewport?.height;
+	// 			console.log("Visual viewport height: " + this.viewHeight);
+	// 		} else {
+	// 			console.log("parent's visual viewport was null");
+	// 		}
+	// 	} else {
+	// 		if (window.visualViewport != null) {
+	// 			this.viewHeight = window.visualViewport?.height;
+	// 			console.log("Visual viewport height: " + this.viewHeight);
+	// 		} else {
+	// 			console.log("visual viewport was null");
+	// 		}
+	// 	}
+	// }
 
 	openNav(): void {
 		this.menuOpen = true;
