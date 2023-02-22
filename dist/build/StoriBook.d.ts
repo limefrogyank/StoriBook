@@ -1,0 +1,45 @@
+import { FASTElement } from '@microsoft/fast-element';
+import { StoriPage } from './StoriPage';
+export declare class StoriBook extends FASTElement {
+    rootContainer?: HTMLDivElement;
+    videoElement?: HTMLVideoElement;
+    ablePlayer: any;
+    chaptersDiv?: HTMLDivElement;
+    mainSlot?: HTMLSlotElement;
+    nodes: Node[];
+    pages: StoriPage[];
+    menuOpen: boolean;
+    canPlayThroughRef?: () => void;
+    timeupdateRef?: (ev: Event) => void;
+    chapterCues: ChapterCue[];
+    isFullscreen: boolean;
+    isNarrow: boolean;
+    ablepath: string;
+    video: string;
+    captions: string;
+    metadata: string;
+    chapters: string;
+    aspectRatio: number;
+    menuWidth: string;
+    viewHeight: number;
+    overrideChapterNames: boolean;
+    selectedIndex: number;
+    defaultPageNumber: number;
+    nodesChanged(): void;
+    preparePrintAsync(): Promise<void>;
+    resetViewHeight(): void;
+    connectedCallback(): void;
+    onCanPlayThrough(): void;
+    processChapterNamesAndCues(): void;
+    updateMeta(ev: Event): void;
+    showMeta(now: any): void;
+    queryChanged(e: MediaQueryListEvent): void;
+    openNav(): void;
+    closeNav(): void;
+    keydown(event: KeyboardEvent, page: StoriPage, index: number): void;
+    buttonClick(index: number): Promise<void>;
+    nextButton(): void;
+    prevButton(): void;
+    fullScreenButton(): void;
+}
+//# sourceMappingURL=StoriBook.d.ts.map

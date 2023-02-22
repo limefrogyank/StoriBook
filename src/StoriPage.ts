@@ -41,7 +41,7 @@ export class StoriPage extends FASTElement {
 		if (this.active && this.loadPromise == null && this.content === ""){
 			this.loadPageAsync();
 		}
-	}
+	} 
 
 	public async loadPageAsync():Promise<boolean> {
 		try {
