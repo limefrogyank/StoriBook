@@ -20,7 +20,7 @@ The `title` attribute on each `<stori-page>` is required for the menu label and 
 
 `<stori-book>` can take a few optional attributes:  
 
-`menu-width` controls how wide the side menu is in wide, narrow, and full-screen screen modes.  It accepts a standard css width such as '200px', '30%', etc.   
+`menu-width` controls how wide the side menu is in wide, narrow, and full-screen screen modes.  It accepts a standard css width such as '200px', '30%', etc.  The default value is '300px'. 
 
 `default-page-number` can adjust the starting page that is shown when this element loads.  It uses a one-based index and the starting page will always be page 1 (the first one) if the attribute is not used.
 
