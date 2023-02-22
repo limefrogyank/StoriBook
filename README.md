@@ -4,7 +4,7 @@ Display a series of webpages within a single LMS course page in a window that in
 ![image](https://user-images.githubusercontent.com/7821384/220493730-cc4783d5-c266-4a5f-8bd9-0578a48a5bcf.png)
 
 ## Usage ##
-Copy the files in the bin directory or clone this repo and build it yourself using `npm run build`.  Add **only** the javascript file to your html page:
+Copy the files in the dist directory or clone this repo and build it yourself using `npm run build`.  Add **only** the javascript file to your html page:
 ```
 <script src="dist/bundle.js"></script>
 ```
