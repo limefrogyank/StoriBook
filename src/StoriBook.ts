@@ -174,8 +174,8 @@ export class StoriBook extends FASTElement {
 
 	@attr aspectRatio: number = 0;
 
-	@attr({ attribute: 'menu-width'}) menuWidth: string = '300px';
-	@attr({attribute: 'view-height'}) viewHeight: number = 80;
+	@attr({ attribute: 'menu-width' }) menuWidth: string = '300px';
+	@attr({ attribute: 'view-height' }) viewHeight: number = 80;
 
 
 	@attr({ mode: 'boolean' }) overrideChapterNames: boolean = false;
@@ -183,7 +183,7 @@ export class StoriBook extends FASTElement {
 	@observable selectedIndex: number = -1;
 
 
-	@attr defaultPageNumber: number = 1;
+	@attr({ attribute: 'default-page-number'}) defaultPageNumber: number = 1;
 
 
 	// This reacts to pages being added and sets the appropriate active state on the correct page.
