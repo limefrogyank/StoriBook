@@ -1,5 +1,5 @@
 # StoriBook
-Display a series of webpages within a single LMS course page in a window that includes popout navigation, navbar navigation, and full-screen modes.  This window is fully responsive on both large and small screens.  A print button is included to merge all webpages into one long view without the menu that is easily printable.  
+Display a series of webpages within a single LMS course page in a window that includes popout navigation, navbar navigation, and full-screen modes.  This window is fully responsive on both large and small screens.  A print button is included to merge all webpages into one long view without the menu that is easily printable.  The menu is keyboard navigable for accessibility.
 
 ![image](https://user-images.githubusercontent.com/7821384/220493730-cc4783d5-c266-4a5f-8bd9-0578a48a5bcf.png)
 
