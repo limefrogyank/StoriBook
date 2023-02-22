@@ -9,9 +9,9 @@ Copy the files in the bin directory or clone this repo and build it yourself usi
 Then, use the custom web element called `<stori-book>` along with `<stori-page>` to build your StoriBook.
 ```
 <stori-book>
-			<stori-page title="Very long title to show how it fits into the space given." src="page1.html">Page1</stori-page>
-			<stori-page title="page2" src="page2.html">Page2</stori-page>	
-			<stori-page title="page3" src="page3.html">Page3</stori-page>
+    <stori-page title="Very long title to show how it fits into the space given." src="page1.html">Page1</stori-page>
+    <stori-page title="page2" src="page2.html">Page2</stori-page>	
+    <stori-page title="page3" src="page3.html">Page3</stori-page>
 </stori-book>
 ```
 The `title` attribute on each `<stori-page>` is required for the menu label and a title header when in narrow screen mode.  The `src` attribute is required in order to download the html file.  Currently, NO html sanitation is built-in, so please only link to html files you control on your own domain.  The text content inside each `<stori-page>` shown in the example is completely optional.  It doesn't show in the rendered page, but it WILL show in a WYSIWYG html editor.  Otherwise, this web-element will be completely invisible in the editor.  
