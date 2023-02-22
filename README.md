@@ -1,6 +1,8 @@
 # StoriBook
 Display a series of webpages within a single LMS course page in a window that includes popout navigation, navbar navigation, and full-screen modes.  This window is fully responsive on both large and small screens.  A print button is included to merge all webpages into one long view without the menu that is easily printable.  
 
+![image](https://user-images.githubusercontent.com/7821384/220493730-cc4783d5-c266-4a5f-8bd9-0578a48a5bcf.png)
+
 ## Usage ##
 Copy the files in the bin directory or clone this repo and build it yourself using `npm run build`.  Add **only** the javascript file to your html page:
 ```
@@ -27,6 +29,9 @@ The `title` attribute on each `<stori-page>` is required for the menu label and 
 ### Files in your LMS ###
 
 On D2L, you could simply make a regular Content page that is visible to students and put the `<stori-book>` in that page.  Then, you make several more Content pages that will be the content for your `<stori-page>`s.  Make them invisible so students won't be able to see them.  If your links are relative, they will still be visible to the students when they visit the main page with the `<stori-book>`.
+
+![image](https://user-images.githubusercontent.com/7821384/220493796-aab4f184-d6dc-4ceb-a307-5940d60f6f1d.png)
+
 
 ### Credits ###
 This is based on design work started by Jennifer Lucas.
