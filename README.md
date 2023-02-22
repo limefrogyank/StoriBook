@@ -36,3 +36,7 @@ On D2L, you could simply make a regular Content page that is visible to students
 ## Credits ##
 This is based on design work started by Jennifer Lucas.
 
+The web element is built using FAST technologies https://www.fast.design/.
+
+The icons are from Bootstrap Icons.  
+
