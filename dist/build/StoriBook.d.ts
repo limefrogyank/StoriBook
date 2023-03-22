@@ -36,7 +36,7 @@ export declare class StoriBook extends FASTElement {
     loadHeadersForPageAsync(page: StoriPage): Promise<void>;
     removeHeadersForPage(page: StoriPage): Promise<void>;
     nodesChanged(oldValue: Node[], newValue: Node[]): void;
-    preparePrintAsync(): Promise<void>;
+    preparePrintAsync(donotprint?: boolean): Promise<void>;
     resetViewHeight(): void;
     connectedCallback(): void;
     onCanPlayThrough(): void;

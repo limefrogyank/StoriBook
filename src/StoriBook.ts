@@ -316,7 +316,7 @@ export class StoriBook extends FASTElement {
 	}
 
 	// Downloads all pages and shows them in sequence when printing.  Also undos this state when done.
-	async preparePrintAsync() {
+	async preparePrintAsync(donotprint:boolean=false) {
 		for (const page of this.pages) {
 			if (page instanceof StoriPage) {
 				if (page.content === "") {
@@ -340,10 +340,11 @@ export class StoriBook extends FASTElement {
 			}
 		};
 		//setTimeout(() => window.print(), 100);
-		 requestAnimationFrame(() => {
-		  	window.print();
-		 });
-
+		if (!donotprint){
+			requestAnimationFrame(() => {
+				window.print();
+			});
+		}
 
 	}
 
@@ -372,8 +373,17 @@ export class StoriBook extends FASTElement {
 		// attempt to get view height of parent if element is in an iframe.  
 
 		this.style.setProperty('--view-height', '80vh');
-		const mediaQuery = window.matchMedia('(min-width: 768px)');
-		mediaQuery.addEventListener("change", this.queryChanged.bind(this));
+		// const mediaQuery = window.matchMedia('(min-width: 768px)');
+		// mediaQuery.addEventListener("change", this.queryChanged.bind(this));
+
+		// const mediaQuery = window.matchMedia('print');
+		// mediaQuery.addEventListener("change", this.queryChanged.bind(this));
+
+		// seems like this won't detect prints if this is in an iframe.
+		window.addEventListener("beforeprint", async (event) => {			
+			await this.preparePrintAsync(true);
+		});
+
 		//this.isNarrow = !mediaQuery.matches;
 
 		//if this is inside an iframe, probably need to get the parent's view height

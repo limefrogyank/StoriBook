@@ -17,9 +17,16 @@ ${when(x=>x.active, html<StoriPage>`
 </div>
 `;
 
+const styles = css`
+iframe{
+	width:100%;
+}
+`;
+
 @customElement({
 	name: 'stori-page',
-	template
+	template,
+	styles
 })
 export class StoriPage extends FASTElement {
 	pageContainer?: HTMLDivElement;
