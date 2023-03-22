@@ -36,6 +36,7 @@
     "@microsoft/fast-components": "^2.30.6",
     "@microsoft/fast-element": "^1.11.0",
     "abletest": "^4.2.0",
-    "bootstrap-icons": "^1.10.3"
+    "bootstrap-icons": "^1.10.3",
+    "print-js": "^1.6.0"
   }
 }

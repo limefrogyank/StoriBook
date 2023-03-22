@@ -1,0 +1,11 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36.33 29.29'>
+    <defs>
+        <style>.bicon-1,.bicon-2{fill:none;stroke:#565a5c;stroke-linejoin:round;stroke-width:1.5px;}.bicon-1{stroke-linecap:round;}</style>
+    </defs>
+    <g id='Layer_2' data-name='Layer 2'>
+        <g id='Layer_1-2' data-name='Layer 1'>
+            <path class='bicon-1' d='M3.17,2.52c6,1.85,8.11-5.53,15,1V26.41c-6.88-6.48-9,.89-15-1V2.52Zm30,0c-6,1.85-8.11-5.53-15,1V26.41c6.89-6.48,9,.89,15-1V2.52Z'/>
+            <polyline class='bicon-2' points='33.16 4.06 35.58 4.06 35.58 28.54 0.75 28.54 0.75 4.06 3.17 4.06'/>
+        </g>
+    </g>
+</svg>

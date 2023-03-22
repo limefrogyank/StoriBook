@@ -1,0 +1,149 @@
+/* 4/20/2021 Added Able Player meta overlay support */
+/* 5/12/2021 Added Able Player Auto Playlist Support */
+/* 9/15/2021 Fixing Kaltura inside youtube-container issue */
+dl dd{margin-inline-start: 40px;}
+.ablep-wrapper{
+	border:1px solid #b9c2d0;
+	background-color:#fff;
+	padding: 20px;
+	width : 100%;}
+.able-player .able-status-bar{ height: 2em;}
+.able-playlist li button img{display: none; }
+.ablep-embed{ width: 100%; }
+#player{border: none; width: 100%;}
+
+
+
+#playlist .able-playlist li {background-color: #F2F2F2; min-width: 150px; max-width: 300px; width: 80%; margin: auto; margin-top: 1em;}
+
+
+#playlist .able-playlist .able-current{
+	background-color: #1c507e;
+}
+div.able {box-shadow: none;}
+
+
+#playlist .able-playlist li button:active,#playlist .able-playlist li button:focus,#playlist  .able-playlist li button:hover{
+	background-color: #DDEBF7;
+	
+}
+
+.able-wrapper *{
+    box-sizing: content-box;
+}
+
+
+
+#playlist .able-playlist{display: grid; grid-template-columns: 1fr; }
+
+@media(min-width: 480px){
+#playlist .able-playlist {grid-template-columns: 1fr 1fr;}
+}
+
+@media(min-width: 768px ){
+#playlist .able-playlist{grid-template-columns: 1fr 1fr 1fr;}
+}
+
+@media(min-width: 1100px){
+	
+	
+	.embed-able-list{
+		display: grid;
+		margin-bottom: 1em;
+	}
+	.embed-able-list{}
+	.embed-able-list #player{
+		grid-column: 1;
+	}
+	.embed-able-list #playlist{
+		overflow-y: scroll;
+		grid-column: 2;
+	}
+	.embed-able-list #playlist ul{
+
+       grid-template-columns: 1fr;
+	}
+	#playlist .able-playlist li {
+		width: 100%; 
+		margin-top: 0em;
+		margin: auto; 
+		border-radius: 0;
+		border-width: 1px 0px;
+		}
+
+}
+ul.able-playlist iframe{max-width: 100%; max-height: 100%;}
+.able img{margin: 0; padding: 0;}
+.youtube-sizer{
+	margin:0 auto;
+	max-width:560px;
+	width:95%}
+.youtube-container{
+	overflow:hidden;
+	position:relative}
+.youtube-container video{
+	height:100%;
+	left:0;
+	top:0;
+	width:100%}
+@media only screen and (max-width:640px){
+	.youtube-sizer{width:100%}}
+	
+	
+.able-wrapper{margin:0 auto !important;max-width:640px !important;width:95%}
+.able{
+	/*-- overflow:hidden; */
+	position:relative;
+}
+.able iframe{width:100%}
+@media only screen and (max-width:640px){
+	.able-wrapper{width:100%}}
+.ablep-embed .able-wrapper{max-width:1200px !important;}	
+.able-media-container{
+  position: relative;}
+  div.meta {
+    position: absolute;
+    padding:1em;
+    z-index: 10000;
+    color: white;
+    width: 15em;
+    background: #854604;
+   display: none
+  }
+#tinymce .meta{
+	display: block;
+	position: static;
+	
+}
+#tinymce div.list-group a.active{
+	color: white;
+	
+}
+
+div.meta-left{
+    top: 20%;
+    left: 5%;
+}
+div.meta-center{
+     top:20%;
+     left: 25%;
+     width: 50%;
+}
+div.meta-right{
+    top: 20%;
+     right: 10%;
+}
+div.meta-h5p {
+   top: 1%;
+   left: 1%;
+   width: 93%;
+   background-color: rgba(133, 70, 4 , .8);
+}
+*:fullscreen div.meta-h5p {
+   top: 25%;
+}
+div.meta-h5p iframe{
+    width: 100%;
+    height: 100%;
+}
+div.meta a{color: white;}

@@ -4,6 +4,9 @@ export declare class StoriPage extends FASTElement {
     title: string;
     src: string;
     active: boolean;
+    icon: string;
+    isolateCSS: boolean;
+    isolateJS: boolean;
     content: string;
     error: string;
     loadPromise: Promise<string> | null;

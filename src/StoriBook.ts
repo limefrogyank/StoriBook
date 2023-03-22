@@ -3,6 +3,7 @@ import { FASTElement, customElement, attr, html, volatile, css, repeat, when, ob
 import { NavBar } from "./navbar";
 import { mainStyles } from "./StoriBook-css";
 import { StoriPage } from './StoriPage';
+import { SubPage } from './SubPage';
 
 NavBar;
 StoriPage;
@@ -48,7 +49,7 @@ const navBarTemplate = html<StoriBook>`
 				<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
 			</svg>
 		</fluent-button>
-		<fluent-button aria-label="${x=> x.isFullscreen ? "Exit fullscreen layout" : "Enter fullscreen layout"}" @click="${x => x.fullScreenButton()}" appearance="accent">
+		<fluent-button aria-label="${x => x.isFullscreen ? "Exit fullscreen layout" : "Enter fullscreen layout"}" @click="${x => x.fullScreenButton()}" appearance="accent">
 			${when(x => x.isFullscreen, html<StoriBook>`
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen-exit" viewBox="0 0 16 16">
 				<path d="M5.5 0a.5.5 0 0 1 .5.5v4A1.5 1.5 0 0 1 4.5 6h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 10 4.5v-4a.5.5 0 0 1 .5-.5zM0 10.5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 6 11.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zm10 1a1.5 1.5 0 0 1 1.5-1.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4z"/>
@@ -82,7 +83,7 @@ const audioTemplate = html<StoriBook>`
 
 const template = html<StoriBook>`
 
-<div id="root" class="root" ${ref('rootContainer')} style="--menu-width: ${x=> x.menuWidth}; --view-height: ${x=>x.viewHeight}">
+<div id="root" class="root" ${ref('rootContainer')} style="--menu-width: ${x => x.menuWidth}; --view-height: ${x => x.viewHeight}">
 	<div id="container" class="container ${x => x.menuOpen ? "menu_open" : ""}">
 		<div class="toc ${x => x.menuOpen ? "toc_menu_open" : ""}" id="toc" @click=${x => x.closeNav()}>
 			<div>
@@ -93,21 +94,28 @@ const template = html<StoriBook>`
 					@keyup="${(x, c) => x.buttonClick((c.event.target as Listbox).selectedIndex)}"
 					style="width:100%;"
 					>
-				${repeat(x => x.pages, html<StoriPage>`
+				${repeat(x => x.pages, html<StoriPage|SubPage>`
 					<fluent-option id="b${(x, c) => c.index + 1}" 
 						@click="${(x, c) => c.parent.buttonClick(c.index)}"
 						selected="${(x, c) => c.parent.selectedIndex == c.index ? "true" : "false"}" 
 						aria-selected="${(x, c) => c.parent.selectedIndex == c.index ? "true" : "false"}" 
 						role="button"
 						value="${(x, c) => c.index}"
-						style="height:auto; min-height: calc((var(--base-height-multiplier) + var(--density)) * var(--design-unit) * 1px);">
-						<div style="word-wrap:break-word;white-space:pre-wrap;">${x => x.title}</div>
+						style="height:auto; min-height: calc((var(--base-height-multiplier) + var(--density)) * var(--design-unit) * 1px);${x=> {
+							if (!(x instanceof StoriPage)) {
+								// from fluent-option css
+								return "padding-left: calc(((var(--design-unit) * 3) - var(--stroke-width) - 1) * 1px + " + (x.depth * 20) + "px);";
+							} else {
+								return "";
+							}
+						} }">
+						<span style="word-wrap:break-word;white-space:pre-wrap;display:flex;flex-direction:row;align-items:center;">${when(x=>x.icon != "", html<StoriPage|SubPage>`<img style="margin-right:10px;" height=32 width=32 src="${x=>x.icon}">`)}${x => x.title}</span>
 					</fluent-option>
 				`, { positioning: true })}
 				</fluent-listbox>
 
 				<div style="max-width:300px; max-height:200px;">
-					${when((x,c)=> x.video !== "", html<StoriBook>`${x => audioTemplate}`)}				
+					${when((x, c) => x.video !== "", html<StoriBook>`${x => audioTemplate}`)}				
 				</div>
 			</div>			
 		</div>
@@ -123,7 +131,7 @@ const template = html<StoriBook>`
 					</fluent-button>
 					<span style="margin-left:5px;width:calc(100% - 40px);flex-grow:1;align-self:center;font-weight:bold;">${x => x.pages !== null && x.pages.length > 0 ? x.pages[x.selectedIndex].title : ""}</span>
 				</div>
-				<div class="" id="mainContent" tabindex="0">
+				<div class="" id="mainContent" ${ref('mainContentContainer')} tabindex="0">
 					<slot ${slotted("nodes")}></slot>
 				</div>
 				${x => navBarTemplate}		
@@ -150,14 +158,18 @@ ${mainStyles}
 export class StoriBook extends FASTElement {
 	rootContainer?: HTMLDivElement;
 	videoElement?: HTMLVideoElement;
+	mainContentContainer?: HTMLDivElement;
 
 	ablePlayer: any;
 	chaptersDiv?: HTMLDivElement;
 
 	mainSlot?: HTMLSlotElement;
 	@observable nodes: Node[] = [];
-	@observable pages: StoriPage[] = [];
+	@observable pages: (StoriPage | SubPage)[] = [];
 	@observable menuOpen: boolean = false;
+
+	@observable expand: boolean = false;
+
 
 	canPlayThroughRef?: () => void;
 	timeupdateRef?: (ev: Event) => void;
@@ -165,7 +177,7 @@ export class StoriBook extends FASTElement {
 
 	@observable isFullscreen: boolean = false;
 	@observable isNarrow: boolean = false;
-	
+
 	@attr ablepath: string = '';
 	@attr video: string = '';
 	@attr captions: string = '';
@@ -177,13 +189,25 @@ export class StoriBook extends FASTElement {
 	@attr({ attribute: 'menu-width' }) menuWidth: string = '300px';
 	@attr({ attribute: 'view-height' }) viewHeight: number = 80;
 
-
+	// Downloads all HTML and searches for headers to create subheaders for the TOC.
+	@attr({ mode: 'boolean', attribute: 'sub-headers' }) subheaders: boolean = false;
+	@attr({ attribute: 'top-header' }) topHeader: number = 1; // make a subheader starting with h2 (not h1)
+	@attr({ attribute: 'min-header' }) minHeader: number = 3; // then stop after you finish with h3
+	@volatile get headerQuery(): string{
+		let headerQuery = "";
+		for (let i = this.topHeader; i < this.minHeader; i++) {
+			headerQuery += "h" + (+i + 1) + ",";
+		}
+		headerQuery = headerQuery.slice(0, -1);
+		return headerQuery;
+	}
+	
 	@attr({ mode: 'boolean' }) overrideChapterNames: boolean = false;
 
 	@observable selectedIndex: number = -1;
 
 
-	@attr({ attribute: 'default-page-number'}) defaultPageNumber: number = 1;
+	@attr({ attribute: 'default-page-number' }) defaultPageNumber: number = 1;
 
 
 	// This reacts to pages being added and sets the appropriate active state on the correct page.
@@ -191,7 +215,7 @@ export class StoriBook extends FASTElement {
 		this.selectedIndex = this.defaultPageNumber - 1;
 		if (this.nodes != undefined) {
 			let index = 0;
-			let pages: StoriPage[] = [];
+			let pages: (StoriPage | SubPage)[] = [];
 			for (const node of this.nodes) {
 				if (node.nodeName && node.nodeName.toUpperCase() === "STORI-PAGE") {
 					pages.push(node as StoriPage);
@@ -201,32 +225,77 @@ export class StoriBook extends FASTElement {
 						(node as HTMLElement).removeAttribute('active');
 					}
 					index++;
+
+
+					if (this.subheaders) {
+						//load html and then add subheaders
+						let capturedStoriPage = node as StoriPage;
+						capturedStoriPage.loadPageAsync().then((result) => {
+							if (result) {
+								const parser = new DOMParser();
+								const document = parser.parseFromString(capturedStoriPage.content, "text/html");
+								// let headerQuery = "";
+								// for (let i = this.topHeader; i < this.minHeader; i++) {
+								// 	headerQuery += "h" + (+i + 1) + ",";
+								// }
+								// headerQuery = headerQuery.slice(0, -1);
+								const subPages: SubPage[] = [];
+								const headers = document.querySelectorAll(this.headerQuery);
+								headers.forEach((header, i) => {
+									if (header.textContent === null) return;
+									const subPage: SubPage = {
+										title: header.textContent,
+										page: capturedStoriPage,
+										//anchor: ':~:text=' + header.textContent,
+										index: i,
+										icon:"",
+										//xpath: `//${header.tagName.toLowerCase()}[contains(., '${header.textContent}')]`,// '#:~:text=' + header.textContent,
+										//xpath: `//${header.tagName.toLowerCase()}[contains(.,'${header.textContent}')]`,// '#:~:text=' + header.textContent,
+										depth: +header.tagName.substring(1) - this.topHeader
+									};
+									console.log(subPage);
+									subPages.push(subPage);
+								});
+								const mainPageIndex = this.pages.indexOf(capturedStoriPage);
+								pages.splice(mainPageIndex + 1, 0, ...subPages);
+								if (this.selectedIndex > mainPageIndex) {
+									this.selectedIndex += subPages.length;
+								}
+							}
+						});
+					}
 				}
 			}
 			this.pages = pages;
+
 		}
 	}
 
 	// Downloads all pages and shows them in sequence when printing.  Also undos this state when done.
 	async preparePrintAsync() {
 		for (const page of this.pages) {
-			if (page.content === "") {
-				const result = await page.loadPageAsync();
-				if (!result) {
-					console.log(page.error);
-				}
+			if (page instanceof StoriPage) {
+				if (page.content === "") {
+					const result = await page.loadPageAsync();
+					if (!result) {
+						console.log(page.error);
+					}
 
+				}
+				page.active = true;
 			}
-			page.active = true;
 		}
 		window.onafterprint = () => {
 			for (let i = 0; i < this.pages.length; i++) {
-				if (i != this.selectedIndex) {
-					this.pages[i].active = false;
+				const page = this.pages[i];
+				if (page instanceof StoriPage) {
+					if (i != this.selectedIndex) {
+						page.active = false;
+					}
 				}
 			}
 		};
-		setTimeout(()=> window.print(), 100);
+		setTimeout(() => window.print(), 100);
 		// requestAnimationFrame(() => {
 		// 	window.print();
 		// });
@@ -235,17 +304,17 @@ export class StoriBook extends FASTElement {
 	}
 
 	// method to get viewheight of parent if in an iframe 
-	resetViewHeight(){
-		if (window.parent != null){
+	resetViewHeight() {
+		if (window.parent != null) {
 			//gets 1% of viewheight
-			const vh = window.parent.innerHeight/100;
-			const viewHeight = vh*this.viewHeight + 'px';
+			const vh = window.parent.innerHeight / 100;
+			const viewHeight = vh * this.viewHeight + 'px';
 			// const styleHeight = this.style.getPropertyValue('height');
 			// if (styleHeight.endsWith('vh')){
 			// 	const heightValue = styleHeight.substring(0, styleHeight.length-2);
 
 			// } else {
-				// use the default.
+			// use the default.
 			this.style.setProperty('--view-height', viewHeight);
 			// }
 		}
@@ -254,7 +323,7 @@ export class StoriBook extends FASTElement {
 	connectedCallback(): void {
 		super.connectedCallback();
 		// attempt to get view height of parent if element is in an iframe.  
-		
+
 		this.style.setProperty('--view-height', '80vh');
 		const mediaQuery = window.matchMedia('(min-width: 768px)');
 		mediaQuery.addEventListener("change", this.queryChanged.bind(this));
@@ -267,7 +336,17 @@ export class StoriBook extends FASTElement {
 		} else {
 			//window.addEventListener("resize", this.setViewportHeight.bind(this));
 		}
-		
+
+
+		// // Actually, we don't want external styling here.  This will affect the storibook styling itself.
+		// const cssTags = document.querySelectorAll("link[rel='stylesheet']");
+		// if (cssTags != null && this.shadowRoot != null ){
+		// 	for (let i = 0; i < cssTags.length; i++) {
+		// 		this.shadowRoot.append(cssTags[i].cloneNode(true));
+		// 	}
+		// }
+
+
 		//this.setViewportHeight();
 
 		document.addEventListener('fullscreenchange', (event) => {
@@ -553,26 +632,103 @@ export class StoriBook extends FASTElement {
 					this.ablePlayer?.seekTo(cue.start);
 				}
 
+				const oldIndex = this.selectedIndex;
+				const oldPage = this.pages[oldIndex];
 				this.selectedIndex = index;
+				const newPage = this.pages[this.selectedIndex];
 
-				for (let i = 0; i < this.pages.length; i++) {
-					if (i == this.selectedIndex) {
-						this.pages[i].setAttribute('active', 'true');
+				if (newPage instanceof StoriPage) {
+					if (oldPage instanceof StoriPage) {
+						(oldPage as StoriPage).removeAttribute('active');
+						(newPage as StoriPage).setAttribute('active', 'true');
+					} else if ((oldPage as SubPage).page !== newPage) {
+						(oldPage as SubPage).page.removeAttribute('active');
+						(newPage as StoriPage).setAttribute('active', 'true');
 					} else {
-						this.pages[i].removeAttribute('active');
+						const firstElementChild = (newPage as StoriPage).shadowRoot!.firstElementChild;
+						if (firstElementChild != null && this.mainContentContainer != null) {
+						
+							this.mainContentContainer.scrollTo({ behavior: "smooth", top:0 });
+							//firstElementChild.scrollIntoView();
+						}
+						//(newPage as StoriPage).iframeElement!.contentWindow?.scrollTo(0, 0);
 					}
+				} else {
+					
+					if (oldPage instanceof StoriPage && (newPage as SubPage).page !== oldPage) {
+						if (this.mainContentContainer != null) {
+							let mutationObserver = new MutationObserver((mutations) => {
+								const subPage = (newPage as SubPage);
+								const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
+	
+								if (anchorElements != null && newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
+									const parentRect =  newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
+									const childRect = anchorElements[subPage.index].getBoundingClientRect();
+									const scrollTop = childRect.top - parentRect.top;
+									this.mainContentContainer?.scrollTo({ behavior: "smooth", top: scrollTop });
+									//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
+								}
+								mutationObserver.disconnect();
+							});
+							if (newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null)
+								mutationObserver.observe(newPage.page.shadowRoot.firstElementChild, { childList: true, subtree: true });
+						}
+						// old is StoriPage and new subpage is not same page
+						(oldPage as StoriPage).removeAttribute('active');
+						(newPage as SubPage).page.setAttribute('active', 'true');
+						
+						
+					} else if (!(oldPage instanceof StoriPage) && (oldPage as SubPage).page !== (newPage as SubPage).page) {
+						// old is subpage and new subpage is not same page
+						if (this.mainContentContainer != null) {
+							let mutationObserver = new MutationObserver((mutations) => {
+								const subPage = (newPage as SubPage);
+								const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
+	
+								if (anchorElements != null && newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
+									const parentRect =  newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
+									const childRect = anchorElements[subPage.index].getBoundingClientRect();
+									const scrollTop = childRect.top - parentRect.top;
+									this.mainContentContainer?.scrollTo({ behavior: "smooth", top: scrollTop });
+									//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
+								}
+								mutationObserver.disconnect();
+							});
+							if (newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null)
+								mutationObserver.observe(newPage.page.shadowRoot.firstElementChild, { childList: true, subtree: true });
+						}
+						(oldPage as SubPage).page.removeAttribute('active');
+						(newPage as SubPage).page.setAttribute('active', 'true');
+					} else {
+						// old is subpage and new subpage are the same... no need to wait.
+						const subPage = (newPage as SubPage);
+						const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
+
+						if (anchorElements != null &&  newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
+							//const parentRect = this.mainContentContainer.getBoundingClientRect();
+							const parentRect = newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
+							const childRect = anchorElements[subPage.index].getBoundingClientRect();
+							const scrollTop = childRect.top - parentRect.top;
+							this.mainContentContainer?.scroll({ behavior: "smooth", top: scrollTop });
+							//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
+						}
+						return;
+					}
+
+					// need to wait for page load if it is a new page, otherwise the scrolling will fail.
+					
 				}
 
-				// const response = await fetch(page.src);
-				// const result = await response.text();
-				// this.content = result;
-				//this.videoElement?.addEventListener('timeupdate', this.timeupdateRef!);
 
 			}
 		} catch (ex) {
 			console.log(ex);
 			// this.content = "";
 		}
+	}
+
+	scrollToSubpageHeader(){
+
 	}
 
 	nextButton() {

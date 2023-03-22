@@ -1,14 +1,17 @@
 import { FASTElement } from '@microsoft/fast-element';
 import { StoriPage } from './StoriPage';
+import { SubPage } from './SubPage';
 export declare class StoriBook extends FASTElement {
     rootContainer?: HTMLDivElement;
     videoElement?: HTMLVideoElement;
+    mainContentContainer?: HTMLDivElement;
     ablePlayer: any;
     chaptersDiv?: HTMLDivElement;
     mainSlot?: HTMLSlotElement;
     nodes: Node[];
-    pages: StoriPage[];
+    pages: (StoriPage | SubPage)[];
     menuOpen: boolean;
+    expand: boolean;
     canPlayThroughRef?: () => void;
     timeupdateRef?: (ev: Event) => void;
     chapterCues: ChapterCue[];
@@ -22,6 +25,10 @@ export declare class StoriBook extends FASTElement {
     aspectRatio: number;
     menuWidth: string;
     viewHeight: number;
+    subheaders: boolean;
+    topHeader: number;
+    minHeader: number;
+    get headerQuery(): string;
     overrideChapterNames: boolean;
     selectedIndex: number;
     defaultPageNumber: number;
@@ -38,6 +45,7 @@ export declare class StoriBook extends FASTElement {
     closeNav(): void;
     keydown(event: KeyboardEvent, page: StoriPage, index: number): void;
     buttonClick(index: number): Promise<void>;
+    scrollToSubpageHeader(): void;
     nextButton(): void;
     prevButton(): void;
     fullScreenButton(): void;

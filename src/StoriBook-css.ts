@@ -66,10 +66,12 @@ ${ableplayercss.toString()}
 	grid-column-start: 2;
 	grid-column-end: 2;
 	padding:5px;
-	height:100%;
+	/*height:100%;*/
 	/*height:70vh;*/
 	width:calc(100% - 10px);
+	flex:1;
 	overflow:auto;
+	overscroll-behavior: contain;
 }
 #navbar{
 	width:100%;
@@ -130,10 +132,12 @@ ${ableplayercss.toString()}
 		bottom: 0;
 		background: #1C1C1C;
 		transition: opacity 0.2s ease-in-out;
+		pointer-events: none;
 	}
 	.overlay_active{
-		opacity:0.85;
+		opacity:0.60;
 		z-index:2;
+		pointer-events: auto;
 	}
 }
 
@@ -145,22 +149,7 @@ ${ableplayercss.toString()}
 }
 
 @media print {
-	:host{
-		height:max-content !important;
-	}
-	#root{
-		height:100%;
-	}
-	.toc {
-		opacity:0;
-	}
-	.toc_menu_open{
-		opacity:0;
-	}
-	.container{
-		margin: 0 calc(-1 * var(--menu-width));
-		width: calc(100% + var(--menu-width));
-	}
+	
 
 }
 
@@ -194,7 +183,7 @@ ${ableplayercss.toString()}
 	max-height:none;
 	height:100% !important;
 }
-#mainContent, #toc{
+#toc{
 	overflow-y: auto;
 }
 

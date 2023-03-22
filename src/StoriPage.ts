@@ -1,5 +1,6 @@
 import { FASTElement, customElement, attr, html, volatile, css, repeat, when, observable, DOM, ref, children, $global } from '@microsoft/fast-element';
 import { ProgressRing } from '@microsoft/fast-components';
+import { StoriBook } from './StoriBook';
 
 ProgressRing;
 
@@ -25,6 +26,10 @@ export class StoriPage extends FASTElement {
 	@attr title: string = '';
 	@attr src: string = '';
 	@attr({ mode: 'boolean' }) active: boolean=false;
+	@attr icon: string = ''; //src of icon
+
+	@attr({ mode: 'boolean', attribute: 'isolate-css' }) isolateCSS: boolean=false;
+	@attr({ mode: 'boolean', attribute: 'isolate-js' }) isolateJS: boolean=false;
 
 	@observable content:string = "";
 	@observable error:string= "";
@@ -48,6 +53,36 @@ export class StoriPage extends FASTElement {
 			this.loading=true;
 			const response = await fetch(this.src);
 			const result = await response.text();
+
+			if (!this.isolateCSS){
+				const cssTags = document.querySelectorAll("link[rel='stylesheet']");
+				if (cssTags != null && this.shadowRoot != null ){
+					for (let i = 0; i < cssTags.length; i++) {
+						this.shadowRoot.append(cssTags[i].cloneNode(true));
+					}
+				}
+			}
+			if (!this.isolateJS){
+				const scriptTags = document.querySelectorAll("script[type='text/javascript']");
+				if (scriptTags != null && this.shadowRoot != null ){
+					for (let i = 0; i < scriptTags.length; i++) {
+						this.shadowRoot.append(scriptTags[i].cloneNode(true));
+					}
+				}
+			}
+
+
+			// if (!this.isolateCSS && this.parentElement != null){
+			// 	const storiBook = this.parentElement as StoriBook;
+			// 	const styleSheets = storiBook.shadowRoot?.styleSheets;
+			// 	const cssTags = storiBook.querySelectorAll("link[rel='stylesheet']");
+			// 	if (styleSheets != null){
+			// 		for (let i = 0; i < styleSheets.length; i++) {
+			// 			this.shadowRoot?.adoptedStyleSheets?.push(styleSheets.item(i) as CSSStyleSheet);
+			// 		}
+			// 	}
+			// }
+
 			this.content = result;
 			this.loading=false;
 			return true;
