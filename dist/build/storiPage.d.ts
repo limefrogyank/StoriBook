@@ -9,9 +9,10 @@ export declare class StoriPage extends FASTElement {
     isolateJS: boolean;
     content: string;
     error: string;
-    loadPromise: Promise<string> | null;
+    loadPromise: Promise<boolean> | null;
     loading: boolean;
     connectedCallback(): void;
+    waitForPageLoadAsync(): Promise<boolean>;
     activeChanged(): void;
     loadPageAsync(): Promise<boolean>;
 }

@@ -33,7 +33,7 @@ export class StoriPage extends FASTElement {
 
 	@observable content:string = "";
 	@observable error:string= "";
-	loadPromise:Promise<string> | null = null;
+	loadPromise:Promise<boolean> | null = null;
 
 	@observable loading:boolean = true;
 	
@@ -42,9 +42,17 @@ export class StoriPage extends FASTElement {
 		
 	}
 
+	public waitForPageLoadAsync() :Promise<boolean>{
+		if (this.loadPromise == null){
+			return this.loadPageAsync();
+		} else {
+			return this.loadPromise;
+		}
+	}
+
 	activeChanged(){
 		if (this.active && this.loadPromise == null && this.content === ""){
-			this.loadPageAsync();
+			this.loadPromise = this.loadPageAsync();
 		}
 	} 
 

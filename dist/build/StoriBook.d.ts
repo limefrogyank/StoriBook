@@ -9,7 +9,7 @@ export declare class StoriBook extends FASTElement {
     chaptersDiv?: HTMLDivElement;
     mainSlot?: HTMLSlotElement;
     nodes: Node[];
-    pages: (StoriPage | SubPage)[];
+    pages: Array<StoriPage | SubPage>;
     menuOpen: boolean;
     expand: boolean;
     canPlayThroughRef?: () => void;
@@ -26,13 +26,16 @@ export declare class StoriBook extends FASTElement {
     menuWidth: string;
     viewHeight: number;
     subheaders: boolean;
+    subheadersAlways: boolean;
     topHeader: number;
     minHeader: number;
     get headerQuery(): string;
     overrideChapterNames: boolean;
     selectedIndex: number;
     defaultPageNumber: number;
-    nodesChanged(): void;
+    loadHeadersForPageAsync(page: StoriPage): Promise<void>;
+    removeHeadersForPage(page: StoriPage): Promise<void>;
+    nodesChanged(oldValue: Node[], newValue: Node[]): void;
     preparePrintAsync(): Promise<void>;
     resetViewHeight(): void;
     connectedCallback(): void;

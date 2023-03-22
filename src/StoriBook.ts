@@ -165,7 +165,7 @@ export class StoriBook extends FASTElement {
 
 	mainSlot?: HTMLSlotElement;
 	@observable nodes: Node[] = [];
-	@observable pages: (StoriPage | SubPage)[] = [];
+	@observable pages: Array<StoriPage | SubPage> = new Array<StoriPage | SubPage>();
 	@observable menuOpen: boolean = false;
 
 	@observable expand: boolean = false;
@@ -191,6 +191,7 @@ export class StoriBook extends FASTElement {
 
 	// Downloads all HTML and searches for headers to create subheaders for the TOC.
 	@attr({ mode: 'boolean', attribute: 'sub-headers' }) subheaders: boolean = false;
+	@attr({ mode: 'boolean', attribute: 'sub-headers-always' }) subheadersAlways: boolean = false;
 	@attr({ attribute: 'top-header' }) topHeader: number = 1; // make a subheader starting with h2 (not h1)
 	@attr({ attribute: 'min-header' }) minHeader: number = 3; // then stop after you finish with h3
 	@volatile get headerQuery(): string{
@@ -209,36 +210,83 @@ export class StoriBook extends FASTElement {
 
 	@attr({ attribute: 'default-page-number' }) defaultPageNumber: number = 1;
 
+	async loadHeadersForPageAsync(page: StoriPage) {
+		if (this.subheaders){
+			//load html and then add subheaders
+			const result = await page.waitForPageLoadAsync();
+			
+			if (result) {
+				const parser = new DOMParser();
+				const document = parser.parseFromString(page.content, "text/html");
+				const subPages: SubPage[] = [];
+				const headers = document.querySelectorAll(this.headerQuery);
+				headers.forEach((header, i) => {
+					if (header.textContent === null) return;
+					const subPage: SubPage = {
+						title: header.textContent,
+						page: page,
+						index: i,
+						icon:"",
+						depth: +header.tagName.substring(1) - this.topHeader
+					};
+					console.log(subPage);
+					subPages.push(subPage);
+				});
+				const mainPageIndex = this.pages.indexOf(page);
+				this.pages.splice(mainPageIndex + 1, 0, ...subPages);
+				if (this.selectedIndex > mainPageIndex) {
+					this.selectedIndex += subPages.length;
+				}
+			}
+			
+		}
+	}
+
+	async removeHeadersForPage(page: StoriPage) {
+		if (this.subheaders){
+
+			const index = this.pages.indexOf(page);
+			for (let i = index + 1; i < this.pages.length; i++) {
+				const subPage = this.pages[i];
+				if (subPage instanceof StoriPage) {
+					break;
+				} else {
+					this.pages.splice(i, 1);
+					i--;
+				}
+			}
+		}
+	}
 
 	// This reacts to pages being added and sets the appropriate active state on the correct page.
-	nodesChanged() {
-		this.selectedIndex = this.defaultPageNumber - 1;
+	nodesChanged(oldValue: Node[], newValue: Node[]) {
+		const allNodes = this.nodes.filter(x => x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE");
+		const nodesAdded = newValue != null ? newValue.filter(x => !oldValue.includes(x) && x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE") : [];
+		const nodesRemoved = oldValue != null ? oldValue.filter(x => !newValue.includes(x) && x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE") : [];
+		
 		if (this.nodes != undefined) {
-			let index = 0;
-			let pages: (StoriPage | SubPage)[] = [];
-			for (const node of this.nodes) {
+			//let index = 0;
+			
+			for (const node of nodesAdded) {
 				if (node.nodeName && node.nodeName.toUpperCase() === "STORI-PAGE") {
-					pages.push(node as StoriPage);
+					const index = allNodes.indexOf(node);
+					this.pages.splice(index,0,node as StoriPage);
 					if (index == this.selectedIndex) {
 						(node as HTMLElement).setAttribute('active', 'true');
+						this.loadHeadersForPageAsync(node as StoriPage);
 					} else {
 						(node as HTMLElement).removeAttribute('active');
 					}
-					index++;
+					
 
 
-					if (this.subheaders) {
+					if (this.subheadersAlways) {
 						//load html and then add subheaders
 						let capturedStoriPage = node as StoriPage;
-						capturedStoriPage.loadPageAsync().then((result) => {
+						capturedStoriPage.waitForPageLoadAsync().then((result) => {
 							if (result) {
 								const parser = new DOMParser();
 								const document = parser.parseFromString(capturedStoriPage.content, "text/html");
-								// let headerQuery = "";
-								// for (let i = this.topHeader; i < this.minHeader; i++) {
-								// 	headerQuery += "h" + (+i + 1) + ",";
-								// }
-								// headerQuery = headerQuery.slice(0, -1);
 								const subPages: SubPage[] = [];
 								const headers = document.querySelectorAll(this.headerQuery);
 								headers.forEach((header, i) => {
@@ -246,18 +294,15 @@ export class StoriBook extends FASTElement {
 									const subPage: SubPage = {
 										title: header.textContent,
 										page: capturedStoriPage,
-										//anchor: ':~:text=' + header.textContent,
 										index: i,
 										icon:"",
-										//xpath: `//${header.tagName.toLowerCase()}[contains(., '${header.textContent}')]`,// '#:~:text=' + header.textContent,
-										//xpath: `//${header.tagName.toLowerCase()}[contains(.,'${header.textContent}')]`,// '#:~:text=' + header.textContent,
 										depth: +header.tagName.substring(1) - this.topHeader
 									};
 									console.log(subPage);
 									subPages.push(subPage);
 								});
 								const mainPageIndex = this.pages.indexOf(capturedStoriPage);
-								pages.splice(mainPageIndex + 1, 0, ...subPages);
+								this.pages.splice(mainPageIndex + 1, 0, ...subPages);
 								if (this.selectedIndex > mainPageIndex) {
 									this.selectedIndex += subPages.length;
 								}
@@ -266,7 +311,6 @@ export class StoriBook extends FASTElement {
 					}
 				}
 			}
-			this.pages = pages;
 
 		}
 	}
@@ -276,7 +320,7 @@ export class StoriBook extends FASTElement {
 		for (const page of this.pages) {
 			if (page instanceof StoriPage) {
 				if (page.content === "") {
-					const result = await page.loadPageAsync();
+					const result = await page.waitForPageLoadAsync();
 					if (!result) {
 						console.log(page.error);
 					}
@@ -295,10 +339,10 @@ export class StoriBook extends FASTElement {
 				}
 			}
 		};
-		setTimeout(() => window.print(), 100);
-		// requestAnimationFrame(() => {
-		// 	window.print();
-		// });
+		//setTimeout(() => window.print(), 100);
+		 requestAnimationFrame(() => {
+		  	window.print();
+		 });
 
 
 	}
@@ -322,6 +366,9 @@ export class StoriBook extends FASTElement {
 
 	connectedCallback(): void {
 		super.connectedCallback();
+
+		this.selectedIndex = this.defaultPageNumber - 1;
+
 		// attempt to get view height of parent if element is in an iframe.  
 
 		this.style.setProperty('--view-height', '80vh');
@@ -336,16 +383,6 @@ export class StoriBook extends FASTElement {
 		} else {
 			//window.addEventListener("resize", this.setViewportHeight.bind(this));
 		}
-
-
-		// // Actually, we don't want external styling here.  This will affect the storibook styling itself.
-		// const cssTags = document.querySelectorAll("link[rel='stylesheet']");
-		// if (cssTags != null && this.shadowRoot != null ){
-		// 	for (let i = 0; i < cssTags.length; i++) {
-		// 		this.shadowRoot.append(cssTags[i].cloneNode(true));
-		// 	}
-		// }
-
 
 		//this.setViewportHeight();
 
@@ -563,54 +600,12 @@ export class StoriBook extends FASTElement {
 		//this.isNarrow = !e.matches;
 	}
 
-	// pagesChanged(oldval: string, newval: string): void {
-	// 	// let d = this.pagesArray;
-	// }
-
-	// setViewportHeight() {
-	// 	if (document.location.ancestorOrigins.length) {
-	// 		if (parent.window.visualViewport != null) {
-	// 			this.viewHeight = parent.window.visualViewport?.height;
-	// 			console.log("Visual viewport height: " + this.viewHeight);
-	// 		} else {
-	// 			console.log("parent's visual viewport was null");
-	// 		}
-	// 	} else {
-	// 		if (window.visualViewport != null) {
-	// 			this.viewHeight = window.visualViewport?.height;
-	// 			console.log("Visual viewport height: " + this.viewHeight);
-	// 		} else {
-	// 			console.log("visual viewport was null");
-	// 		}
-	// 	}
-	// }
-
 	openNav(): void {
 		this.menuOpen = true;
-		// if (this.overlay!=null && this.sidenavContainer!= null && this.rootContainer != null){
-		// 	const bb = this.rootContainer.getBoundingClientRect();
-		// 	console.log(bb);
-		// 	this.overlay.style.display = "block";
-		// 	// this.sidenavContainer.style.width="50%";
-		// 	//  this.sidenavContainer.style.top = bb.top+"px";
-		// 	//  this.sidenavContainer.style.left = bb.left + "px";
-		// 	//  this.sidenavContainer.style.height = bb.height + "px";
-
-		// 	const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-		// 	const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-		// 	// window.addEventListener("scroll", (ev:Event)=>{
-		// 	// 	ev.preventDefault();
-		// 	// 	window.scrollTo(scrollLeft, scrollTop);
-		// 	// });
-		// 	//this.sidenavContainer.style.height = bb.height + "px";
-		// }
 	}
+
 	closeNav(): void {
 		this.menuOpen = false;
-		// if (this.backdrop!=null && this.sidenavContainer!= null){
-		// 	this.backdrop.style.display = "none";
-		// 	this.sidenavContainer.style.width="0";
-		// }
 	}
 
 	keydown(event: KeyboardEvent, page: StoriPage, index: number) {
@@ -623,6 +618,117 @@ export class StoriBook extends FASTElement {
 	async buttonClick(index: number) {
 		this.closeNav();
 		try {
+			if (this.subheaders){
+				if (this.selectedIndex != index) {
+					this.videoElement?.removeEventListener('timeupdate', this.timeupdateRef!);
+					// check if video is playing with chapters and advance video
+					if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
+						const cue = this.chapterCues[index];
+						this.ablePlayer?.updateChapter(cue.start);
+						this.ablePlayer?.seekTo(cue.start);
+					}
+	
+					const oldIndex = this.selectedIndex;
+					const oldPage = this.pages[oldIndex];
+					this.selectedIndex = index;
+					const newPage = this.pages[this.selectedIndex];
+	
+					if (newPage instanceof StoriPage) {
+						if (oldPage instanceof StoriPage) {
+							(oldPage as StoriPage).removeAttribute('active');
+							(newPage as StoriPage).setAttribute('active', 'true');
+							this.loadHeadersForPageAsync(newPage as StoriPage);
+							this.removeHeadersForPage(oldPage as StoriPage);
+							if (this.mainContentContainer != null)
+								this.mainContentContainer.scrollTo({ behavior: "auto", top:0 });
+						} else if ((oldPage as SubPage).page !== newPage) {
+							(oldPage as SubPage).page.removeAttribute('active');
+							(newPage as StoriPage).setAttribute('active', 'true');
+							this.loadHeadersForPageAsync(newPage as StoriPage);
+							this.removeHeadersForPage((oldPage as SubPage).page);
+							if (this.mainContentContainer != null)
+								this.mainContentContainer.scrollTo({ behavior: "auto", top:0 });
+						} else {
+							const firstElementChild = (newPage as StoriPage).shadowRoot!.firstElementChild;
+							if (firstElementChild != null && this.mainContentContainer != null) {
+							
+								this.mainContentContainer.scrollTo({ behavior: "smooth", top:0 });
+								//firstElementChild.scrollIntoView();
+							}
+							//(newPage as StoriPage).iframeElement!.contentWindow?.scrollTo(0, 0);
+						}
+						//find new index.
+						this.selectedIndex = this.pages.indexOf(newPage);
+					} else {
+						
+						if (oldPage instanceof StoriPage && (newPage as SubPage).page !== oldPage) {
+							if (this.mainContentContainer != null) {
+								let mutationObserver = new MutationObserver((mutations) => {
+									const subPage = (newPage as SubPage);
+									const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
+		
+									if (anchorElements != null && newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
+										const parentRect =  newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
+										const childRect = anchorElements[subPage.index].getBoundingClientRect();
+										const scrollTop = childRect.top - parentRect.top;
+										this.mainContentContainer?.scrollTo({ behavior: "smooth", top: scrollTop });
+										//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
+									}
+									mutationObserver.disconnect();
+								});
+								if (newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null)
+									mutationObserver.observe(newPage.page.shadowRoot.firstElementChild, { childList: true, subtree: true });
+							}
+							// old is StoriPage and new subpage is not same page
+							(oldPage as StoriPage).removeAttribute('active');
+							(newPage as SubPage).page.setAttribute('active', 'true');
+							
+							
+						} else if (!(oldPage instanceof StoriPage) && (oldPage as SubPage).page !== (newPage as SubPage).page) {
+							// old is subpage and new subpage is not same page
+							if (this.mainContentContainer != null) {
+								let mutationObserver = new MutationObserver((mutations) => {
+									const subPage = (newPage as SubPage);
+									const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
+		
+									if (anchorElements != null && newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
+										const parentRect =  newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
+										const childRect = anchorElements[subPage.index].getBoundingClientRect();
+										const scrollTop = childRect.top - parentRect.top;
+										this.mainContentContainer?.scrollTo({ behavior: "smooth", top: scrollTop });
+										//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
+									}
+									mutationObserver.disconnect();
+								});
+								if (newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null)
+									mutationObserver.observe(newPage.page.shadowRoot.firstElementChild, { childList: true, subtree: true });
+							}
+							(oldPage as SubPage).page.removeAttribute('active');
+							(newPage as SubPage).page.setAttribute('active', 'true');
+						} else {
+							// old is subpage and new subpage are the same... no need to wait.
+							const subPage = (newPage as SubPage);
+							const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
+	
+							if (anchorElements != null &&  newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
+								//const parentRect = this.mainContentContainer.getBoundingClientRect();
+								const parentRect = newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
+								const childRect = anchorElements[subPage.index].getBoundingClientRect();
+								const scrollTop = childRect.top - parentRect.top;
+								this.mainContentContainer?.scroll({ behavior: "smooth", top: scrollTop });
+								//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
+							}
+							return;
+						}
+	
+						// need to wait for page load if it is a new page, otherwise the scrolling will fail.
+						
+					}
+	
+	
+				}
+
+			} else if (this.subheadersAlways){
 			if (this.selectedIndex != index) {
 				this.videoElement?.removeEventListener('timeupdate', this.timeupdateRef!);
 				// check if video is playing with chapters and advance video
@@ -641,9 +747,13 @@ export class StoriBook extends FASTElement {
 					if (oldPage instanceof StoriPage) {
 						(oldPage as StoriPage).removeAttribute('active');
 						(newPage as StoriPage).setAttribute('active', 'true');
+						this.loadHeadersForPageAsync(newPage as StoriPage);
+						this.removeHeadersForPage(oldPage as StoriPage);
 					} else if ((oldPage as SubPage).page !== newPage) {
 						(oldPage as SubPage).page.removeAttribute('active');
 						(newPage as StoriPage).setAttribute('active', 'true');
+						this.loadHeadersForPageAsync(newPage as StoriPage);
+						this.removeHeadersForPage((oldPage as SubPage).page);
 					} else {
 						const firstElementChild = (newPage as StoriPage).shadowRoot!.firstElementChild;
 						if (firstElementChild != null && this.mainContentContainer != null) {
@@ -719,7 +829,7 @@ export class StoriBook extends FASTElement {
 					
 				}
 
-
+			}
 			}
 		} catch (ex) {
 			console.log(ex);
