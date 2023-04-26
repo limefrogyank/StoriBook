@@ -340,11 +340,12 @@ export class StoriBook extends FASTElement {
 			}
 		};
 		//setTimeout(() => window.print(), 100);
-		if (!donotprint){
-			requestAnimationFrame(() => {
+		
+		requestAnimationFrame(() => {
+			if (!donotprint){
 				window.print();
-			});
-		}
+			}
+		});
 
 	}
 
@@ -381,7 +382,7 @@ export class StoriBook extends FASTElement {
 
 		// seems like this won't detect prints if this is in an iframe.
 		window.addEventListener("beforeprint", async (event) => {			
-			await this.preparePrintAsync(true);
+			//await this.preparePrintAsync(true);
 		});
 
 		//this.isNarrow = !mediaQuery.matches;
