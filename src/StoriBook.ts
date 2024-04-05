@@ -170,7 +170,6 @@ export class StoriBook extends FASTElement {
 
 	@observable expand: boolean = false;
 
-
 	canPlayThroughRef?: () => void;
 	timeupdateRef?: (ev: Event) => void;
 	chapterCues: ChapterCue[] = [];
@@ -191,6 +190,7 @@ export class StoriBook extends FASTElement {
 
 	// Downloads all HTML and searches for headers to create subheaders for the TOC.
 	@attr({ mode: 'boolean', attribute: 'sub-headers' }) subheaders: boolean = false;
+	// Show subheaders even if page is not currently selected
 	@attr({ mode: 'boolean', attribute: 'sub-headers-always' }) subheadersAlways: boolean = false;
 	@attr({ attribute: 'top-header' }) topHeader: number = 1; // make a subheader starting with h2 (not h1)
 	@attr({ attribute: 'min-header' }) minHeader: number = 3; // then stop after you finish with h3
@@ -841,6 +841,39 @@ export class StoriBook extends FASTElement {
 				}
 
 			}
+			} else {
+				if (this.selectedIndex != index) {
+					this.videoElement?.removeEventListener('timeupdate', this.timeupdateRef!);
+					// check if video is playing with chapters and advance video
+					if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
+						const cue = this.chapterCues[index];
+						this.ablePlayer?.updateChapter(cue.start);
+						this.ablePlayer?.seekTo(cue.start);
+					}
+	
+					const oldIndex = this.selectedIndex;
+					const oldPage = this.pages[oldIndex];
+					this.selectedIndex = index;
+					const newPage = this.pages[this.selectedIndex];
+	
+
+					if (oldPage instanceof StoriPage) {
+						(oldPage as StoriPage).removeAttribute('active');
+						(newPage as StoriPage).setAttribute('active', 'true');
+						this.loadHeadersForPageAsync(newPage as StoriPage);
+						this.removeHeadersForPage(oldPage as StoriPage);
+					} else {
+						const firstElementChild = (newPage as StoriPage).shadowRoot!.firstElementChild;
+						if (firstElementChild != null && this.mainContentContainer != null) {
+						
+							this.mainContentContainer.scrollTo({ behavior: "smooth", top:0 });
+							//firstElementChild.scrollIntoView();
+						}
+						//(newPage as StoriPage).iframeElement!.contentWindow?.scrollTo(0, 0);
+					}
+					
+				
+				}
 			}
 		} catch (ex) {
 			console.log(ex);

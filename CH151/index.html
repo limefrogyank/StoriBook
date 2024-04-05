@@ -11,13 +11,15 @@
 
 
 	<!-- <link rel="stylesheet" href="src/STORIBook.css" /> -->
+	<link rel="stylesheet" href="./presentAble.css" type="text/css"/>
+	<link rel="stylesheet" href="./presentAbleAster.css" type="text/css"/>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 	<link rel="stylesheet" href="/ableplayer/build/ableplayer.min.css" type="text/css">
 	<script src="/ableplayer/build/ableplayer.min.js"></script>
 	<!-- <script src="src/test.js"></script> -->
-	<script src="dist/bundle.js"></script>
+	<script src="../dist/bundle.js"></script>
 </head>
 
 <body>
@@ -40,46 +42,17 @@
 		</div>
 
 		<stori-book 
-			overrideChapterNames
-			aspectRatio="1.7777"
+			aspectRatio="1.777"
 			video="https://cdnapisec.kaltura.com/p/823192/sp/0/playManifest/entryId/1_vn9gu97a/format/url/protocol/https/flavorParamId/0/a.mp4"
-			captions="/1_vn9gu97a.vtt" chapters="/1_vn9gu97a.chap.vtt" metadata="/1_vn9gu97a.meta.vtt" 
-			pages='[
-		{ 
-			"title": "Page1",
-			"src": "page1.html"
-		},
-		{
-			"title": "Page2",
-			"src": "page2.html"
-		},
-		{
-			"title": "Page3",
-			"src": "page2.html"
-		},
-		{
-			"title": "Page4",
-			"src": "page2.html"
-		},
-		{
-			"title": "Page5",
-			"src": "page2.html"
-		},
-		{
-			"title": "Page5",
-			"src": "page2.html"
-		},
-		{
-			"title": "Page5",
-			"src": "page2.html"
-		},
-		{
-			"title": "Page5",
-			"src": "page2.html"
-		}
-		]'></stori-book>
+			captions="./1_vn9gu97a.vtt" 
+			chapters="./1_vn9gu97a.chap.vtt" 
+			metadata="./1_vn9gu97a.meta.vtt" 
+			>
+		<stori-page title="Learning Objectives" src="pages/page1.html">Page 1</stori-page>
+		<stori-page title="What is Science?" src="pages/page2.html">Page 2</stori-page>
+	</stori-book>
 	</div>
-	THERE"S SOMETHIGN HERE Top-Down
+	THERE'S SOMETHIGN HERE Top-Down
 	<h2>hhh</h2>
 </body>
 

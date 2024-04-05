@@ -1,0 +1,111 @@
+/* Coral text active #005566 */
+/* Sage text active #FFE78F */
+
+.as-vcenter{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.as-back {
+	fill: #fff;
+}
+
+.as-back-alt {
+	fill: #1c2e4a;
+	fill-rule: evenodd;
+}
+
+.as-img {
+	isolation: isolate;
+}
+
+.as-title, foreignObject h2{
+	font-family: 'Assistant', sans-serif;
+	font-size: 80px;
+	line-height: revert;
+	margin: 0;
+	color: #002060;
+	
+	    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.as-heading, foreignObject h3{
+	font-family: 'Assistant', sans-serif;
+	font-size: 60px;
+	line-height: revert;
+	margin: 0;
+}
+
+
+.as-body, foreignObject p, foreignObject li {
+	font-size: 40px;
+	line-height: revert;
+	margin: 0;
+	font-family: 'Open Sans', sans-serif;
+	font-family: 'glacial_indifferenceregular', sans-serif;
+}
+
+.as-heading-alt, .as-body-alt{
+	margin: 0;
+	color: white;
+}
+
+/* text box */
+.as-box{
+	fill: #676960;
+	color: white;
+	margin: 0;
+}
+.as-icon-box *{
+	stroke: #fff
+}
+
+.as-box h3 {
+    color: white;
+}
+
+.as-box:hover, .as-box:focus, .as-box:hover h3, .as-box:focus h3, .as-box:hover .as-icon-box *, .as-box:focus .as-icon-box * {
+	color:#FFE78F;
+	stroke: #FFE78F;
+}
+
+/*Alternative Text Box */
+.as-box-alt{
+	fill: #EFB0A4;
+	fill-rule: evenodd;
+}
+
+.as-box-alt h3, .as-box-alt p, .as-box-alt li {
+    color: black;
+}
+
+ .as-icon-box-alt *{
+	stroke: #000;
+ }
+.as-box-alt:hover, .as-box-alt:focus, .as-box-alt:hover h3, .as-box-alt:focus h3,  .as-box-alt:hover p, .as-box-alt:focus p, .as-box-alt:hover .as-icon-box-alt *, .as-box-alt:focus .as-icon-box-alt  *{
+	color:#005566;
+	stroke:#005566;
+}
+
+.as-icon *, .as-icon-box *, .as-icon-box-alt *{
+	fill: none;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+
+}
+
+.as-icon *{
+	stroke: #002060;
+
+}
+
+
+foreignObject img{
+	border-radius: 10%;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
