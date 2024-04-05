@@ -17,7 +17,6 @@ export declare class StoriBook extends FASTElement {
     chapterCues: ChapterCue[];
     isFullscreen: boolean;
     isNarrow: boolean;
-    ablepath: string;
     video: string;
     captions: string;
     metadata: string;
