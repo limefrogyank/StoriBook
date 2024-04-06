@@ -7,6 +7,7 @@ export declare class StoriBook extends FASTElement {
     mainContentContainer?: HTMLDivElement;
     ablePlayer: any;
     chaptersDiv?: HTMLDivElement;
+    transcriptDiv?: HTMLDivElement;
     mainSlot?: HTMLSlotElement;
     nodes: Node[];
     pages: Array<StoriPage | SubPage>;
@@ -41,6 +42,7 @@ export declare class StoriBook extends FASTElement {
     connectedCallback(): void;
     onCanPlayThrough(): void;
     processChapterNamesAndCues(): void;
+    updateTranscript(now: any): void;
     updateMeta(ev: Event): void;
     showMeta(now: any): void;
     queryChanged(e: MediaQueryListEvent): void;

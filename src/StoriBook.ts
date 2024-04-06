@@ -67,8 +67,8 @@ const navBarTemplate = html<StoriBook>`
 const audioTemplate = html<StoriBook>`
 <div id="audiobox">
 	<div>
-		<video ${ref('videoElement')} data-able-player data-skin="2020" preload="auto" data-transcript-div="aSlideParent"
-				height="auto" data-use-chapters-button="false" data-seekbar-scope="chapter"
+		<video ${ref('videoElement')} data-able-player data-skin="2020" preload="auto" data-transcript-div="transcript"
+				height="auto" data-use-chapters-button="false" data-seekbar-scope="chapter" plays-inline
 				data-meta-type="selector" style="width: 100%; height: auto;">
 			<source src="${x => x.video}" />
 			<track kind="captions" src="${x => x.captions}" />
@@ -133,8 +133,10 @@ const template = html<StoriBook>`
 				</div>
 				<div class="" id="mainContent" ${ref('mainContentContainer')} tabindex="0">
 					<slot ${slotted("nodes")}></slot>
+					<div id="transcript" style="height:200px;width:400px;" ${ref('transcriptDiv')}></div>
 				</div>
-				${x => navBarTemplate}		
+				${x => navBarTemplate}	
+				
 			</div>
 		</div>
 	</div>
@@ -162,6 +164,7 @@ export class StoriBook extends FASTElement {
 
 	ablePlayer: any;
 	chaptersDiv?: HTMLDivElement;
+	transcriptDiv?: HTMLDivElement;
 
 	mainSlot?: HTMLSlotElement;
 	@observable nodes: Node[] = [];
@@ -264,6 +267,15 @@ export class StoriBook extends FASTElement {
 		const nodesAdded = newValue != null ? newValue.filter(x => !oldValue.includes(x) && x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE") : [];
 		const nodesRemoved = oldValue != null ? oldValue.filter(x => !newValue.includes(x) && x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE") : [];
 		
+		// this section is only to make Presentables with meta data (PCC CH151 project) work properly.  They are expecting slides with id "s1" etc
+		allNodes.forEach((x,i)=>{
+			if ((x as StoriPage).shadowRoot && (x as StoriPage).shadowRoot!.children.length > 0){
+				const child = (x as StoriPage).shadowRoot!.children.item(0);
+				if (child)
+					child.id = "s"+ (i+1).toString();
+			} 
+		});
+
 		if (this.nodes != undefined) {
 			//let index = 0;
 			
@@ -418,6 +430,9 @@ export class StoriBook extends FASTElement {
 
 
 		this.ablePlayer.$chaptersDiv = (window as any).$(this.chaptersDiv)
+
+
+		
 		// this.videoElement?.addEventListener('loadedmetadata', ()=>{
 		// 	console.log("CHECKING");
 		// 	console.log(this.ablePlayer.chapters);	
@@ -429,9 +444,9 @@ export class StoriBook extends FASTElement {
 
 		// this.ablePlayer.onMediaNewSourceLoad = ()=> {
 		// 	console.log((window as any).AblePlayerInstances[0].chapters[0]);	
-		// 	this.ablePlayer.$media.on('timeupdate',() => {
-		// 		this.updateMeta(); 
-		// 	}); 
+			// this.ablePlayer.$media.on('timeupdate',(ev : any) => {
+			// 	this.updateMeta(ev); 
+			// }); 
 		// }; //.then(()=>{
 
 	}
@@ -444,9 +459,15 @@ export class StoriBook extends FASTElement {
 			this.processChapterNamesAndCues();
 
 		}
+
+		// let test = this.ablePlayer.$transcriptDiv;
+		// this.transcriptDiv!.append(this.ablePlayer.$transcriptArea[0]);
+
 		//this.addChapterNav();
 		//this.ablePlayer.$chaptersDiv = (window as any).$(this.chaptersDiv);//(window as any).$();
 		this.videoElement?.addEventListener('timeupdate', this.timeupdateRef!);
+
+
 	}
 
 	processChapterNamesAndCues() {
@@ -478,9 +499,60 @@ export class StoriBook extends FASTElement {
 		}
 	}
 
+	updateTranscript(now: any) {
+		//console.log(now);
+		var tempSelectors, m, thisCaption,
+			cues, cueText, cueLines, i, line,
+			showDuration, focusTarget;
+		let currentCaption;
+		tempSelectors = [];
+		if (this.ablePlayer.captions.length >= 1) {
+			let captions : any[] = this.ablePlayer.captions;
+			let lang = this.ablePlayer.lang;
+			let caption = captions.find(x=> x.language == lang);
+			if (caption){
+				cues = caption.cues;
+			}
+		}
+		else {
+			cues = [];
+		}
+		for (m = 0; m < cues.length; m++) {
+			if ((cues[m].start <= now) && (cues[m].end > now)) {
+				thisCaption = m;
+				break;
+			}
+		}
+		//console.log(cues[thisMeta as number]);
+		if (typeof thisCaption !== 'undefined') {
+			if (currentCaption !== thisCaption) {
+
+				// it's time to load the new metadata cue into the container div
+				//this.ablePlayer.$metaDiv.html(this.ablePlayer.flattenCueForMeta(cues[thisCaption]).replace('\n', '<br>'));
+				console.log(this.ablePlayer.flattenCueForMeta(cues[thisCaption]).replace('\n', '<br>'));
+			}
+		}
+		else {
+			// there is currently no metadata. Empty stale content
+			// if (typeof this.ablePlayer.$metaDiv !== 'undefined') {
+			// 	this.ablePlayer.$metaDiv.html('');
+			// }
+			// if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
+			// 	for (i = 0; i < this.ablePlayer.visibleSelectors.length; i++) {
+			// 		(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
+			// 	}
+			// 	// reset array
+			// 	this.ablePlayer.visibleSelectors = [];
+			// }
+			currentCaption = -1;
+		}
+	}
+
 
 	updateMeta(ev: Event) {
+		this.updateTranscript(this.ablePlayer.elapsed);
 		this.ablePlayer.refreshControls('timeline'); // for some reason, this is not firing automatically
+		
 		if (this.ablePlayer.hasMeta) {
 			if (this.ablePlayer.metaType === 'text') {
 				this.ablePlayer.$metaDiv.show();
@@ -534,12 +606,19 @@ export class StoriBook extends FASTElement {
 						}
 						else if (line.toLowerCase().substring(0, 6) == 'focus:') {
 							focusTarget = line.substring(6).trim();
-							focusTarget = focusTarget.replace(`\#`, ``);
+							// focusTarget = focusTarget.replace(`\#`, ``);
 
-							let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
-							if (elem.length) {
-								elem.focus();
+							const currentStoriPage = this.querySelectorAll('stori-page').item(this.selectedIndex);
+							let target = currentStoriPage.shadowRoot?.querySelector(focusTarget);
+
+							if (target){
+								target.focus();
 							}
+
+							// let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
+							// if (elem.length) {
+							// 	elem.focus();
+							// }
 							// if ((window as any).$(focusTarget).length) {
 							// 	(window as any).$(focusTarget).focus();
 							// }
