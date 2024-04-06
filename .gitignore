@@ -1,4 +1,5 @@
 node_modules
+dist
 dist/*.hot-update.js
 dist/*.hot-update.json
 ableplayer
