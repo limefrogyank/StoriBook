@@ -162,7 +162,6 @@ export class StoriBook extends FASTElement {
 	videoElement?: HTMLVideoElement;
 	mainContentContainer?: HTMLDivElement;
 
-	ablePlayer: any;
 	chaptersDiv?: HTMLDivElement;
 	transcriptDiv?: HTMLDivElement;
 
@@ -180,7 +179,7 @@ export class StoriBook extends FASTElement {
 	@observable isFullscreen: boolean = false;
 	@observable isNarrow: boolean = false;
 
-	@attr ablepath: string = '';
+
 	@attr video: string = '';
 	@attr captions: string = '';
 	@attr metadata: string = '';
