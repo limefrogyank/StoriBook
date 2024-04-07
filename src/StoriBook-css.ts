@@ -1,6 +1,6 @@
 import { Behavior, css, CSSDirective  } from '@microsoft/fast-element';
 import ableplayercss from  '../ableplayer/build/ableplayer.min.css';
-
+import videojscss from '../videojs/video-js.css';
 // class RootHeight extends CSSDirective {
 // 	private widthProperty = "--root-width";
 // 	createCSS() {
@@ -19,6 +19,7 @@ import ableplayercss from  '../ableplayer/build/ableplayer.min.css';
 
 // }
 
+//${ableplayercss.toString()}
 
 export const mainStyles = css`
 
@@ -28,7 +29,8 @@ export const mainStyles = css`
 	height: var(--view-height);
 }
 
-${ableplayercss.toString()}
+${videojscss.toString()}
+
 #root{
 	width:100%;
 	height: 100%;

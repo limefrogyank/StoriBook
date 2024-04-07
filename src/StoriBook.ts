@@ -67,13 +67,14 @@ const navBarTemplate = html<StoriBook>`
 const audioTemplate = html<StoriBook>`
 <div id="audiobox">
 	<div>
-		<video ${ref('videoElement')} data-able-player data-skin="2020" preload="auto" data-transcript-div="aSlideParent"
-				height="auto" data-use-chapters-button="false" data-seekbar-scope="chapter"
-				data-meta-type="selector" style="width: 100%; height: auto;">
-			<source src="${x => x.video}" />
-			<track kind="captions" src="${x => x.captions}" />
-			<track kind="metadata" src="${x => x.metadata}" />
-			<track kind="chapters" src="${x => x.chapters}" />
+		<video ${ref('videoElement')} class='video-js' controls='controls'
+				data-setup='{ "playbackRates": [0.5, 1, 1.5, 2], "controlBar": {"pictureInPictureToggle":false, "captions":false}}' 
+		 		data-able-player preload="auto" data-transcript-div="aSlideParent"
+				height="auto">
+			<source src="${x => x.video}" type="application/x-mpegURL">
+			<track kind="captions" src="${x => x.captions}" srclang="en" label="English" default>
+			<track kind="metadata" src="${x => x.metadata}" >
+			<track kind="chapters" src="${x => x.chapters}" >
 		</video>
 		<div id="chapters" ${ref('chaptersDiv')} style="display:none;"></div>
 	</div>
@@ -367,6 +368,45 @@ export class StoriBook extends FASTElement {
 
 	connectedCallback(): void {
 		super.connectedCallback();
+		
+		var videos = this.shadowRoot!.firstElementChild!.getElementsByTagName('video');
+		for (var i=0; i<videos.length; i++) {
+			var video = videos[i];
+
+			if (video.hasAttribute('data-able-player')) {
+				var videoPlayer = (window as any).videojs(video,
+					{
+						controlBar: {pictureInPictureToggle:false}
+					});
+				console.log(videoPlayer);
+
+				videoPlayer.on('pluginsetup', ()=>{
+					
+				});
+	
+
+				videoPlayer.ready( function(this:any) {
+
+					var options = {
+						showTitle: false,
+						showTrackSelector: true,
+					};
+					//var transcript = videoPlayer.transcript(options);
+
+					var metadata = videoPlayer.metadataActions({});
+				
+				videoPlayer.textTracks()[0].mode = 'hidden';
+				videoPlayer.textTracks()[1].mode = 'hidden';
+				//this.qualityLevels();
+				//this.maxQualitySelector();
+
+				
+				//console.log(transcript);
+				//this.el().appendChild(transcript.element()); 
+				
+				});
+			}
+		}
 
 		this.selectedIndex = this.defaultPageNumber - 1;
 
@@ -410,20 +450,13 @@ export class StoriBook extends FASTElement {
 		});
 
 		//try to add video to able player instances outside of element
-		this.ablePlayer = new (window as any).AblePlayer(this.videoElement);
-		(window as any).AblePlayerInstances.push(this.ablePlayer);
-
-		console.log((window as any).AblePlayerInstances[0]);
-
-
-		this.ablePlayer.$chaptersDiv = (window as any).$(this.chaptersDiv)
 		// this.videoElement?.addEventListener('loadedmetadata', ()=>{
 		// 	console.log("CHECKING");
 		// 	console.log(this.ablePlayer.chapters);	
 		// });
 
 		this.canPlayThroughRef = this.onCanPlayThrough.bind(this);
-		this.timeupdateRef = this.updateMeta.bind(this);
+		//this.timeupdateRef = this.updateMeta.bind(this);
 		this.videoElement?.addEventListener('canplaythrough', this.canPlayThroughRef);
 
 		// this.ablePlayer.onMediaNewSourceLoad = ()=> {
@@ -438,7 +471,6 @@ export class StoriBook extends FASTElement {
 	onCanPlayThrough() {
 		//this.videoElement?.removeEventListener('canplaythrough', this.canPlayThroughRef!);
 		console.log("CHECKING");
-		console.log(this.ablePlayer.chapters);
 		if (this.chapterCues.length == 0) {
 			this.processChapterNamesAndCues();
 
@@ -450,160 +482,160 @@ export class StoriBook extends FASTElement {
 
 	processChapterNamesAndCues() {
 		let cues;
-		if (this.ablePlayer.useChapterTimes) {
-			cues = this.ablePlayer.selectedChapters.cues;
-		}
-		else if (this.ablePlayer.chapters.length >= 1) {
-			cues = this.ablePlayer.chapters[0].cues;
-		}
-		else {
-			cues = [];
-		}
-		if (cues.length > 0) {
-			for (let c = 0; c < cues.length; c++) {
-				const chapterName = this.ablePlayer.flattenCueForCaption(cues[c]);
-				const startTime = cues[c].start;
-				this.chapterCues.push({
-					title: chapterName,
-					start: startTime
-				});
-				// if (this.overrideChapterNames && this.pagesArray.length > c){
-				// 	let page :IPage = {title: chapterName, src: this.pagesArray[c].src};
-				// 	//page.title = chapterName;
-				// 	this.pagesArray.splice(c,1,page);
-				// 	//this.pagesArray[c].title = chapterName;
-				// }
-			}
-		}
+		// if (this.ablePlayer.useChapterTimes) {
+		// 	cues = this.ablePlayer.selectedChapters.cues;
+		// }
+		// else if (this.ablePlayer.chapters.length >= 1) {
+		// 	cues = this.ablePlayer.chapters[0].cues;
+		// }
+		// else {
+		// 	cues = [];
+		// }
+		// if (cues.length > 0) {
+		// 	for (let c = 0; c < cues.length; c++) {
+		// 		const chapterName = this.ablePlayer.flattenCueForCaption(cues[c]);
+		// 		const startTime = cues[c].start;
+		// 		this.chapterCues.push({
+		// 			title: chapterName,
+		// 			start: startTime
+		// 		});
+		// 		// if (this.overrideChapterNames && this.pagesArray.length > c){
+		// 		// 	let page :IPage = {title: chapterName, src: this.pagesArray[c].src};
+		// 		// 	//page.title = chapterName;
+		// 		// 	this.pagesArray.splice(c,1,page);
+		// 		// 	//this.pagesArray[c].title = chapterName;
+		// 		// }
+		// 	}
+		// }
 	}
 
 
-	updateMeta(ev: Event) {
-		this.ablePlayer.refreshControls('timeline'); // for some reason, this is not firing automatically
-		if (this.ablePlayer.hasMeta) {
-			if (this.ablePlayer.metaType === 'text') {
-				this.ablePlayer.$metaDiv.show();
-				this.showMeta(this.ablePlayer.elapsed);
-			}
-			else {
-				this.showMeta(this.ablePlayer.elapsed);
-			}
-		}
-	}
+	// updateMeta(ev: Event) {
+	// 	this.ablePlayer.refreshControls('timeline'); // for some reason, this is not firing automatically
+	// 	if (this.ablePlayer.hasMeta) {
+	// 		if (this.ablePlayer.metaType === 'text') {
+	// 			this.ablePlayer.$metaDiv.show();
+	// 			this.showMeta(this.ablePlayer.elapsed);
+	// 		}
+	// 		else {
+	// 			this.showMeta(this.ablePlayer.elapsed);
+	// 		}
+	// 	}
+	// }
 
-	showMeta(now: any) {
-		//console.log(now);
-		var tempSelectors, m, thisMeta,
-			cues, cueText, cueLines, i, line,
-			showDuration, focusTarget;
-		let currentMeta;
-		tempSelectors = [];
-		if (this.ablePlayer.meta.length >= 1) {
-			cues = this.ablePlayer.meta;
-		}
-		else {
-			cues = [];
-		}
-		for (m = 0; m < cues.length; m++) {
-			if ((cues[m].start <= now) && (cues[m].end > now)) {
-				thisMeta = m;
-				break;
-			}
-		}
-		//console.log(cues[thisMeta as number]);
-		if (typeof thisMeta !== 'undefined') {
-			if (currentMeta !== thisMeta) {
+	// showMeta(now: any) {
+	// 	//console.log(now);
+	// 	var tempSelectors, m, thisMeta,
+	// 		cues, cueText, cueLines, i, line,
+	// 		showDuration, focusTarget;
+	// 	let currentMeta;
+	// 	tempSelectors = [];
+	// 	if (this.ablePlayer.meta.length >= 1) {
+	// 		cues = this.ablePlayer.meta;
+	// 	}
+	// 	else {
+	// 		cues = [];
+	// 	}
+	// 	for (m = 0; m < cues.length; m++) {
+	// 		if ((cues[m].start <= now) && (cues[m].end > now)) {
+	// 			thisMeta = m;
+	// 			break;
+	// 		}
+	// 	}
+	// 	//console.log(cues[thisMeta as number]);
+	// 	if (typeof thisMeta !== 'undefined') {
+	// 		if (currentMeta !== thisMeta) {
 
-				if (this.ablePlayer.metaType === 'text') {
-					// it's time to load the new metadata cue into the container div
-					this.ablePlayer.$metaDiv.html(this.ablePlayer.flattenCueForMeta(cues[thisMeta]).replace('\n', '<br>'));
-				}
-				else if (this.ablePlayer.metaType === 'selector') {
-					// it's time to show content referenced by the designated selector(s)
-					cueText = this.ablePlayer.flattenCueForMeta(cues[thisMeta]);
-					console.log(cueText);
-					cueLines = cueText.split('\n');
-					for (i = 0; i < cueLines.length; i++) {
-						line = (window as any).$.trim(cueLines[i]);
+	// 			if (this.ablePlayer.metaType === 'text') {
+	// 				// it's time to load the new metadata cue into the container div
+	// 				this.ablePlayer.$metaDiv.html(this.ablePlayer.flattenCueForMeta(cues[thisMeta]).replace('\n', '<br>'));
+	// 			}
+	// 			else if (this.ablePlayer.metaType === 'selector') {
+	// 				// it's time to show content referenced by the designated selector(s)
+	// 				cueText = this.ablePlayer.flattenCueForMeta(cues[thisMeta]);
+	// 				console.log(cueText);
+	// 				cueLines = cueText.split('\n');
+	// 				for (i = 0; i < cueLines.length; i++) {
+	// 					line = (window as any).$.trim(cueLines[i]);
 
-						if (line.toLowerCase().trim() === 'pause') {
-							// don't show big play button when pausing via metadata
-							this.ablePlayer.hideBigPlayButton = true;
-							this.ablePlayer.pauseMedia();
-						}
-						else if (line.toLowerCase().substring(0, 6) == 'focus:') {
-							focusTarget = line.substring(6).trim();
-							focusTarget = focusTarget.replace(`\#`, ``);
+	// 					if (line.toLowerCase().trim() === 'pause') {
+	// 						// don't show big play button when pausing via metadata
+	// 						this.ablePlayer.hideBigPlayButton = true;
+	// 						this.ablePlayer.pauseMedia();
+	// 					}
+	// 					else if (line.toLowerCase().substring(0, 6) == 'focus:') {
+	// 						focusTarget = line.substring(6).trim();
+	// 						focusTarget = focusTarget.replace(`\#`, ``);
 
-							let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
-							if (elem.length) {
-								elem.focus();
-							}
-							// if ((window as any).$(focusTarget).length) {
-							// 	(window as any).$(focusTarget).focus();
-							// }
-						}
-						else if (line.toLowerCase().substring(0, 6) == 'click:') {
-							focusTarget = line.substring(6).trim();
-							focusTarget = focusTarget.replace(`\#`, ``);
-							let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
-							if (elem.length) {
-								elem.click();
-							}
-							// if ((window as any).$(focusTarget).length) {
-							// 	(window as any).$(focusTarget).focus();
-							// }
-						}
-						else {
+	// 						let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
+	// 						if (elem.length) {
+	// 							elem.focus();
+	// 						}
+	// 						// if ((window as any).$(focusTarget).length) {
+	// 						// 	(window as any).$(focusTarget).focus();
+	// 						// }
+	// 					}
+	// 					else if (line.toLowerCase().substring(0, 6) == 'click:') {
+	// 						focusTarget = line.substring(6).trim();
+	// 						focusTarget = focusTarget.replace(`\#`, ``);
+	// 						let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
+	// 						if (elem.length) {
+	// 							elem.click();
+	// 						}
+	// 						// if ((window as any).$(focusTarget).length) {
+	// 						// 	(window as any).$(focusTarget).focus();
+	// 						// }
+	// 					}
+	// 					else {
 
-							if ((window as any).$(line).length) {
-								// selector exists
-								currentMeta = thisMeta;
-								showDuration = parseInt((window as any).$(line).attr('data-duration'));
-								if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
-									(window as any).$(line).show().delay(showDuration).fadeOut();
-								}
-								else {
-									// no duration specified. Just show the element until end time specified in VTT file
-									(window as any).$(line).show();
-								}
-								// add to array of visible selectors so it can be hidden at end time
-								this.ablePlayer.visibleSelectors.push(line);
-								tempSelectors.push(line);
+	// 						if ((window as any).$(line).length) {
+	// 							// selector exists
+	// 							currentMeta = thisMeta;
+	// 							showDuration = parseInt((window as any).$(line).attr('data-duration'));
+	// 							if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
+	// 								(window as any).$(line).show().delay(showDuration).fadeOut();
+	// 							}
+	// 							else {
+	// 								// no duration specified. Just show the element until end time specified in VTT file
+	// 								(window as any).$(line).show();
+	// 							}
+	// 							// add to array of visible selectors so it can be hidden at end time
+	// 							this.ablePlayer.visibleSelectors.push(line);
+	// 							tempSelectors.push(line);
 
-							}
-						}
-					}
-					// now step through this.visibleSelectors and remove anything that's stale
-					if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
-						if (this.ablePlayer.visibleSelectors.length !== tempSelectors.length) {
-							for (i = this.ablePlayer.visibleSelectors.length - 1; i >= 0; i--) {
-								if ((window as any).$.inArray(this.ablePlayer.visibleSelectors[i], tempSelectors) == -1) {
-									(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
-									this.ablePlayer.visibleSelectors.splice(i, 1);
-								}
-							}
-						}
-					}
+	// 						}
+	// 					}
+	// 				}
+	// 				// now step through this.visibleSelectors and remove anything that's stale
+	// 				if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
+	// 					if (this.ablePlayer.visibleSelectors.length !== tempSelectors.length) {
+	// 						for (i = this.ablePlayer.visibleSelectors.length - 1; i >= 0; i--) {
+	// 							if ((window as any).$.inArray(this.ablePlayer.visibleSelectors[i], tempSelectors) == -1) {
+	// 								(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
+	// 								this.ablePlayer.visibleSelectors.splice(i, 1);
+	// 							}
+	// 						}
+	// 					}
+	// 				}
 
-				}
-			}
-		}
-		else {
-			// there is currently no metadata. Empty stale content
-			if (typeof this.ablePlayer.$metaDiv !== 'undefined') {
-				this.ablePlayer.$metaDiv.html('');
-			}
-			if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
-				for (i = 0; i < this.ablePlayer.visibleSelectors.length; i++) {
-					(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
-				}
-				// reset array
-				this.ablePlayer.visibleSelectors = [];
-			}
-			currentMeta = -1;
-		}
-	}
+	// 			}
+	// 		}
+	// 	}
+	// 	else {
+	// 		// there is currently no metadata. Empty stale content
+	// 		if (typeof this.ablePlayer.$metaDiv !== 'undefined') {
+	// 			this.ablePlayer.$metaDiv.html('');
+	// 		}
+	// 		if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
+	// 			for (i = 0; i < this.ablePlayer.visibleSelectors.length; i++) {
+	// 				(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
+	// 			}
+	// 			// reset array
+	// 			this.ablePlayer.visibleSelectors = [];
+	// 		}
+	// 		currentMeta = -1;
+	// 	}
+	// }
 
 	queryChanged(e: MediaQueryListEvent) {
 		console.log(e);
@@ -634,8 +666,8 @@ export class StoriBook extends FASTElement {
 					// check if video is playing with chapters and advance video
 					if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
 						const cue = this.chapterCues[index];
-						this.ablePlayer?.updateChapter(cue.start);
-						this.ablePlayer?.seekTo(cue.start);
+						// this.ablePlayer?.updateChapter(cue.start);
+						// this.ablePlayer?.seekTo(cue.start);
 					}
 	
 					const oldIndex = this.selectedIndex;
@@ -744,8 +776,8 @@ export class StoriBook extends FASTElement {
 				// check if video is playing with chapters and advance video
 				if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
 					const cue = this.chapterCues[index];
-					this.ablePlayer?.updateChapter(cue.start);
-					this.ablePlayer?.seekTo(cue.start);
+					// this.ablePlayer?.updateChapter(cue.start);
+					// this.ablePlayer?.seekTo(cue.start);
 				}
 
 				const oldIndex = this.selectedIndex;
@@ -846,8 +878,8 @@ export class StoriBook extends FASTElement {
 					// check if video is playing with chapters and advance video
 					if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
 						const cue = this.chapterCues[index];
-						this.ablePlayer?.updateChapter(cue.start);
-						this.ablePlayer?.seekTo(cue.start);
+						// this.ablePlayer?.updateChapter(cue.start);
+						// this.ablePlayer?.seekTo(cue.start);
 					}
 	
 					const oldIndex = this.selectedIndex;
