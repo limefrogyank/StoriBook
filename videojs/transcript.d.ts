@@ -11,6 +11,7 @@ interface TranscriptPluginOptions {
     index: number;
     showTranscriptButton: boolean;
     showCaptionsButton: boolean;
+    showFullScreenButton: boolean;
 }
 declare const plugin: any;
 export declare class TranscriptPlugin extends plugin {

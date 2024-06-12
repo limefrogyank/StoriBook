@@ -184,10 +184,11 @@
         this.index = -3;
         this.showTranscriptButton = false;
         this.showCaptionsButton = false;
+        this.showFullScreenButton = false;
       }
     }
-    const plugin$1 = videojs__default["default"].getPlugin('plugin');
-    class TranscriptPlugin extends plugin$1 {
+    const plugin$2 = videojs__default["default"].getPlugin('plugin');
+    class TranscriptPlugin extends plugin$2 {
       constructor(player, options) {
         super(player, options);
         this.isExternal = false;
@@ -226,15 +227,30 @@
             player.controlBar.removeChild(captionsButton);
           }
         }
+        // FOR PRESENTABLES ONLY
+        if (!this.options.showFullScreenButton) {
+          const fullScreenButton = player.controlBar.getChild('FullscreenToggle');
+          if (fullScreenButton) {
+            player.controlBar.removeChild(fullScreenButton);
+          }
+        }
+        const chaptersButton = player.controlBar.getChild('ChaptersButton');
+        if (chaptersButton) {
+          player.controlBar.removeChild(chaptersButton);
+        }
         this.validTracks = getTextTrackList(player);
         this.descriptionTracks = getDescriptionTracks(player);
         this.currentTrack = getActiveTrack(this.validTracks, Settings.transcriptDefaultLang);
         //this.currentDescriptionTrack = getActiveDescriptionTrack(this.descriptionTracks, this.currentTrack);
         const el = player.el();
         const externalDivId = player.getAttribute('data-transcript-div');
+        console.log('id is: ');
+        console.log(externalDivId);
         let externalDiv = null;
         if (externalDivId !== null) {
           externalDiv = el.ownerDocument.getElementById(externalDivId);
+          console.log("THE EXTERNAL DIV IS:  ");
+          console.log(externalDiv);
           if (externalDiv !== null) {
             this.isExternal = true;
           }
@@ -292,9 +308,11 @@
         el.classList.add('resizable');
         el.role = 'dialog';
         el.ariaLabel = localize('Transcript');
-        const startSize = Settings.transcriptSize;
-        el.style.width = startSize.width + 'px';
-        el.style.height = startSize.height + 'px';
+        if (this.isExternal) ; else {
+          const startSize = Settings.transcriptSize;
+          el.style.width = startSize.width + 'px';
+          el.style.height = startSize.height + 'px';
+        }
         el.setAttribute('id', this.name + '-' + this.player.id());
         if (this.options.showTitle) {
           this.title = this.createTitle();
@@ -461,10 +479,8 @@
               line.classList.add('is-active');
               if (this.options.autoscroll) {
                 // && !(this.options.stopScrollWhenInUse)) { //&& this.body?.scroll.inUse())) {
-                line.scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'center'
-                });
+                // line.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                line.scrollIntoView(false);
               }
             }
           } else {
@@ -954,806 +970,9 @@
     videojs__default["default"].use('*', speakDescriptionsTrack);
     console.log("REGISTERED SPEAK DESCRIPTIONS TRACK");
 
-    const _isOnMobile = videojs__default["default"].browser.IS_IOS || videojs__default["default"].browser.IS_NATIVE_ANDROID;
-    const Tech = videojs__default["default"].getTech('Tech');
-    // interface YoutubePlayerArgs {
-    //     controls: number;
-    //     modestbranding: number;
-    //     rel: number;
-    //     showinfo: number;
-    //     loop: number;
-    //     autohide?: number;
-    //     cc_load_policy?: number;
-    //     disablekb?: number;
-    //     color?: string;
-    //     fs?: number;
-    //     end?: number;
-    //     hl?: string;
-    //     iv_load_policy?: number;
-    //     list?: string;
-    //     listType?: string;
-    //     playlist?: string;
-    //     playsinline?: number;
-    //     start?: number;
-    //     theme?: string;
-    // }
-    class Youtube extends Tech {
-      constructor(options, ready) {
-        super(options, ready);
-        this.loadingYouTubeCaptions = true;
-        this.captionLangPending = null;
-        this.prefCaptionsSize = 'medium';
-        this.options = options;
-        this.setPoster(options.poster);
-        this.setSrc(this.options_.source, true);
-        // Set the vjs-youtube class to the player
-        // Parent is not set yet so we have to wait a tick
-        this.setTimeout(() => {
-          if (this.el_) {
-            this.el_.parentNode.className += ' vjs-youtube';
-            if (_isOnMobile) {
-              this.el_.parentNode.className += ' vjs-youtube-mobile';
-            }
-            if (Youtube.isApiReady) {
-              this.initYTPlayer();
-            } else {
-              Youtube.apiReadyQueue.push(this);
-            }
-            console.log(this.player());
-            //this.button = this.player().controlBar.addChild('YoutubeCaptionsButton', { parent: this }, -1) as YoutubeCaptionsButton;
-          }
-        });
-      }
-
-      dispose() {
-        if (this.ytPlayer) {
-          //Dispose of the YouTube Player
-          if (this.ytPlayer.stopVideo) {
-            this.ytPlayer.stopVideo();
-          }
-          if (this.ytPlayer.destroy) {
-            this.ytPlayer.destroy();
-          }
-        } else {
-          //YouTube API hasn't finished loading or the player is already disposed
-          var index = Youtube.apiReadyQueue.indexOf(this);
-          if (index !== -1) {
-            Youtube.apiReadyQueue.splice(index, 1);
-          }
-        }
-        this.ytPlayer = null;
-        this.el_.parentNode.className = this.el_.parentNode.className.replace(' vjs-youtube', '').replace(' vjs-youtube-mobile', '');
-        this.el_.parentNode.removeChild(this.el_);
-        //Needs to be called after the YouTube player is destroyed, otherwise there will be a null reference exception
-        Tech.prototype.dispose.call(this);
-      }
-      createEl() {
-        var div = document.createElement('div');
-        div.setAttribute('id', this.options_.techId);
-        div.setAttribute('style', 'width:100%;height:100%;top:0;left:0;position:absolute');
-        div.setAttribute('class', 'vjs-tech');
-        var divWrapper = document.createElement('div');
-        divWrapper.appendChild(div);
-        if (!_isOnMobile && !this.options_.ytControls) {
-          var divBlocker = document.createElement('div');
-          divBlocker.setAttribute('class', 'vjs-iframe-blocker');
-          divBlocker.setAttribute('style', 'position:absolute;top:0;left:0;width:100%;height:100%');
-          // In case the blocker is still there and we want to pause
-          divBlocker.onclick = () => {
-            this.pause();
-          };
-          divWrapper.appendChild(divBlocker);
-        }
-        return divWrapper;
-      }
-      initYTPlayer() {
-        var playerVars = {
-          controls: 0,
-          modestbranding: 1,
-          rel: 0,
-          showinfo: 0,
-          loop: this.options_.loop ? 1 : 0
-        };
-        // Let the user set any YouTube parameter
-        // https://developers.google.com/youtube/player_parameters?playerVersion=HTML5#Parameters
-        // To use YouTube controls, you must use ytControls instead
-        // To use the loop or autoplay, use the video.js settings
-        if (typeof this.options_.autohide !== 'undefined') {
-          playerVars.autohide = this.options_.autohide;
-        }
-        if (typeof this.options_['cc_load_policy'] !== 'undefined') {
-          playerVars['cc_load_policy'] = this.options_['cc_load_policy'];
-        } else {
-          playerVars['cc_load_policy'] = 1;
-        }
-        if (typeof this.options_['cc_lang_pref'] !== 'undefined') {
-          playerVars['cc_lang_pref'] = this.options_['cc_lang_pref'];
-        } else {
-          playerVars['cc_lang_pref'] = 'en';
-        }
-        if (typeof this.options_.ytControls !== 'undefined') {
-          playerVars.controls = this.options_.ytControls;
-        }
-        if (typeof this.options_.disablekb !== 'undefined') {
-          playerVars.disablekb = this.options_.disablekb;
-        }
-        if (typeof this.options_.color !== 'undefined') {
-          playerVars.color = this.options_.color;
-        }
-        if (!playerVars.controls) {
-          // Let video.js handle the fullscreen unless it is the YouTube native controls
-          playerVars.fs = 0;
-        } else if (typeof this.options_.fs !== 'undefined') {
-          playerVars.fs = this.options_.fs;
-        }
-        if (this.options_.source.src.indexOf('end=') !== -1) {
-          var srcEndTime = this.options_.source.src.match(/end=([0-9]*)/);
-          this.options_.end = parseInt(srcEndTime[1]);
-        }
-        if (typeof this.options_.end !== 'undefined') {
-          playerVars.end = this.options_.end;
-        }
-        if (typeof this.options_.hl !== 'undefined') {
-          playerVars.hl = this.options_.hl;
-        } else if (typeof this.options_.language !== 'undefined') {
-          // Set the YouTube player on the same language than video.js
-          playerVars.hl = this.options_.language.substr(0, 2);
-        }
-        if (typeof this.options_['iv_load_policy'] !== 'undefined') {
-          playerVars['iv_load_policy'] = this.options_['iv_load_policy'];
-        }
-        if (typeof this.options_.list !== 'undefined') {
-          playerVars.list = this.options_.list;
-        } else if (this.url && typeof this.url.listId !== 'undefined') {
-          playerVars.list = this.url.listId;
-        }
-        if (typeof this.options_.listType !== 'undefined') {
-          playerVars.listType = this.options_.listType;
-        }
-        if (typeof this.options_.modestbranding !== 'undefined') {
-          playerVars.modestbranding = this.options_.modestbranding;
-        }
-        if (typeof this.options_.playlist !== 'undefined') {
-          playerVars.playlist = this.options_.playlist;
-        }
-        if (typeof this.options_.playsinline !== 'undefined') {
-          playerVars.playsinline = this.options_.playsinline;
-        }
-        if (typeof this.options_.rel !== 'undefined') {
-          playerVars.rel = this.options_.rel;
-        }
-        if (typeof this.options_.showinfo !== 'undefined') {
-          playerVars.showinfo = this.options_.showinfo;
-        }
-        if (this.options_.source.src.indexOf('start=') !== -1) {
-          var srcStartTime = this.options_.source.src.match(/start=([0-9]*)/);
-          this.options_.start = parseInt(srcStartTime[1]);
-        }
-        if (typeof this.options_.start !== 'undefined') {
-          playerVars.start = this.options_.start;
-        }
-        if (typeof this.options_.theme !== 'undefined') {
-          playerVars.theme = this.options_.theme;
-        }
-        // Allow undocumented options to be passed along via customVars
-        if (typeof this.options_.customVars !== 'undefined') {
-          var customVars = this.options_.customVars;
-          Object.keys(customVars).forEach(function (key) {
-            playerVars[key] = customVars[key];
-          });
-        }
-        this.activeVideoId = this.url ? this.url.videoId : null;
-        this.activeList = playerVars.list;
-        var playerConfig = {
-          videoId: this.activeVideoId,
-          playerVars: playerVars,
-          events: {
-            onReady: this.onPlayerReady.bind(this),
-            onPlaybackQualityChange: this.onPlayerPlaybackQualityChange.bind(this),
-            onPlaybackRateChange: this.onPlayerPlaybackRateChange.bind(this),
-            onStateChange: this.onPlayerStateChange.bind(this),
-            onVolumeChange: this.onPlayerVolumeChange.bind(this),
-            onError: this.onPlayerError.bind(this),
-            onApiChange: this.onPlayerApiChange.bind(this)
-          }
-        };
-        if (typeof this.options_.enablePrivacyEnhancedMode !== 'undefined' && this.options_.enablePrivacyEnhancedMode) {
-          playerConfig.host = 'https://www.youtube-nocookie.com';
-        }
-        this.ytPlayer = new YT.Player(this.options_.techId, playerConfig);
-      }
-      onPlayerApiChange() {
-        if (this.loadingYouTubeCaptions) {
-          // loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
-          const ytTracks = this.ytPlayer.getOption('captions', 'tracklist');
-          if (ytTracks && ytTracks.length) {
-            // Step through ytTracks and add them to global tracks array
-            // Note: Unlike YouTube Data API, the IFrame Player API only returns 
-            // tracks that are published, and does NOT include ASR captions 
-            // So, no additional filtering is required 
-            for (let i = 0; i < ytTracks.length; i++) {
-              const trackLang = ytTracks[i].languageCode;
-              ytTracks[i].languageName; // displayName and languageName seem to always have the same value
-              if (typeof this.captionLang !== 'undefined') {
-                if (trackLang === this.captionLang) ;
-              } else if (typeof this.lang !== 'undefined') {
-                if (trackLang === this.lang) ;
-              }
-            }
-            //thisObj.hasCaptions = true;
-            // setupPopups again with new captions array, replacing original
-            //thisObj.setupPopups('captions');				
-          }
-
-          this.loadingYouTubeCaptions = false;
-        }
-        if (this.captionLangPending) {
-          // user selected a new caption language prior to playback starting 
-          // set it now 
-          this.ytPlayer.setOption('captions', 'track', {
-            'languageCode': this.captionLangPending
-          });
-          this.captionLangPending = null;
-        }
-      }
-      onPlayerReady() {
-        if (this.options_.muted) {
-          this.ytPlayer.mute();
-        }
-        var playbackRates = this.ytPlayer.getAvailablePlaybackRates();
-        if (playbackRates.length > 1) {
-          this.featuresPlaybackRate = true;
-        }
-        this.playerReady_ = true;
-        this.triggerReady();
-        if (this.playOnReady) {
-          this.play();
-        } else if (this.cueOnReady) {
-          this.cueVideoById_(this.url.videoId);
-          this.activeVideoId = this.url.videoId;
-        }
-      }
-      onPlayerPlaybackQualityChange() {}
-      onPlayerPlaybackRateChange() {
-        this.trigger('ratechange');
-      }
-      onPlayerStateChange(e) {
-        var state = e.data;
-        if (state === this.lastState || this.errorNumber) {
-          return;
-        }
-        this.lastState = state;
-        switch (state) {
-          case -1:
-            this.trigger('loadstart');
-            this.trigger('loadedmetadata');
-            this.trigger('durationchange');
-            this.trigger('ratechange');
-            break;
-          case YT.PlayerState.ENDED:
-            this.trigger('ended');
-            break;
-          case YT.PlayerState.PLAYING:
-            this.trigger('timeupdate');
-            this.trigger('durationchange');
-            this.trigger('playing');
-            this.trigger('play');
-            if (this.isSeeking) {
-              this.onSeeked();
-            }
-            break;
-          case YT.PlayerState.PAUSED:
-            this.trigger('canplay');
-            if (this.isSeeking) {
-              this.onSeeked();
-            } else {
-              this.trigger('pause');
-            }
-            break;
-          case YT.PlayerState.BUFFERING:
-            this.player_.trigger('timeupdate');
-            this.player_.trigger('waiting');
-            break;
-        }
-      }
-      onPlayerVolumeChange() {
-        this.trigger('volumechange');
-      }
-      onPlayerError(e) {
-        this.errorNumber = e.data;
-        this.trigger('pause');
-        this.trigger('error');
-      }
-      error() {
-        var code = 1000 + this.errorNumber; // as smaller codes are reserved
-        switch (this.errorNumber) {
-          case 5:
-            return {
-              code: code,
-              message: 'Error while trying to play the video'
-            };
-          case 2:
-          case 100:
-            return {
-              code: code,
-              message: 'Unable to find the video'
-            };
-          case 101:
-          case 150:
-            return {
-              code: code,
-              message: 'Playback on other Websites has been disabled by the video owner.'
-            };
-        }
-        return {
-          code: code,
-          message: 'YouTube unknown error (' + this.errorNumber + ')'
-        };
-      }
-      loadVideoById_(id) {
-        var options = {
-          videoId: id
-        };
-        if (this.options_.start) {
-          options.startSeconds = this.options_.start;
-        }
-        if (this.options_.end) {
-          options.endSeconds = this.options_.end;
-        }
-        this.ytPlayer.loadVideoById(options);
-      }
-      cueVideoById_(id) {
-        var options = {
-          videoId: id
-        };
-        if (this.options_.start) {
-          options.startSeconds = this.options_.start;
-        }
-        if (this.options_.end) {
-          options.endSeconds = this.options_.end;
-        }
-        this.ytPlayer.cueVideoById(options);
-      }
-      src(src) {
-        if (src) {
-          this.setSrc({
-            src: src
-          });
-        }
-        return this.source;
-      }
-      poster() {
-        // You can't start programmaticlly a video with a mobile
-        // through the iframe so we hide the poster and the play button (with CSS)
-        if (_isOnMobile) {
-          return null;
-        }
-        return this.poster_;
-      }
-      setPoster(poster) {
-        this.poster_ = poster;
-      }
-      setSrc(source, someBool = false) {
-        if (!source || !source.src) {
-          return;
-        }
-        delete this.errorNumber;
-        this.source = source;
-        this.url = Youtube.parseUrl(source.src);
-        if (!this.options_.poster) {
-          if (this.url.videoId) {
-            // Set the low resolution first
-            this.poster_ = 'https://img.youtube.com/vi/' + this.url.videoId + '/0.jpg';
-            this.trigger('posterchange');
-            // Check if their is a high res
-            this.checkHighResPoster();
-          }
-        }
-        if (this.options_.autoplay && !_isOnMobile) {
-          if (this.isReady_) {
-            this.play();
-          } else {
-            this.playOnReady = true;
-          }
-        } else if (this.activeVideoId !== this.url.videoId) {
-          if (this.isReady_) {
-            this.cueVideoById_(this.url.videoId);
-            this.activeVideoId = this.url.videoId;
-          } else {
-            this.cueOnReady = true;
-          }
-        }
-      }
-      autoplay() {
-        return this.options_.autoplay;
-      }
-      setAutoplay(val) {
-        this.options_.autoplay = val;
-      }
-      loop() {
-        return this.options_.loop;
-      }
-      setLoop(val) {
-        this.options_.loop = val;
-      }
-      play() {
-        if (!this.url || !this.url.videoId) {
-          return;
-        }
-        this.wasPausedBeforeSeek = false;
-        if (this.isReady_) {
-          if (this.url.listId) {
-            if (this.activeList === this.url.listId) {
-              this.ytPlayer.playVideo();
-            } else {
-              this.ytPlayer.loadPlaylist(this.url.listId);
-              this.activeList = this.url.listId;
-            }
-          }
-          if (this.activeVideoId === this.url.videoId) {
-            this.ytPlayer.playVideo();
-          } else {
-            this.loadVideoById_(this.url.videoId);
-            this.activeVideoId = this.url.videoId;
-          }
-        } else {
-          this.trigger('waiting');
-          this.playOnReady = true;
-        }
-      }
-      pause() {
-        if (this.ytPlayer) {
-          this.ytPlayer.pauseVideo();
-        }
-      }
-      paused() {
-        return this.ytPlayer ? this.lastState !== YT.PlayerState.PLAYING && this.lastState !== YT.PlayerState.BUFFERING : true;
-      }
-      currentTime() {
-        return this.ytPlayer ? this.ytPlayer.getCurrentTime() : 0;
-      }
-      setCurrentTime(seconds) {
-        if (this.lastState === YT.PlayerState.PAUSED) {
-          this.timeBeforeSeek = this.currentTime();
-        }
-        if (!this.isSeeking) {
-          this.wasPausedBeforeSeek = this.paused();
-        }
-        this.ytPlayer.seekTo(seconds, true);
-        this.trigger('timeupdate');
-        this.trigger('seeking');
-        this.isSeeking = true;
-        // A seek event during pause does not return an event to trigger a seeked event,
-        // so run an interval timer to look for the currentTime to change
-        if (this.lastState === YT.PlayerState.PAUSED && this.timeBeforeSeek !== seconds) {
-          clearInterval(this.checkSeekedInPauseInterval);
-          this.checkSeekedInPauseInterval = setInterval(() => {
-            if (this.lastState !== YT.PlayerState.PAUSED || !this.isSeeking) {
-              // If something changed while we were waiting for the currentTime to change,
-              //  clear the interval timer
-              clearInterval(this.checkSeekedInPauseInterval);
-            } else if (this.currentTime() !== this.timeBeforeSeek) {
-              this.trigger('timeupdate');
-              this.onSeeked();
-            }
-          }, 250);
-        }
-      }
-      seeking() {
-        return this.isSeeking;
-      }
-      seekable() {
-        if (!this.ytPlayer) {
-          return videojs__default["default"].time.createTimeRange();
-        }
-        return videojs__default["default"].time.createTimeRange(0, this.ytPlayer.getDuration());
-      }
-      onSeeked() {
-        clearInterval(this.checkSeekedInPauseInterval);
-        this.isSeeking = false;
-        if (this.wasPausedBeforeSeek) {
-          this.pause();
-        }
-        this.trigger('seeked');
-      }
-      playbackRate() {
-        return this.ytPlayer ? this.ytPlayer.getPlaybackRate() : 1;
-      }
-      setPlaybackRate(suggestedRate) {
-        if (!this.ytPlayer) {
-          return;
-        }
-        this.ytPlayer.setPlaybackRate(suggestedRate);
-      }
-      duration() {
-        return this.ytPlayer ? this.ytPlayer.getDuration() : 0;
-      }
-      currentSrc() {
-        return this.source && this.source.src;
-      }
-      ended() {
-        return this.ytPlayer ? this.lastState === YT.PlayerState.ENDED : false;
-      }
-      volume() {
-        return this.ytPlayer ? this.ytPlayer.getVolume() / 100.0 : 1;
-      }
-      setVolume(percentAsDecimal) {
-        if (!this.ytPlayer) {
-          return;
-        }
-        this.ytPlayer.setVolume(percentAsDecimal * 100.0);
-      }
-      muted(mute) {
-        return this.ytPlayer ? this.ytPlayer.isMuted() : false;
-      }
-      setMuted(mute) {
-        if (!this.ytPlayer) {
-          return;
-        } else {
-          this.muted(true); // THIS DOESN'T DO ANYTHING...
-        }
-
-        if (mute) {
-          this.ytPlayer.mute();
-        } else {
-          this.ytPlayer.unMute();
-        }
-        this.setTimeout(() => {
-          this.trigger('volumechange');
-        }, 50);
-      }
-      buffered() {
-        if (!this.ytPlayer || !this.ytPlayer.getVideoLoadedFraction) {
-          return videojs__default["default"].time.createTimeRange();
-        }
-        var bufferedEnd = this.ytPlayer.getVideoLoadedFraction() * this.ytPlayer.getDuration();
-        return videojs__default["default"].time.createTimeRange(0, bufferedEnd);
-      }
-      // TODO: Can we really do something with this on YouTUbe?
-      preload() {}
-      load() {}
-      reset() {}
-      networkState() {
-        if (!this.ytPlayer) {
-          return 0; //NETWORK_EMPTY
-        }
-
-        switch (this.ytPlayer.getPlayerState()) {
-          case -1:
-            //unstarted
-            return 0;
-          //NETWORK_EMPTY
-          case 3:
-            //buffering
-            return 2;
-          //NETWORK_LOADING
-          default:
-            return 1;
-          //NETWORK_IDLE
-        }
-      }
-
-      readyState() {
-        if (!this.ytPlayer) {
-          return 0; //HAVE_NOTHING
-        }
-
-        switch (this.ytPlayer.getPlayerState()) {
-          case -1:
-            //unstarted
-            return 0;
-          //HAVE_NOTHING
-          case 5:
-            //video cued
-            return 1;
-          //HAVE_METADATA
-          case 3:
-            //buffering
-            return 2;
-          //HAVE_CURRENT_DATA
-          default:
-            return 4;
-          //HAVE_ENOUGH_DATA
-        }
-      }
-
-      supportsFullScreen() {
-        return document.fullscreenEnabled || document.webkitFullscreenEnabled || document.mozFullScreenEnabled || document.msFullscreenEnabled;
-      }
-      // Tries to get the highest resolution thumbnail available for the video
-      checkHighResPoster() {
-        var uri = 'https://img.youtube.com/vi/' + this.url.videoId + '/maxresdefault.jpg';
-        try {
-          const image = new Image();
-          image.onload = () => {
-            // Onload may still be called if YouTube returns the 120x90 error thumbnail
-            if ('naturalHeight' in image) {
-              if (image.naturalHeight <= 90 || image.naturalWidth <= 120) {
-                return;
-              }
-            } else if (image.height <= 90 || image.width <= 120) {
-              return;
-            }
-            this.poster_ = uri;
-            this.trigger('posterchange');
-          };
-          image.onerror = function () {};
-          image.src = uri;
-        } catch (e) {}
-      }
-    }
-    Youtube.isApiReady = false;
-    Youtube.apiReadyQueue = [];
-    Youtube.isSupported = function () {
-      return true;
-    };
-    Youtube.canPlaySource = function (e) {
-      return Youtube.canPlayType(e.type);
-    };
-    Youtube.canPlayType = function (e) {
-      return e === 'video/youtube';
-    };
-    Youtube.parseUrl = function (url) {
-      var result = {
-        videoId: null
-      };
-      var regex = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      var match = url.match(regex);
-      if (match && match[2].length === 11) {
-        result.videoId = match[2];
-      }
-      var regPlaylist = /[?&]list=([^#\&\?]+)/;
-      match = url.match(regPlaylist);
-      if (match && match[1]) {
-        result.listId = match[1];
-      }
-      return result;
-    };
-    function apiLoaded() {
-      YT.ready(function () {
-        Youtube.isApiReady = true;
-        for (var i = 0; i < Youtube.apiReadyQueue.length; ++i) {
-          Youtube.apiReadyQueue[i].initYTPlayer();
-        }
-      });
-    }
-    function loadScript(src, callback) {
-      var _a;
-      var loaded = false;
-      var tag = document.createElement('script');
-      var firstScriptTag = document.getElementsByTagName('script')[0];
-      if (!firstScriptTag) {
-        // when loaded in jest without jsdom setup it doesn't get any element.
-        // In jest it doesn't really make sense to do anything, because no one is watching youtube in jest
-        return;
-      }
-      (_a = firstScriptTag.parentNode) === null || _a === void 0 ? void 0 : _a.insertBefore(tag, firstScriptTag);
-      tag.onload = function () {
-        if (!loaded) {
-          loaded = true;
-          callback();
-        }
-      };
-      // tag.addEventListener('readystatechange', () => {
-      //     if (!loaded && (this.readyState === 'complete' || this.readyState === 'loaded')) {
-      //         loaded = true;
-      //         callback();
-      //     }
-      // };
-      tag.src = src;
-    }
-    function injectCss() {
-      var css =
-      // iframe blocker to catch mouse events
-      '.vjs-youtube .vjs-iframe-blocker { display: none; }' + '.vjs-youtube.vjs-user-inactive .vjs-iframe-blocker { display: block; }' + '.vjs-youtube .vjs-poster { background-size: cover; }' + '.vjs-youtube-mobile .vjs-big-play-button { display: none; }';
-      var head = document.head || document.getElementsByTagName('head')[0];
-      var style = document.createElement('style');
-      style.type = 'text/css';
-      // if (style.styleSheet) {
-      //     style.styleSheet.cssText = css;
-      // } else {
-      style.appendChild(document.createTextNode(css));
-      // }
-      head.appendChild(style);
-    }
-    Youtube.apiReadyQueue = [];
-    if (typeof document !== 'undefined') {
-      loadScript('https://www.youtube.com/iframe_api', apiLoaded);
-      injectCss();
-    }
-    // Older versions of VJS5 doesn't have the registerTech function
-    if (typeof videojs__default["default"].registerTech !== 'undefined') {
-      videojs__default["default"].registerTech('Youtube', Youtube);
-    } else {
-      videojs__default["default"].registerComponent('Youtube', Youtube);
-    }
-
-    const MenuButton = videojs__default["default"].getComponent('MenuButton');
-    const MenuItem = videojs__default["default"].getComponent('MenuItem');
-    const Menu = videojs__default["default"].getComponent('Menu');
-    const Dom = videojs__default["default"].dom;
-    // Default options for the plugin.
-    const defaults = {};
-    class YoutubeCaptionsButton extends MenuButton {
-      /**
-       * QualityButton constructor
-       *
-       * @param {Player} player - videojs player instance
-       * @param {Object} options - component options
-       */
-      constructor(player, options) {
-        super(player, options);
-        this.altoptions = Object.assign(options, defaults);
-        this.parent = this.altoptions.parent;
-        this.items = [];
-        this.addClass('vjs-max-quality-selector-button');
-      }
-      handleMenuItemClick(e) {
-        const selectedIndex = parseInt(e.currentTarget.dataset.id, 10);
-        this.parent.changeLevel(selectedIndex);
-      }
-      handleSubmenuKeyPress(e) {
-        if (e.currentTarget.dataset.id === undefined) {
-          return;
-        }
-        const selectedIndex = parseInt(e.currentTarget.dataset.id, 10);
-        this.parent.changeLevel(selectedIndex);
-      }
-      createButton(menu, cssClass, text, id) {
-        const buttonEl = Dom.createEl('li', {
-          className: cssClass,
-          innerHTML: text,
-          tabIndex: -1
-        }, {
-          'data-id': id
-        });
-        const menuItem = new MenuItem(this.player_, {
-          el: buttonEl
-        });
-        menuItem.on('click', this.handleMenuItemClick.bind(this));
-        menu.addItem(menuItem);
-      }
-      createMenu() {
-        const menu = new Menu(this.player_, {
-          menuButton: this
-        });
-        const uniqueEntries = [];
-        const uniqueHeights = [];
-        if (this.items) {
-          if (!this.parent.autoMode && !this.parent.options.disableAuto) {
-            this.createButton(menu, 'vjs-menu-item', this.parent.options.autoLabel, -1);
-          }
-          for (let i = 0; i < this.items.length; i++) {
-            const quality = this.items[i];
-            if (this.parent.options.filterDuplicates && uniqueEntries.includes(quality.uniqueId)) {
-              continue;
-            } else {
-              uniqueEntries.push(quality.uniqueId);
-            }
-            if (this.parent.options.filterDuplicateHeights && uniqueHeights.includes(quality.height)) {
-              continue;
-            } else {
-              uniqueHeights.push(quality.height);
-            }
-            let elClass = 'vjs-menu-item';
-            elClass += quality.isCurrent ? ' vjs-selected' : '';
-            this.createButton(menu, elClass, this.parent.getQualityDisplayString(quality), quality.id);
-          }
-          if (!this.parent.options.showSingleItemMenu && menu.children_.length === 1) {
-            return new Menu(this.player_, {
-              menuButton: this
-            });
-          }
-        }
-        return menu;
-      }
-    }
-    console.log("REGISTERED YOUTUBE BUTTON");
-    videojs__default["default"].registerComponent('YoutubeCaptionsButton', YoutubeCaptionsButton);
-
     //import { VideoJsPlayer } from "./videojs2";
-    const plugin = videojs__default["default"].getPlugin('plugin');
-    class MetadataPlugin extends plugin {
+    const plugin$1 = videojs__default["default"].getPlugin('plugin');
+    class MetadataPlugin extends plugin$1 {
       constructor(player, options) {
         super(player, options);
         player.on('loadedmetadata', () => {
@@ -1772,7 +991,7 @@
           }
           // Add a listener for the "cuechange" event and start ad playback.
           metadataTrack === null || metadataTrack === void 0 ? void 0 : metadataTrack.addEventListener('cuechange', ev => {
-            var _a;
+            var _a, _b;
             for (let i = 0; i < metadataTrack.activeCues.length; i++) {
               const cue = metadataTrack.activeCues[i];
               const cueText = cue.text;
@@ -1784,7 +1003,6 @@
                   player.pause();
                 } else if (line.toLowerCase().substring(0, 6) == 'focus:') {
                   const focusTarget = line.substring(6).trim();
-                  // this is inside the storibook, so the storipages will be children
                   const storiPages = player.el().ownerDocument.querySelectorAll('stori-page');
                   let currentIndex = 0;
                   storiPages.forEach((v, i, arr) => {
@@ -1801,7 +1019,9 @@
                   }
                 } else if (line.toLowerCase().substring(0, 6) == 'click:') {
                   const focusTarget = line.substring(6).trim();
-                  let element = player.el().ownerDocument.querySelector(focusTarget);
+                  // ASSUMES ONE STORIBOOK ON HTML PAGE
+                  const storibook = player.el().ownerDocument.querySelector('stori-book');
+                  let element = (_b = storibook === null || storibook === void 0 ? void 0 : storibook.shadowRoot) === null || _b === void 0 ? void 0 : _b.querySelector(focusTarget);
                   if (element) {
                     element.click();
                   }
@@ -1813,6 +1033,177 @@
       }
     }
     videojs__default["default"].registerPlugin('metadataActions', MetadataPlugin);
+
+    //import { VideoJsPlayer } from "./videojs2";
+    const plugin = videojs__default["default"].getPlugin('plugin');
+    class DefaultHotkeyPluginOptions {
+      constructor() {
+        this.prefAltKey = true;
+        this.prefCtrlKey = true;
+        this.prefShiftKey = false;
+      }
+    }
+    class HotkeyPlugin extends plugin {
+      constructor(player, options) {
+        super(player, options);
+        this.originalOptions = structuredClone(options);
+        this.options = Object.assign(options, new DefaultHotkeyPluginOptions());
+        this.player = player;
+        this.onkeypress = this.onkeypress.bind(this);
+        window.addEventListener('keydown', this.onkeypress);
+        console.log("Added window keydown event");
+      }
+      usingModifierKeys(e) {
+        // return true if user is holding down required modifier keys
+        if (this.options.prefAltKey === true && !e.altKey) {
+          return false;
+        }
+        if (this.options.prefCtrlKey === true && !e.ctrlKey) {
+          return false;
+        }
+        if (this.options.prefShiftKey === true && !e.shiftKey) {
+          return false;
+        }
+        return true;
+      }
+      okToHandleKeyPress(thisElement) {
+        // returns true unless user's focus is on a UI element
+        // that is likely to need supported keystrokes, including space
+        if (thisElement.tagName === 'INPUT') {
+          return false;
+        } else {
+          return true;
+        }
+      }
+      onkeypress(e) {
+        // handle keystrokes (using DHTML Style Guide recommended key combinations)
+        // https://web.archive.org/web/20130127004544/http://dev.aol.com/dhtml_style_guide/#mediaplayer
+        // Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
+        // NOTE #1: Style guide only supports Play/Pause, Stop, Mute, Captions, & Volume Up & Down
+        // The rest are reasonable best choices
+        // NOTE #2: If there are multiple players on a single page, keystroke handlers
+        // are only bound to the FIRST player
+        // NOTE #3: The DHTML Style Guide is now the W3C WAI-ARIA Authoring Guide and has undergone many revisions
+        // including removal of the "media player" design pattern. There's an issue about that:
+        // https://github.com/w3c/aria-practices/issues/27
+        var _a, _b, _c, _d;
+        let code;
+        let thisElement;
+        // Convert to lower case.
+        code = e.key;
+        console.log(e);
+        console.log("Pressed:  " + e.key);
+        thisElement = window.document.activeElement;
+        if (thisElement && !this.okToHandleKeyPress(thisElement)) {
+          return false;
+        }
+        // Only use keypress to control player if focus is NOT on a form field or contenteditable element
+        // (or a textarea element with player in stenoMode)
+        if (!((thisElement === null || thisElement === void 0 ? void 0 : thisElement.hasAttribute('contenteditable')) || (thisElement === null || thisElement === void 0 ? void 0 : thisElement.tagName) === 'input' || (thisElement === null || thisElement === void 0 ? void 0 : thisElement.tagName) === 'textarea' || (thisElement === null || thisElement === void 0 ? void 0 : thisElement.tagName) === 'select' || ((_a = e.target) === null || _a === void 0 ? void 0 : _a.hasAttribute('contenteditable')) || ((_b = e.target) === null || _b === void 0 ? void 0 : _b.tagName) === 'INPUT' || ((_c = e.target) === null || _c === void 0 ? void 0 : _c.tagName) === 'TEXTAREA' || ((_d = e.target) === null || _d === void 0 ? void 0 : _d.tagName) === 'SELECT')) {
+          if (code === "Escape") ; else if (code === " ") {
+            // spacebar = play/pause
+            // disable spacebar support for play/pause toggle as of 4.2.10
+            // spacebar should not be handled everywhere on the page, since users use that to scroll the page
+            // when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
+            if ((thisElement === null || thisElement === void 0 ? void 0 : thisElement.getAttribute('role')) === 'button') {
+              // register a click on this element
+              e.preventDefault();
+              thisElement.click();
+            }
+          } else if (code === "p" || code === "P") {
+            // p = play/pause
+            if (this.usingModifierKeys(e)) {
+              e.preventDefault();
+              if (this.player.paused()) {
+                this.player.play();
+              } else {
+                this.player.pause();
+              }
+            }
+          } else if (code === "s" || code === "S") {
+            // s = stop (now restart)
+            if (this.usingModifierKeys(e)) {
+              e.preventDefault();
+              this.player.reset();
+            }
+          } else if (code === "m" || code === "M") {
+            // m = mute
+            if (this.usingModifierKeys(e)) {
+              e.preventDefault();
+              this.player.volume(0);
+            }
+          }
+          // else if (code === 118) { // v = volume
+          // 	if (this.usingModifierKeys(e)) {
+          // 		e.preventDefault();
+          // 		this.player.vo
+          // 	}
+          // }
+          else if (code === "1" || code === "2" || code === "3" || code === "4" || code === "5" || code === "6" || code === "7" || code === "8" || code === "9") {
+            // set volume 1-9
+            if (this.usingModifierKeys(e)) {
+              e.preventDefault();
+              let volumeLevel = +code / 9;
+              this.player.volume(volumeLevel);
+            }
+          }
+          // else if (code === 99) { // c = caption toggle
+          // 	if (this.usingModifierKeys(e)) {
+          // 		e.preventDefault();
+          // 		this.handleCaptionToggle();
+          // 	}
+          // }
+          // else if (code === 100) { // d = description
+          // 	if (this.usingModifierKeys(e)) {
+          // 		e.preventDefault();
+          // 		this.handleDescriptionToggle();
+          // 	}
+          // }
+          else if (code === "f" || code === "F") {
+            // f = forward
+            if (this.usingModifierKeys(e)) {
+              e.preventDefault();
+              this.player.currentTime(this.player.currentTime() + 5);
+            }
+          } else if (code === "r" || code === "R") {
+            // r = rewind
+            if (this.usingModifierKeys(e)) {
+              e.preventDefault();
+              this.player.currentTime(this.player.currentTime() - 5);
+            }
+          }
+          // else if (code === 98) { // b = back (previous track)
+          // 	if (this.usingModifierKeys(e)) {
+          // 		e.preventDefault();
+          // 		this.player.();
+          // 	}
+          // }
+          // else if (code === 110) { // n = next track
+          // 	if (this.usingModifierKeys(e)) {
+          // 		e.preventDefault();
+          // 		this.handleNextTrack();
+          // 	}
+          // }
+          // else if (code === 101) { // e = preferences
+          // 	if (this.usingModifierKeys(e)) {
+          // 		e.preventDefault();
+          // 		this.handlePrefsClick();
+          // 	}
+          // }
+          else if (code === "Enter") {
+            // Enter
+            if ((thisElement === null || thisElement === void 0 ? void 0 : thisElement.getAttribute('role')) === 'button' || (thisElement === null || thisElement === void 0 ? void 0 : thisElement.tagName) === 'SPAN') {
+              // register a click on this element
+              // if it's a transcript span the transcript span click handler will take over
+              thisElement.click();
+            } else if ((thisElement === null || thisElement === void 0 ? void 0 : thisElement.tagName) === 'LI') {
+              thisElement.click();
+            }
+          }
+        }
+      }
+    }
+    videojs__default["default"].registerPlugin('hotkeys', HotkeyPlugin);
 
 }));
 //# sourceMappingURL=videojs-accessibility.js.map

@@ -1,4 +1,3 @@
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const path = require('path');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
@@ -12,7 +11,8 @@ module.exports = function (env, { mode }) {
 		},
 		output: {
 			filename: 'bundle.js',
-			publicPath: '/'
+			publicPath: '/',
+			clean: true
 		},
 		resolve: {
 			extensions: ['.ts', '.js'],
@@ -30,7 +30,6 @@ module.exports = function (env, { mode }) {
 			}
 		},
 		plugins: [
-			new CleanWebpackPlugin(),
 			new MiniCssExtractPlugin()
 		],
 		module: {

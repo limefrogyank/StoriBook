@@ -1,4 +1,4 @@
-import { provideFluentDesignSystem, fluentOption, fluentListbox, fluentButton, Listbox, StandardLuminance, baseLayerLuminance } from '@fluentui/web-components';
+import { provideFluentDesignSystem, fluentOption, fluentListbox, fluentButton, Listbox, StandardLuminance, baseLayerLuminance, fluentSlider, fluentSelect, fluentSliderLabel, Slider, Select } from '@fluentui/web-components';
 import { FASTElement, customElement, attr, html, volatile, css, repeat, when, observable, DOM, ref, children, $global, slotted } from '@microsoft/fast-element';
 import { NavBar } from "./navbar";
 import { mainStyles } from "./StoriBook-css";
@@ -11,7 +11,10 @@ StoriPage;
 provideFluentDesignSystem().register(
 	fluentListbox(),
 	fluentOption(),
-	fluentButton()
+	fluentButton(),
+	fluentSlider(),
+	fluentSelect(),
+	fluentSliderLabel()
 );
 
 
@@ -38,6 +41,9 @@ const navBarTemplate = html<StoriBook>`
 			</svg>
 		</fluent-button>
 	</div>
+	<div class="middle-navbar"> 
+		${x => mediaControl}	
+	</div>
 	<div class="right-side-navbar">
 		<fluent-button aria-label="Previous Page" style="width:40;height:40;" @click="${x => x.prevButton()}" appearance="accent">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
@@ -63,7 +69,42 @@ const navBarTemplate = html<StoriBook>`
 		</fluent-button>
 	</div>
 </nav>
-`
+`;
+
+const mediaControl = html<StoriBook>`
+<fluent-button aria-label="Play/Pause" style="width:40;height:40;" @click="${x=> !x.videoPlayer.hasStarted() || x.videoPlayer.paused() ? x.videoPlayer.play() : x.videoPlayer.pause() }">
+${when(x => !x.isPlaying, html<StoriBook>`
+	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
+		<path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z"/>
+	</svg>
+`)}
+${when(x => x.isPlaying, html<StoriBook>`
+	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
+		<path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+	</svg>
+`)}
+</fluent-button>
+<fluent-slider 
+	${ref("slider")}
+	style="margin-top:14px;margin-bottom:-7px;width:180px;" 
+	step="1" 
+	min="0" 
+	max="${x=>x.duration}" 
+	:value="${x=> x.currentTime}" 
+	@change="${(x,c)=> x.sliderChange(c.event)}">
+</fluent-slider>
+<div style="margin-top:7px; margin-bottom:-7px;">Test</div>
+<fluent-select 
+	${ref("speedSelect")}
+	style="min-width:20px;" 
+	@input="${(x,c)=>{ console.log(c.event); x.videoPlayer.playbackRate(x.speedSelect.value); x.currentSpeed = +x.speedSelect.value; }}">
+	<fluent-option value="0.5">0.5x</fluent-option>
+	<fluent-option value="1" selected>1.0x</fluent-option>
+	<fluent-option value="1.5">1.5x</fluent-option>
+	<fluent-option value="2">2.0x</fluent-option>
+</fluent-select>
+`;
+
 const audioTemplate = html<StoriBook>`
 <div id="audiobox">
 	<div>
@@ -116,7 +157,8 @@ const template = html<StoriBook>`
 				</fluent-listbox>
 
 				<div style="max-width:300px; max-height:200px;">
-					${when((x, c) => x.video !== "", html<StoriBook>`${x => audioTemplate}`)}				
+					<slot name="video"></slot>
+					<!-- ${when((x, c) => x.video !== "", html<StoriBook>`${x => audioTemplate}`)}				 -->
 				</div>
 			</div>			
 		</div>
@@ -135,7 +177,11 @@ const template = html<StoriBook>`
 				<div class="" id="mainContent" ${ref('mainContentContainer')} tabindex="0">
 					<slot ${slotted("nodes")}></slot>
 				</div>
-				${x => navBarTemplate}		
+				
+				${x => navBarTemplate}	
+				<div id="transcriptContainer">
+					<slot name="transcript" ></slot>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -160,6 +206,14 @@ export class StoriBook extends FASTElement {
 	rootContainer?: HTMLDivElement;
 	videoElement?: HTMLVideoElement;
 	mainContentContainer?: HTMLDivElement;
+
+	videoPlayer?: any;
+	@observable isPlaying:boolean=false;
+	slider!: Slider;
+	@observable duration:number=0;
+	@observable currentTime:number=0;
+	@observable currentSpeed:number=1;
+	speedSelect!: Select;
 
 	chaptersDiv?: HTMLDivElement;
 
@@ -258,6 +312,7 @@ export class StoriBook extends FASTElement {
 		}
 	}
 
+	
 	// This reacts to pages being added and sets the appropriate active state on the correct page.
 	nodesChanged(oldValue: Node[], newValue: Node[]) {
 		const allNodes = this.nodes.filter(x => x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE");
@@ -274,7 +329,7 @@ export class StoriBook extends FASTElement {
 					if (index == this.selectedIndex) {
 						(node as HTMLElement).setAttribute('active', 'true');
 						this.loadHeadersForPageAsync(node as StoriPage);
-					} else {
+					} else { 
 						(node as HTMLElement).removeAttribute('active');
 					}
 					
@@ -342,10 +397,13 @@ export class StoriBook extends FASTElement {
 		//setTimeout(() => window.print(), 100);
 		
 		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => {
 			if (!donotprint){
 				window.print();
 			}
-		});
+		});	});	});	});
 
 	}
 
@@ -369,44 +427,90 @@ export class StoriBook extends FASTElement {
 	connectedCallback(): void {
 		super.connectedCallback();
 		
-		var videos = this.shadowRoot!.firstElementChild!.getElementsByTagName('video');
-		for (var i=0; i<videos.length; i++) {
-			var video = videos[i];
+		const videoslot = this.shadowRoot?.querySelector('slot[name=video]') as HTMLSlotElement;
+		const transcriptslot = this.shadowRoot?.querySelector('slot[name=transcript]') as HTMLSlotElement;
 
-			if (video.hasAttribute('data-able-player')) {
-				var videoPlayer = (window as any).videojs(video,
-					{
-						controlBar: {pictureInPictureToggle:false}
-					});
-				console.log(videoPlayer);
+		const slotChangeHandler = (e : Event)=>{
 
-				videoPlayer.on('pluginsetup', ()=>{
-					
-				});
+			videoslot.removeEventListener('slotchange', slotChangeHandler);
+			const videoElement = videoslot.assignedElements(); 
+			const transcriptElement = transcriptslot.assignedElements(); 
 	
-
-				videoPlayer.ready( function(this:any) {
-
+			this.videoPlayer = (window as any).videojs(videoElement[0],
+				{
+					controlBar: {pictureInPictureToggle:false}
+				});
+				console.log(this.videoPlayer);
+	
+				this.videoPlayer.ready( ()=> {
+	
 					var options = {
 						showTitle: false,
 						showTrackSelector: true,
 					};
-					//var transcript = videoPlayer.transcript(options);
+					var transcript = this.videoPlayer.transcript(options);
+	
+					var metadata = this.videoPlayer.metadataActions({});
 
-					var metadata = videoPlayer.metadataActions({});
+					this.videoPlayer.hotkeys({});
 				
-				videoPlayer.textTracks()[0].mode = 'hidden';
-				videoPlayer.textTracks()[1].mode = 'hidden';
-				//this.qualityLevels();
-				//this.maxQualitySelector();
+					this.videoPlayer.textTracks()[0].mode = 'hidden';
+					this.videoPlayer.textTracks()[1].mode = 'hidden';
+
+					this.videoPlayer.one("loadedmetadata", ()=>{
+						this.duration = this.videoPlayer.duration();
+					});
+					
+					this.currentSpeed = this.convertSpeedToMenuIndex(this.videoPlayer.playbackRate());
+
+					this.timeupdateRef = this.timeUpdate.bind(this);
+					this.videoPlayer.player().on('timeupdate', this.timeupdateRef);
+			
+			});
+		};
+		
+		videoslot.addEventListener('slotchange', slotChangeHandler);
+
+		
+
+		// var videos = this.shadowRoot!.firstElementChild!.getElementsByTagName('video');
+		// for (var i=0; i<videos.length; i++) {
+		// 	var video = videos[i];
+
+		// 	if (video.hasAttribute('data-able-player')) {
+		// 		var videoPlayer = (window as any).videojs(video,
+		// 			{
+		// 				controlBar: {pictureInPictureToggle:false}
+		// 			});
+		// 		console.log(videoPlayer);
+
+		// 		videoPlayer.on('pluginsetup', ()=>{
+					
+		// 		});
+	
+
+		// 		videoPlayer.ready( function(this:any) {
+
+		// 			var options = {
+		// 				showTitle: false,
+		// 				showTrackSelector: true,
+		// 			};
+		// 			//var transcript = videoPlayer.transcript(options);
+
+		// 			var metadata = videoPlayer.metadataActions({});
+				
+		// 		videoPlayer.textTracks()[0].mode = 'hidden';
+		// 		videoPlayer.textTracks()[1].mode = 'hidden';
+		// 		//this.qualityLevels();
+		// 		//this.maxQualitySelector();
 
 				
-				//console.log(transcript);
-				//this.el().appendChild(transcript.element()); 
+		// 		//console.log(transcript);
+		// 		//this.el().appendChild(transcript.element()); 
 				
-				});
-			}
-		}
+		// 		});
+		// 	}
+		// }
 
 		this.selectedIndex = this.defaultPageNumber - 1;
 
@@ -456,7 +560,7 @@ export class StoriBook extends FASTElement {
 		// });
 
 		this.canPlayThroughRef = this.onCanPlayThrough.bind(this);
-		//this.timeupdateRef = this.updateMeta.bind(this);
+		
 		this.videoElement?.addEventListener('canplaythrough', this.canPlayThroughRef);
 
 		// this.ablePlayer.onMediaNewSourceLoad = ()=> {
@@ -467,6 +571,36 @@ export class StoriBook extends FASTElement {
 		// }; //.then(()=>{
 
 	}
+
+	convertSpeedToMenuIndex(playbackRate:number){
+		switch (playbackRate){
+			case 0.5:
+				return 0;
+			case 1: 
+				return 1;
+			case 1.5:
+				return 2;
+			case 2:
+				return 3;
+			default:
+				return 1;
+		}
+	}
+
+	timeUpdate(){
+		this.isPlaying = !this.videoPlayer.paused() && this.videoPlayer.hasStarted();
+		this.currentTime = this.videoPlayer.currentTime();
+	}
+
+	sliderChange(e:Event){
+		//if ((e as CustomEvent).detail)
+			//console.log(this.slider.value);
+		if (+this.slider.value !== this.currentTime){
+			//this.currentTime = +this.slider.value;
+			this.videoPlayer.currentTime(+this.slider.value);
+		}
+	}
+
 
 	onCanPlayThrough() {
 		//this.videoElement?.removeEventListener('canplaythrough', this.canPlayThroughRef!);

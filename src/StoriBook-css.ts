@@ -71,7 +71,7 @@ ${videojscss.toString()}
 	/*height:100%;*/
 	/*height:70vh;*/
 	width:calc(100% - 10px);
-	flex:1;
+	flex:5 1 auto;
 	overflow:auto;
 	overscroll-behavior: contain;
 }
@@ -81,9 +81,27 @@ ${videojscss.toString()}
 	flex-direction:row;
 	justify-content:space-between;
 	background:#EEE;
+	flex: 0 0 auto;
 }
+::slotted(div) {
+	flex:2 3;
+	width:100%;
+	height:100%;
+	overflow:auto;
+}
+
+#transcriptContainer{
+	overflow:hidden;
+	height:100%;
+	flex: 2 2 auto;
+}
+
 .left-side-navbar{
 	
+}
+.middle-navbar{
+	display:flex;
+	flex-direction:row;
 }
 .right-side-navbar{
 
@@ -154,15 +172,27 @@ ${videojscss.toString()}
 	:host{
 		height:calc(100% + 1000px);
 	}
+	#root{
+		overflow:inherit;
+	}
 	#navbar{
 		display:none;
 	}
 	.container{
+		overflow:inherit;
 		grid-template-columns:0px auto;
 	}
-	#mainContent{
-		overflow: hidden;
+	#contentWithNavBarOverlay{
+		overflow:inherit;
 	}
+	#contentWithNavBar{
+		overflow:inherit;
+	}
+	#mainContent{
+		display:block;
+		overflow: inherit;
+	}
+	
 }
 
 
