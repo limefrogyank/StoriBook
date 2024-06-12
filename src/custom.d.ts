@@ -9,5 +9,5 @@ declare module '*.svg' {
 
   interface ChapterCue{
 	title?: string;  //title is optional because we can actually retrieve it from chapter video metadata
-	start: number;
+	startTime: number;
   }

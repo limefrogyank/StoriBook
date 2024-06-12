@@ -135,12 +135,12 @@ const template = html<StoriBook>`
 				
 				<br/>
 				<fluent-listbox aria-labelledby="tocLabel" 
-					@keyup="${(x, c) => x.buttonClick((c.event.target as Listbox).selectedIndex)}"
+					@keyup="${(x, c) => {console.log('listbox click'); x.buttonClick((c.event.target as Listbox).selectedIndex);}}"
 					style="width:100%;"
 					>
 				${repeat(x => x.pages, html<StoriPage|SubPage>`
 					<fluent-option id="b${(x, c) => c.index + 1}" 
-						@click="${(x, c) => c.parent.buttonClick(c.index)}"
+						@click="${(x, c) => { console.log('listItem click'); c.event.stopPropagation(); c.event.preventDefault(); c.parent.buttonClick(c.index);}}"
 						selected="${(x, c) => c.parent.selectedIndex == c.index ? "true" : "false"}" 
 						aria-selected="${(x, c) => c.parent.selectedIndex == c.index ? "true" : "false"}" 
 						role="button"
@@ -472,8 +472,22 @@ export class StoriBook extends FASTElement {
 					this.videoPlayer.textTracks()[0].mode = 'hidden';
 					this.videoPlayer.textTracks()[1].mode = 'hidden';
 
+					//this.canPlayThroughRef = this.onCanPlayThrough.bind(this);
+		
+					//this.videoPlayer.one('canplaythrough', this.canPlayThroughRef);
+					
+
+
 					this.videoPlayer.one("loadedmetadata", ()=>{
+						console.log("CHECKING");
+						if (this.chapterCues.length == 0) {
+							this.processChapterNamesAndCues();
+			   
+					   }
+
 						this.duration = this.videoPlayer.duration();
+
+						
 					});
 					
 					this.currentSpeed = this.convertSpeedToMenuIndex(this.videoPlayer.playbackRate());
@@ -575,10 +589,7 @@ export class StoriBook extends FASTElement {
 		// 	console.log(this.ablePlayer.chapters);	
 		// });
 
-		this.canPlayThroughRef = this.onCanPlayThrough.bind(this);
 		
-		this.videoElement?.addEventListener('canplaythrough', this.canPlayThroughRef);
-
 		// this.ablePlayer.onMediaNewSourceLoad = ()=> {
 		// 	console.log((window as any).AblePlayerInstances[0].chapters[0]);	
 			// this.ablePlayer.$media.on('timeupdate',(ev : any) => {
@@ -618,232 +629,16 @@ export class StoriBook extends FASTElement {
 	}
 
 
-	onCanPlayThrough() {
-		//this.videoElement?.removeEventListener('canplaythrough', this.canPlayThroughRef!);
-		console.log("CHECKING");
-		if (this.chapterCues.length == 0) {
-			this.processChapterNamesAndCues();
-
-		}
-
-		// let test = this.ablePlayer.$transcriptDiv;
-		// this.transcriptDiv!.append(this.ablePlayer.$transcriptArea[0]);
-
-		//this.addChapterNav();
-		//this.ablePlayer.$chaptersDiv = (window as any).$(this.chaptersDiv);//(window as any).$();
-		this.videoElement?.addEventListener('timeupdate', this.timeupdateRef!);
-
-
-	}
-
-	processChapterNamesAndCues() {
-		let cues;
-		// if (this.ablePlayer.useChapterTimes) {
-		// 	cues = this.ablePlayer.selectedChapters.cues;
-		// }
-		// else if (this.ablePlayer.chapters.length >= 1) {
-		// 	cues = this.ablePlayer.chapters[0].cues;
-		// }
-		// else {
-		// 	cues = [];
-		// }
-		// if (cues.length > 0) {
-		// 	for (let c = 0; c < cues.length; c++) {
-		// 		const chapterName = this.ablePlayer.flattenCueForCaption(cues[c]);
-		// 		const startTime = cues[c].start;
-		// 		this.chapterCues.push({
-		// 			title: chapterName,
-		// 			start: startTime
-		// 		});
-		// 		// if (this.overrideChapterNames && this.pagesArray.length > c){
-		// 		// 	let page :IPage = {title: chapterName, src: this.pagesArray[c].src};
-		// 		// 	//page.title = chapterName;
-		// 		// 	this.pagesArray.splice(c,1,page);
-		// 		// 	//this.pagesArray[c].title = chapterName;
-		// 		// }
-		// 	}
-		// }
-	}
-
-	updateTranscript(now: any) {
-		//console.log(now);
-		var tempSelectors, m, thisCaption,
-			cues, cueText, cueLines, i, line,
-			showDuration, focusTarget;
-		let currentCaption;
-		tempSelectors = [];
-		if (this.ablePlayer.captions.length >= 1) {
-			let captions : any[] = this.ablePlayer.captions;
-			let lang = this.ablePlayer.lang;
-			let caption = captions.find(x=> x.language == lang);
-			if (caption){
-				cues = caption.cues;
+	processChapterNamesAndCues(){
+		console.log(this.videoPlayer.textTracks());
+		this.videoPlayer.textTracks().tracks_.forEach((v:any)=>{
+			if (v.kind === "chapters"){
+				console.log('found chapters');
+				console.log(v);
+				this.chapterCues = v.cues_;
 			}
-		}
-		else {
-			cues = [];
-		}
-		for (m = 0; m < cues.length; m++) {
-			if ((cues[m].start <= now) && (cues[m].end > now)) {
-				thisCaption = m;
-				break;
-			}
-		}
-		//console.log(cues[thisMeta as number]);
-		if (typeof thisCaption !== 'undefined') {
-			if (currentCaption !== thisCaption) {
-
-				// it's time to load the new metadata cue into the container div
-				//this.ablePlayer.$metaDiv.html(this.ablePlayer.flattenCueForMeta(cues[thisCaption]).replace('\n', '<br>'));
-				console.log(this.ablePlayer.flattenCueForMeta(cues[thisCaption]).replace('\n', '<br>'));
-			}
-		}
-		else {
-			// there is currently no metadata. Empty stale content
-			// if (typeof this.ablePlayer.$metaDiv !== 'undefined') {
-			// 	this.ablePlayer.$metaDiv.html('');
-			// }
-			// if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
-			// 	for (i = 0; i < this.ablePlayer.visibleSelectors.length; i++) {
-			// 		(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
-			// 	}
-			// 	// reset array
-			// 	this.ablePlayer.visibleSelectors = [];
-			// }
-			currentCaption = -1;
-		}
+		});
 	}
-
-
-
-	// updateMeta(ev: Event) {
-	// 	this.ablePlayer.refreshControls('timeline'); // for some reason, this is not firing automatically
-	// 	if (this.ablePlayer.hasMeta) {
-	// 		if (this.ablePlayer.metaType === 'text') {
-	// 			this.ablePlayer.$metaDiv.show();
-	// 			this.showMeta(this.ablePlayer.elapsed);
-	// 		}
-	// 		else {
-	// 			this.showMeta(this.ablePlayer.elapsed);
-	// 		}
-	// 	}
-	// }
-
-	// showMeta(now: any) {
-	// 	//console.log(now);
-	// 	var tempSelectors, m, thisMeta,
-	// 		cues, cueText, cueLines, i, line,
-	// 		showDuration, focusTarget;
-	// 	let currentMeta;
-	// 	tempSelectors = [];
-	// 	if (this.ablePlayer.meta.length >= 1) {
-	// 		cues = this.ablePlayer.meta;
-	// 	}
-	// 	else {
-	// 		cues = [];
-	// 	}
-	// 	for (m = 0; m < cues.length; m++) {
-	// 		if ((cues[m].start <= now) && (cues[m].end > now)) {
-	// 			thisMeta = m;
-	// 			break;
-	// 		}
-	// 	}
-	// 	//console.log(cues[thisMeta as number]);
-	// 	if (typeof thisMeta !== 'undefined') {
-	// 		if (currentMeta !== thisMeta) {
-
-	// 			if (this.ablePlayer.metaType === 'text') {
-	// 				// it's time to load the new metadata cue into the container div
-	// 				this.ablePlayer.$metaDiv.html(this.ablePlayer.flattenCueForMeta(cues[thisMeta]).replace('\n', '<br>'));
-	// 			}
-	// 			else if (this.ablePlayer.metaType === 'selector') {
-	// 				// it's time to show content referenced by the designated selector(s)
-	// 				cueText = this.ablePlayer.flattenCueForMeta(cues[thisMeta]);
-	// 				console.log(cueText);
-	// 				cueLines = cueText.split('\n');
-	// 				for (i = 0; i < cueLines.length; i++) {
-	// 					line = (window as any).$.trim(cueLines[i]);
-
-	// 					if (line.toLowerCase().trim() === 'pause') {
-	// 						// don't show big play button when pausing via metadata
-	// 						this.ablePlayer.hideBigPlayButton = true;
-	// 						this.ablePlayer.pauseMedia();
-	// 					}
-	// 					else if (line.toLowerCase().substring(0, 6) == 'focus:') {
-	// 						focusTarget = line.substring(6).trim();
-	// 						focusTarget = focusTarget.replace(`\#`, ``);
-
-	// 						let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
-	// 						if (elem.length) {
-	// 							elem.focus();
-	// 						}
-	// 						// if ((window as any).$(focusTarget).length) {
-	// 						// 	(window as any).$(focusTarget).focus();
-	// 						// }
-	// 					}
-	// 					else if (line.toLowerCase().substring(0, 6) == 'click:') {
-	// 						focusTarget = line.substring(6).trim();
-	// 						focusTarget = focusTarget.replace(`\#`, ``);
-	// 						let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
-	// 						if (elem.length) {
-	// 							elem.click();
-	// 						}
-	// 						// if ((window as any).$(focusTarget).length) {
-	// 						// 	(window as any).$(focusTarget).focus();
-	// 						// }
-	// 					}
-	// 					else {
-
-	// 						if ((window as any).$(line).length) {
-	// 							// selector exists
-	// 							currentMeta = thisMeta;
-	// 							showDuration = parseInt((window as any).$(line).attr('data-duration'));
-	// 							if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
-	// 								(window as any).$(line).show().delay(showDuration).fadeOut();
-	// 							}
-	// 							else {
-	// 								// no duration specified. Just show the element until end time specified in VTT file
-	// 								(window as any).$(line).show();
-	// 							}
-	// 							// add to array of visible selectors so it can be hidden at end time
-	// 							this.ablePlayer.visibleSelectors.push(line);
-	// 							tempSelectors.push(line);
-
-	// 						}
-	// 					}
-	// 				}
-	// 				// now step through this.visibleSelectors and remove anything that's stale
-	// 				if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
-	// 					if (this.ablePlayer.visibleSelectors.length !== tempSelectors.length) {
-	// 						for (i = this.ablePlayer.visibleSelectors.length - 1; i >= 0; i--) {
-	// 							if ((window as any).$.inArray(this.ablePlayer.visibleSelectors[i], tempSelectors) == -1) {
-	// 								(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
-	// 								this.ablePlayer.visibleSelectors.splice(i, 1);
-	// 							}
-	// 						}
-	// 					}
-	// 				}
-
-	// 			}
-	// 		}
-	// 	}
-	// 	else {
-	// 		// there is currently no metadata. Empty stale content
-	// 		if (typeof this.ablePlayer.$metaDiv !== 'undefined') {
-	// 			this.ablePlayer.$metaDiv.html('');
-	// 		}
-	// 		if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
-	// 			for (i = 0; i < this.ablePlayer.visibleSelectors.length; i++) {
-	// 				(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
-	// 			}
-	// 			// reset array
-	// 			this.ablePlayer.visibleSelectors = [];
-	// 		}
-	// 		currentMeta = -1;
-	// 	}
-	// }
-
-	
 
 	queryChanged(e: MediaQueryListEvent) {
 		console.log(e);
@@ -855,20 +650,25 @@ export class StoriBook extends FASTElement {
 	}
 
 	closeNav(): void {
-		this.menuOpen = false;
+		if (this.menuOpen){
+			this.menuOpen = false;
+		}
 	}
 
-	keydown(event: KeyboardEvent, page: StoriPage, index: number) {
-		//if (event.code == "32" || event.code == "13"){
-		event.preventDefault();
-		this.buttonClick(index);
-		//}
-	}
+	// keydown(event: KeyboardEvent, page: StoriPage, index: number) {
+	// 	//if (event.code == "32" || event.code == "13"){
+	// 	event.preventDefault();
+	// 	//this.buttonClick(index);
+	// 	//}
+	// }
 
-	async buttonClick(index: number) {
+	buttonClick(index: number) {
+		console.log("CLICK!1111");
 		this.closeNav();
 		try {
+			// Case where subheaders are present so they can be removed if clicking on a new header
 			if (this.subheaders){
+
 				if (this.selectedIndex != index) {
 					this.videoElement?.removeEventListener('timeupdate', this.timeupdateRef!);
 					// check if video is playing with chapters and advance video
@@ -978,114 +778,119 @@ export class StoriBook extends FASTElement {
 	
 				}
 
-			} else if (this.subheadersAlways){
-			if (this.selectedIndex != index) {
-				this.videoElement?.removeEventListener('timeupdate', this.timeupdateRef!);
-				// check if video is playing with chapters and advance video
-				if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
-					const cue = this.chapterCues[index];
-					// this.ablePlayer?.updateChapter(cue.start);
-					// this.ablePlayer?.seekTo(cue.start);
-				}
-
-				const oldIndex = this.selectedIndex;
-				const oldPage = this.pages[oldIndex];
-				this.selectedIndex = index;
-				const newPage = this.pages[this.selectedIndex];
-
-				if (newPage instanceof StoriPage) {
-					if (oldPage instanceof StoriPage) {
-						(oldPage as StoriPage).removeAttribute('active');
-						(newPage as StoriPage).setAttribute('active', 'true');
-						this.loadHeadersForPageAsync(newPage as StoriPage);
-						this.removeHeadersForPage(oldPage as StoriPage);
-					} else if ((oldPage as SubPage).page !== newPage) {
-						(oldPage as SubPage).page.removeAttribute('active');
-						(newPage as StoriPage).setAttribute('active', 'true');
-						this.loadHeadersForPageAsync(newPage as StoriPage);
-						this.removeHeadersForPage((oldPage as SubPage).page);
-					} else {
-						const firstElementChild = (newPage as StoriPage).shadowRoot!.firstElementChild;
-						if (firstElementChild != null && this.mainContentContainer != null) {
-						
-							this.mainContentContainer.scrollTo({ behavior: "smooth", top:0 });
-							//firstElementChild.scrollIntoView();
-						}
-						//(newPage as StoriPage).iframeElement!.contentWindow?.scrollTo(0, 0);
-					}
-				} else {
-					
-					if (oldPage instanceof StoriPage && (newPage as SubPage).page !== oldPage) {
-						if (this.mainContentContainer != null) {
-							let mutationObserver = new MutationObserver((mutations) => {
-								const subPage = (newPage as SubPage);
-								const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
-	
-								if (anchorElements != null && newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
-									const parentRect =  newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
-									const childRect = anchorElements[subPage.index].getBoundingClientRect();
-									const scrollTop = childRect.top - parentRect.top;
-									this.mainContentContainer?.scrollTo({ behavior: "smooth", top: scrollTop });
-									//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
-								}
-								mutationObserver.disconnect();
-							});
-							if (newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null)
-								mutationObserver.observe(newPage.page.shadowRoot.firstElementChild, { childList: true, subtree: true });
-						}
-						// old is StoriPage and new subpage is not same page
-						(oldPage as StoriPage).removeAttribute('active');
-						(newPage as SubPage).page.setAttribute('active', 'true');
-						
-						
-					} else if (!(oldPage instanceof StoriPage) && (oldPage as SubPage).page !== (newPage as SubPage).page) {
-						// old is subpage and new subpage is not same page
-						if (this.mainContentContainer != null) {
-							let mutationObserver = new MutationObserver((mutations) => {
-								const subPage = (newPage as SubPage);
-								const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
-	
-								if (anchorElements != null && newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
-									const parentRect =  newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
-									const childRect = anchorElements[subPage.index].getBoundingClientRect();
-									const scrollTop = childRect.top - parentRect.top;
-									this.mainContentContainer?.scrollTo({ behavior: "smooth", top: scrollTop });
-									//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
-								}
-								mutationObserver.disconnect();
-							});
-							if (newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null)
-								mutationObserver.observe(newPage.page.shadowRoot.firstElementChild, { childList: true, subtree: true });
-						}
-						(oldPage as SubPage).page.removeAttribute('active');
-						(newPage as SubPage).page.setAttribute('active', 'true');
-					} else {
-						// old is subpage and new subpage are the same... no need to wait.
-						const subPage = (newPage as SubPage);
-						const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
-
-						if (anchorElements != null &&  newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
-							//const parentRect = this.mainContentContainer.getBoundingClientRect();
-							const parentRect = newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
-							const childRect = anchorElements[subPage.index].getBoundingClientRect();
-							const scrollTop = childRect.top - parentRect.top;
-							this.mainContentContainer?.scroll({ behavior: "smooth", top: scrollTop });
-							//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
-						}
-						return;
-					}
-
-					// need to wait for page load if it is a new page, otherwise the scrolling will fail.
-					
-				}
-
-			}
-			} else {
+			// Case where subheaders are always present, don't remove them just navigate
+			} else if (this.subheadersAlways) {
 				if (this.selectedIndex != index) {
 					this.videoElement?.removeEventListener('timeupdate', this.timeupdateRef!);
 					// check if video is playing with chapters and advance video
 					if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
 						const cue = this.chapterCues[index];
+						// this.ablePlayer?.updateChapter(cue.start);
+						// this.ablePlayer?.seekTo(cue.start);
+					}
+
+					const oldIndex = this.selectedIndex;
+					const oldPage = this.pages[oldIndex];
+					this.selectedIndex = index;
+					const newPage = this.pages[this.selectedIndex];
+
+					if (newPage instanceof StoriPage) {
+						if (oldPage instanceof StoriPage) {
+							(oldPage as StoriPage).removeAttribute('active');
+							(newPage as StoriPage).setAttribute('active', 'true');
+							this.loadHeadersForPageAsync(newPage as StoriPage);
+							this.removeHeadersForPage(oldPage as StoriPage);
+						} else if ((oldPage as SubPage).page !== newPage) {
+							(oldPage as SubPage).page.removeAttribute('active');
+							(newPage as StoriPage).setAttribute('active', 'true');
+							this.loadHeadersForPageAsync(newPage as StoriPage);
+							this.removeHeadersForPage((oldPage as SubPage).page);
+						} else {
+							const firstElementChild = (newPage as StoriPage).shadowRoot!.firstElementChild;
+							if (firstElementChild != null && this.mainContentContainer != null) {
+							
+								this.mainContentContainer.scrollTo({ behavior: "smooth", top:0 });
+								//firstElementChild.scrollIntoView();
+							}
+							//(newPage as StoriPage).iframeElement!.contentWindow?.scrollTo(0, 0);
+						}
+					} else {
+						
+						if (oldPage instanceof StoriPage && (newPage as SubPage).page !== oldPage) {
+							if (this.mainContentContainer != null) {
+								let mutationObserver = new MutationObserver((mutations) => {
+									const subPage = (newPage as SubPage);
+									const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
+		
+									if (anchorElements != null && newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
+										const parentRect =  newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
+										const childRect = anchorElements[subPage.index].getBoundingClientRect();
+										const scrollTop = childRect.top - parentRect.top;
+										this.mainContentContainer?.scrollTo({ behavior: "smooth", top: scrollTop });
+										//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
+									}
+									mutationObserver.disconnect();
+								});
+								if (newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null)
+									mutationObserver.observe(newPage.page.shadowRoot.firstElementChild, { childList: true, subtree: true });
+							}
+							// old is StoriPage and new subpage is not same page
+							(oldPage as StoriPage).removeAttribute('active');
+							(newPage as SubPage).page.setAttribute('active', 'true');
+							
+							
+						} else if (!(oldPage instanceof StoriPage) && (oldPage as SubPage).page !== (newPage as SubPage).page) {
+							// old is subpage and new subpage is not same page
+							if (this.mainContentContainer != null) {
+								let mutationObserver = new MutationObserver((mutations) => {
+									const subPage = (newPage as SubPage);
+									const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
+		
+									if (anchorElements != null && newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
+										const parentRect =  newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
+										const childRect = anchorElements[subPage.index].getBoundingClientRect();
+										const scrollTop = childRect.top - parentRect.top;
+										this.mainContentContainer?.scrollTo({ behavior: "smooth", top: scrollTop });
+										//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
+									}
+									mutationObserver.disconnect();
+								});
+								if (newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null)
+									mutationObserver.observe(newPage.page.shadowRoot.firstElementChild, { childList: true, subtree: true });
+							}
+							(oldPage as SubPage).page.removeAttribute('active');
+							(newPage as SubPage).page.setAttribute('active', 'true');
+						} else {
+							// old is subpage and new subpage are the same... no need to wait.
+							const subPage = (newPage as SubPage);
+							const anchorElements = subPage.page.shadowRoot?.querySelectorAll(this.headerQuery);
+
+							if (anchorElements != null &&  newPage.page.shadowRoot != null && newPage.page.shadowRoot.firstElementChild != null) {
+								//const parentRect = this.mainContentContainer.getBoundingClientRect();
+								const parentRect = newPage.page.shadowRoot.firstElementChild.getBoundingClientRect();
+								const childRect = anchorElements[subPage.index].getBoundingClientRect();
+								const scrollTop = childRect.top - parentRect.top;
+								this.mainContentContainer?.scroll({ behavior: "smooth", top: scrollTop });
+								//anchorElements[subPage.index].scrollIntoView({block: "start", behavior: "smooth"});
+							}
+							return;
+						}
+
+						// need to wait for page load if it is a new page, otherwise the scrolling will fail.
+						
+					}
+
+				}
+			// case where no subheaders are present
+			} else {
+				if (this.selectedIndex != index) {
+					//this.videoElement?.removeEventListener('timeupdate', this.timeupdateRef!);
+					// check if video is playing with chapters and advance video
+					if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
+						const cue = this.chapterCues[index];
+						console.log(cue.startTime);
+						this.videoPlayer.currentTime(cue.startTime);
+					//this.seekChapter(index);
 						// this.ablePlayer?.updateChapter(cue.start);
 						// this.ablePlayer?.seekTo(cue.start);
 					}
@@ -1096,20 +901,20 @@ export class StoriBook extends FASTElement {
 					const newPage = this.pages[this.selectedIndex];
 	
 
-					if (oldPage instanceof StoriPage) {
+					// if (oldPage instanceof StoriPage) {
 						(oldPage as StoriPage).removeAttribute('active');
 						(newPage as StoriPage).setAttribute('active', 'true');
-						this.loadHeadersForPageAsync(newPage as StoriPage);
-						this.removeHeadersForPage(oldPage as StoriPage);
-					} else {
-						const firstElementChild = (newPage as StoriPage).shadowRoot!.firstElementChild;
-						if (firstElementChild != null && this.mainContentContainer != null) {
+						//this.loadHeadersForPageAsync(newPage as StoriPage);
+						//this.removeHeadersForPage(oldPage as StoriPage);
+					// } else {
+					// 	const firstElementChild = (newPage as StoriPage).shadowRoot!.firstElementChild;
+					// 	if (firstElementChild != null && this.mainContentContainer != null) {
 						
-							this.mainContentContainer.scrollTo({ behavior: "smooth", top:0 });
-							//firstElementChild.scrollIntoView();
-						}
-						//(newPage as StoriPage).iframeElement!.contentWindow?.scrollTo(0, 0);
-					}
+					// 		this.mainContentContainer.scrollTo({ behavior: "smooth", top:0 });
+					// 		//firstElementChild.scrollIntoView();
+					// 	}
+					// 	//(newPage as StoriPage).iframeElement!.contentWindow?.scrollTo(0, 0);
+					// }
 					
 				
 				}
@@ -1118,6 +923,14 @@ export class StoriBook extends FASTElement {
 			console.log(ex);
 			// this.content = "";
 		}
+	}
+
+	seekChapter(chapterIndex: number){
+		const cue = this.chapterCues[chapterIndex];
+		console.log(chapterIndex);
+		console.log(cue);
+
+		this.videoPlayer.currentTime(cue.startTime);
 	}
 
 	scrollToSubpageHeader(){
