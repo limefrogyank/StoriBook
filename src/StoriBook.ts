@@ -1,4 +1,4 @@
-import { provideFluentDesignSystem, fluentOption, fluentListbox, fluentButton, Listbox, StandardLuminance, baseLayerLuminance } from '@fluentui/web-components';
+import { provideFluentDesignSystem, fluentOption, fluentListbox, fluentButton, Listbox, StandardLuminance, baseLayerLuminance, fluentSlider, fluentSelect, fluentSliderLabel, Slider, Select } from '@fluentui/web-components';
 import { FASTElement, customElement, attr, html, volatile, css, repeat, when, observable, DOM, ref, children, $global, slotted } from '@microsoft/fast-element';
 import { NavBar } from "./navbar";
 import { mainStyles } from "./StoriBook-css";
@@ -11,7 +11,10 @@ StoriPage;
 provideFluentDesignSystem().register(
 	fluentListbox(),
 	fluentOption(),
-	fluentButton()
+	fluentButton(),
+	fluentSlider(),
+	fluentSelect(),
+	fluentSliderLabel()
 );
 
 
@@ -38,6 +41,9 @@ const navBarTemplate = html<StoriBook>`
 			</svg>
 		</fluent-button>
 	</div>
+	<div class="middle-navbar"> 
+		${x => mediaControl}	
+	</div>
 	<div class="right-side-navbar">
 		<fluent-button aria-label="Previous Page" style="width:40;height:40;" @click="${x => x.prevButton()}" appearance="accent">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
@@ -63,17 +69,55 @@ const navBarTemplate = html<StoriBook>`
 		</fluent-button>
 	</div>
 </nav>
-`
+`;
+
+const mediaControl = html<StoriBook>`
+<fluent-button aria-label="Play/Pause" style="width:40;height:40;" @click="${x=> !x.videoPlayer.hasStarted() || x.videoPlayer.paused() ? x.videoPlayer.play() : x.videoPlayer.pause() }">
+${when(x => !x.isPlaying, html<StoriBook>`
+	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
+		<path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z"/>
+	</svg>
+`)}
+${when(x => x.isPlaying, html<StoriBook>`
+	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
+		<path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/>
+	</svg>
+`)}
+</fluent-button>
+<fluent-slider 
+	${ref("slider")}
+	style="margin-top:14px;margin-bottom:-7px;width:180px;" 
+	step="1" 
+	min="0" 
+	max="${x=>x.duration}" 
+	:value="${x=> x.currentTime}" 
+	@change="${(x,c)=> x.sliderChange(c.event)}">
+</fluent-slider>
+<div style="margin-top:7px; margin-bottom:-7px;">Test</div>
+<fluent-select 
+	${ref("speedSelect")}
+	style="min-width:20px;" 
+	@input="${(x,c)=>{ console.log(c.event); x.videoPlayer.playbackRate(x.speedSelect.value); x.currentSpeed = +x.speedSelect.value; }}">
+	<fluent-option value="0.5">0.5x</fluent-option>
+	<fluent-option value="1" selected>1.0x</fluent-option>
+	<fluent-option value="1.5">1.5x</fluent-option>
+	<fluent-option value="2">2.0x</fluent-option>
+</fluent-select>
+`;
+
 const audioTemplate = html<StoriBook>`
 <div id="audiobox">
 	<div>
-		<video ${ref('videoElement')} data-able-player data-skin="2020" preload="auto" data-transcript-div="transcript"
-				height="auto" data-use-chapters-button="false" data-seekbar-scope="chapter" plays-inline
-				data-meta-type="selector" style="width: 100%; height: auto;">
-			<source src="${x => x.video}" />
-			<track kind="captions" src="${x => x.captions}" />
-			<track kind="metadata" src="${x => x.metadata}" />
-			<track kind="chapters" src="${x => x.chapters}" />
+
+		<video ${ref('videoElement')} class='video-js' controls='controls'
+				data-setup='{ "playbackRates": [0.5, 1, 1.5, 2], "controlBar": {"pictureInPictureToggle":false, "captions":false}}' 
+		 		data-able-player preload="auto" data-transcript-div="aSlideParent"
+				height="auto">
+			<source src="${x => x.video}" type="application/x-mpegURL">
+			<track kind="captions" src="${x => x.captions}" srclang="en" label="English" default>
+			<track kind="metadata" src="${x => x.metadata}" >
+			<track kind="chapters" src="${x => x.chapters}" >
+
 		</video>
 		<div id="chapters" ${ref('chaptersDiv')} style="display:none;"></div>
 	</div>
@@ -115,7 +159,8 @@ const template = html<StoriBook>`
 				</fluent-listbox>
 
 				<div style="max-width:300px; max-height:200px;">
-					${when((x, c) => x.video !== "", html<StoriBook>`${x => audioTemplate}`)}				
+					<slot name="video"></slot>
+					<!-- ${when((x, c) => x.video !== "", html<StoriBook>`${x => audioTemplate}`)}				 -->
 				</div>
 			</div>			
 		</div>
@@ -135,8 +180,13 @@ const template = html<StoriBook>`
 					<slot ${slotted("nodes")}></slot>
 					<div id="transcript" style="height:200px;width:400px;" ${ref('transcriptDiv')}></div>
 				</div>
-				${x => navBarTemplate}	
+
 				
+				${x => navBarTemplate}	
+				<div id="transcriptContainer">
+					<slot name="transcript" ></slot>
+				</div>
+
 			</div>
 		</div>
 	</div>
@@ -161,6 +211,14 @@ export class StoriBook extends FASTElement {
 	rootContainer?: HTMLDivElement;
 	videoElement?: HTMLVideoElement;
 	mainContentContainer?: HTMLDivElement;
+
+	videoPlayer?: any;
+	@observable isPlaying:boolean=false;
+	slider!: Slider;
+	@observable duration:number=0;
+	@observable currentTime:number=0;
+	@observable currentSpeed:number=1;
+	speedSelect!: Select;
 
 	chaptersDiv?: HTMLDivElement;
 	transcriptDiv?: HTMLDivElement;
@@ -260,6 +318,7 @@ export class StoriBook extends FASTElement {
 		}
 	}
 
+	
 	// This reacts to pages being added and sets the appropriate active state on the correct page.
 	nodesChanged(oldValue: Node[], newValue: Node[]) {
 		const allNodes = this.nodes.filter(x => x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE");
@@ -285,7 +344,7 @@ export class StoriBook extends FASTElement {
 					if (index == this.selectedIndex) {
 						(node as HTMLElement).setAttribute('active', 'true');
 						this.loadHeadersForPageAsync(node as StoriPage);
-					} else {
+					} else { 
 						(node as HTMLElement).removeAttribute('active');
 					}
 					
@@ -353,10 +412,13 @@ export class StoriBook extends FASTElement {
 		//setTimeout(() => window.print(), 100);
 		
 		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => {
 			if (!donotprint){
 				window.print();
 			}
-		});
+		});	});	});	});
 
 	}
 
@@ -379,6 +441,91 @@ export class StoriBook extends FASTElement {
 
 	connectedCallback(): void {
 		super.connectedCallback();
+		
+		const videoslot = this.shadowRoot?.querySelector('slot[name=video]') as HTMLSlotElement;
+		const transcriptslot = this.shadowRoot?.querySelector('slot[name=transcript]') as HTMLSlotElement;
+
+		const slotChangeHandler = (e : Event)=>{
+
+			videoslot.removeEventListener('slotchange', slotChangeHandler);
+			const videoElement = videoslot.assignedElements(); 
+			const transcriptElement = transcriptslot.assignedElements(); 
+	
+			this.videoPlayer = (window as any).videojs(videoElement[0],
+				{
+					controlBar: {pictureInPictureToggle:false}
+				});
+				console.log(this.videoPlayer);
+	
+				this.videoPlayer.ready( ()=> {
+	
+					var options = {
+						showTitle: false,
+						showTrackSelector: true,
+					};
+					var transcript = this.videoPlayer.transcript(options);
+	
+					var metadata = this.videoPlayer.metadataActions({});
+
+					this.videoPlayer.hotkeys({});
+				
+					this.videoPlayer.textTracks()[0].mode = 'hidden';
+					this.videoPlayer.textTracks()[1].mode = 'hidden';
+
+					this.videoPlayer.one("loadedmetadata", ()=>{
+						this.duration = this.videoPlayer.duration();
+					});
+					
+					this.currentSpeed = this.convertSpeedToMenuIndex(this.videoPlayer.playbackRate());
+
+					this.timeupdateRef = this.timeUpdate.bind(this);
+					this.videoPlayer.player().on('timeupdate', this.timeupdateRef);
+			
+			});
+		};
+		
+		videoslot.addEventListener('slotchange', slotChangeHandler);
+
+		
+
+		// var videos = this.shadowRoot!.firstElementChild!.getElementsByTagName('video');
+		// for (var i=0; i<videos.length; i++) {
+		// 	var video = videos[i];
+
+		// 	if (video.hasAttribute('data-able-player')) {
+		// 		var videoPlayer = (window as any).videojs(video,
+		// 			{
+		// 				controlBar: {pictureInPictureToggle:false}
+		// 			});
+		// 		console.log(videoPlayer);
+
+		// 		videoPlayer.on('pluginsetup', ()=>{
+					
+		// 		});
+	
+
+		// 		videoPlayer.ready( function(this:any) {
+
+		// 			var options = {
+		// 				showTitle: false,
+		// 				showTrackSelector: true,
+		// 			};
+		// 			//var transcript = videoPlayer.transcript(options);
+
+		// 			var metadata = videoPlayer.metadataActions({});
+				
+		// 		videoPlayer.textTracks()[0].mode = 'hidden';
+		// 		videoPlayer.textTracks()[1].mode = 'hidden';
+		// 		//this.qualityLevels();
+		// 		//this.maxQualitySelector();
+
+				
+		// 		//console.log(transcript);
+		// 		//this.el().appendChild(transcript.element()); 
+				
+		// 		});
+		// 	}
+		// }
 
 		this.selectedIndex = this.defaultPageNumber - 1;
 
@@ -422,23 +569,14 @@ export class StoriBook extends FASTElement {
 		});
 
 		//try to add video to able player instances outside of element
-		this.ablePlayer = new (window as any).AblePlayer(this.videoElement);
-		(window as any).AblePlayerInstances.push(this.ablePlayer);
 
-		console.log((window as any).AblePlayerInstances[0]);
-
-
-		this.ablePlayer.$chaptersDiv = (window as any).$(this.chaptersDiv)
-
-
-		
 		// this.videoElement?.addEventListener('loadedmetadata', ()=>{
 		// 	console.log("CHECKING");
 		// 	console.log(this.ablePlayer.chapters);	
 		// });
 
 		this.canPlayThroughRef = this.onCanPlayThrough.bind(this);
-		this.timeupdateRef = this.updateMeta.bind(this);
+		
 		this.videoElement?.addEventListener('canplaythrough', this.canPlayThroughRef);
 
 		// this.ablePlayer.onMediaNewSourceLoad = ()=> {
@@ -450,10 +588,39 @@ export class StoriBook extends FASTElement {
 
 	}
 
+	convertSpeedToMenuIndex(playbackRate:number){
+		switch (playbackRate){
+			case 0.5:
+				return 0;
+			case 1: 
+				return 1;
+			case 1.5:
+				return 2;
+			case 2:
+				return 3;
+			default:
+				return 1;
+		}
+	}
+
+	timeUpdate(){
+		this.isPlaying = !this.videoPlayer.paused() && this.videoPlayer.hasStarted();
+		this.currentTime = this.videoPlayer.currentTime();
+	}
+
+	sliderChange(e:Event){
+		//if ((e as CustomEvent).detail)
+			//console.log(this.slider.value);
+		if (+this.slider.value !== this.currentTime){
+			//this.currentTime = +this.slider.value;
+			this.videoPlayer.currentTime(+this.slider.value);
+		}
+	}
+
+
 	onCanPlayThrough() {
 		//this.videoElement?.removeEventListener('canplaythrough', this.canPlayThroughRef!);
 		console.log("CHECKING");
-		console.log(this.ablePlayer.chapters);
 		if (this.chapterCues.length == 0) {
 			this.processChapterNamesAndCues();
 
@@ -471,31 +638,31 @@ export class StoriBook extends FASTElement {
 
 	processChapterNamesAndCues() {
 		let cues;
-		if (this.ablePlayer.useChapterTimes) {
-			cues = this.ablePlayer.selectedChapters.cues;
-		}
-		else if (this.ablePlayer.chapters.length >= 1) {
-			cues = this.ablePlayer.chapters[0].cues;
-		}
-		else {
-			cues = [];
-		}
-		if (cues.length > 0) {
-			for (let c = 0; c < cues.length; c++) {
-				const chapterName = this.ablePlayer.flattenCueForCaption(cues[c]);
-				const startTime = cues[c].start;
-				this.chapterCues.push({
-					title: chapterName,
-					start: startTime
-				});
-				// if (this.overrideChapterNames && this.pagesArray.length > c){
-				// 	let page :IPage = {title: chapterName, src: this.pagesArray[c].src};
-				// 	//page.title = chapterName;
-				// 	this.pagesArray.splice(c,1,page);
-				// 	//this.pagesArray[c].title = chapterName;
-				// }
-			}
-		}
+		// if (this.ablePlayer.useChapterTimes) {
+		// 	cues = this.ablePlayer.selectedChapters.cues;
+		// }
+		// else if (this.ablePlayer.chapters.length >= 1) {
+		// 	cues = this.ablePlayer.chapters[0].cues;
+		// }
+		// else {
+		// 	cues = [];
+		// }
+		// if (cues.length > 0) {
+		// 	for (let c = 0; c < cues.length; c++) {
+		// 		const chapterName = this.ablePlayer.flattenCueForCaption(cues[c]);
+		// 		const startTime = cues[c].start;
+		// 		this.chapterCues.push({
+		// 			title: chapterName,
+		// 			start: startTime
+		// 		});
+		// 		// if (this.overrideChapterNames && this.pagesArray.length > c){
+		// 		// 	let page :IPage = {title: chapterName, src: this.pagesArray[c].src};
+		// 		// 	//page.title = chapterName;
+		// 		// 	this.pagesArray.splice(c,1,page);
+		// 		// 	//this.pagesArray[c].title = chapterName;
+		// 		// }
+		// 	}
+		// }
 	}
 
 	updateTranscript(now: any) {
@@ -548,141 +715,135 @@ export class StoriBook extends FASTElement {
 	}
 
 
-	updateMeta(ev: Event) {
-		this.updateTranscript(this.ablePlayer.elapsed);
-		this.ablePlayer.refreshControls('timeline'); // for some reason, this is not firing automatically
-		
-		if (this.ablePlayer.hasMeta) {
-			if (this.ablePlayer.metaType === 'text') {
-				this.ablePlayer.$metaDiv.show();
-				this.showMeta(this.ablePlayer.elapsed);
-			}
-			else {
-				this.showMeta(this.ablePlayer.elapsed);
-			}
-		}
-	}
 
-	showMeta(now: any) {
-		//console.log(now);
-		var tempSelectors, m, thisMeta,
-			cues, cueText, cueLines, i, line,
-			showDuration, focusTarget;
-		let currentMeta;
-		tempSelectors = [];
-		if (this.ablePlayer.meta.length >= 1) {
-			cues = this.ablePlayer.meta;
-		}
-		else {
-			cues = [];
-		}
-		for (m = 0; m < cues.length; m++) {
-			if ((cues[m].start <= now) && (cues[m].end > now)) {
-				thisMeta = m;
-				break;
-			}
-		}
-		//console.log(cues[thisMeta as number]);
-		if (typeof thisMeta !== 'undefined') {
-			if (currentMeta !== thisMeta) {
+	// updateMeta(ev: Event) {
+	// 	this.ablePlayer.refreshControls('timeline'); // for some reason, this is not firing automatically
+	// 	if (this.ablePlayer.hasMeta) {
+	// 		if (this.ablePlayer.metaType === 'text') {
+	// 			this.ablePlayer.$metaDiv.show();
+	// 			this.showMeta(this.ablePlayer.elapsed);
+	// 		}
+	// 		else {
+	// 			this.showMeta(this.ablePlayer.elapsed);
+	// 		}
+	// 	}
+	// }
 
-				if (this.ablePlayer.metaType === 'text') {
-					// it's time to load the new metadata cue into the container div
-					this.ablePlayer.$metaDiv.html(this.ablePlayer.flattenCueForMeta(cues[thisMeta]).replace('\n', '<br>'));
-				}
-				else if (this.ablePlayer.metaType === 'selector') {
-					// it's time to show content referenced by the designated selector(s)
-					cueText = this.ablePlayer.flattenCueForMeta(cues[thisMeta]);
-					console.log(cueText);
-					cueLines = cueText.split('\n');
-					for (i = 0; i < cueLines.length; i++) {
-						line = (window as any).$.trim(cueLines[i]);
+	// showMeta(now: any) {
+	// 	//console.log(now);
+	// 	var tempSelectors, m, thisMeta,
+	// 		cues, cueText, cueLines, i, line,
+	// 		showDuration, focusTarget;
+	// 	let currentMeta;
+	// 	tempSelectors = [];
+	// 	if (this.ablePlayer.meta.length >= 1) {
+	// 		cues = this.ablePlayer.meta;
+	// 	}
+	// 	else {
+	// 		cues = [];
+	// 	}
+	// 	for (m = 0; m < cues.length; m++) {
+	// 		if ((cues[m].start <= now) && (cues[m].end > now)) {
+	// 			thisMeta = m;
+	// 			break;
+	// 		}
+	// 	}
+	// 	//console.log(cues[thisMeta as number]);
+	// 	if (typeof thisMeta !== 'undefined') {
+	// 		if (currentMeta !== thisMeta) {
 
-						if (line.toLowerCase().trim() === 'pause') {
-							// don't show big play button when pausing via metadata
-							this.ablePlayer.hideBigPlayButton = true;
-							this.ablePlayer.pauseMedia();
-						}
-						else if (line.toLowerCase().substring(0, 6) == 'focus:') {
-							focusTarget = line.substring(6).trim();
-							// focusTarget = focusTarget.replace(`\#`, ``);
+	// 			if (this.ablePlayer.metaType === 'text') {
+	// 				// it's time to load the new metadata cue into the container div
+	// 				this.ablePlayer.$metaDiv.html(this.ablePlayer.flattenCueForMeta(cues[thisMeta]).replace('\n', '<br>'));
+	// 			}
+	// 			else if (this.ablePlayer.metaType === 'selector') {
+	// 				// it's time to show content referenced by the designated selector(s)
+	// 				cueText = this.ablePlayer.flattenCueForMeta(cues[thisMeta]);
+	// 				console.log(cueText);
+	// 				cueLines = cueText.split('\n');
+	// 				for (i = 0; i < cueLines.length; i++) {
+	// 					line = (window as any).$.trim(cueLines[i]);
 
-							const currentStoriPage = this.querySelectorAll('stori-page').item(this.selectedIndex);
-							let target = currentStoriPage.shadowRoot?.querySelector(focusTarget);
+	// 					if (line.toLowerCase().trim() === 'pause') {
+	// 						// don't show big play button when pausing via metadata
+	// 						this.ablePlayer.hideBigPlayButton = true;
+	// 						this.ablePlayer.pauseMedia();
+	// 					}
+	// 					else if (line.toLowerCase().substring(0, 6) == 'focus:') {
+	// 						focusTarget = line.substring(6).trim();
+	// 						focusTarget = focusTarget.replace(`\#`, ``);
 
-							if (target){
-								target.focus();
-							}
+	// 						let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
+	// 						if (elem.length) {
+	// 							elem.focus();
+	// 						}
+	// 						// if ((window as any).$(focusTarget).length) {
+	// 						// 	(window as any).$(focusTarget).focus();
+	// 						// }
+	// 					}
+	// 					else if (line.toLowerCase().substring(0, 6) == 'click:') {
+	// 						focusTarget = line.substring(6).trim();
+	// 						focusTarget = focusTarget.replace(`\#`, ``);
+	// 						let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
+	// 						if (elem.length) {
+	// 							elem.click();
+	// 						}
+	// 						// if ((window as any).$(focusTarget).length) {
+	// 						// 	(window as any).$(focusTarget).focus();
+	// 						// }
+	// 					}
+	// 					else {
 
-							// let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
-							// if (elem.length) {
-							// 	elem.focus();
-							// }
-							// if ((window as any).$(focusTarget).length) {
-							// 	(window as any).$(focusTarget).focus();
-							// }
-						}
-						else if (line.toLowerCase().substring(0, 6) == 'click:') {
-							focusTarget = line.substring(6).trim();
-							focusTarget = focusTarget.replace(`\#`, ``);
-							let elem = (window as any).AblePlayer.localGetElementById(this.ablePlayer.$ableDiv[0], focusTarget);
-							if (elem.length) {
-								elem.click();
-							}
-							// if ((window as any).$(focusTarget).length) {
-							// 	(window as any).$(focusTarget).focus();
-							// }
-						}
-						else {
+	// 						if ((window as any).$(line).length) {
+	// 							// selector exists
+	// 							currentMeta = thisMeta;
+	// 							showDuration = parseInt((window as any).$(line).attr('data-duration'));
+	// 							if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
+	// 								(window as any).$(line).show().delay(showDuration).fadeOut();
+	// 							}
+	// 							else {
+	// 								// no duration specified. Just show the element until end time specified in VTT file
+	// 								(window as any).$(line).show();
+	// 							}
+	// 							// add to array of visible selectors so it can be hidden at end time
+	// 							this.ablePlayer.visibleSelectors.push(line);
+	// 							tempSelectors.push(line);
 
-							if ((window as any).$(line).length) {
-								// selector exists
-								currentMeta = thisMeta;
-								showDuration = parseInt((window as any).$(line).attr('data-duration'));
-								if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
-									(window as any).$(line).show().delay(showDuration).fadeOut();
-								}
-								else {
-									// no duration specified. Just show the element until end time specified in VTT file
-									(window as any).$(line).show();
-								}
-								// add to array of visible selectors so it can be hidden at end time
-								this.ablePlayer.visibleSelectors.push(line);
-								tempSelectors.push(line);
+	// 						}
+	// 					}
+	// 				}
+	// 				// now step through this.visibleSelectors and remove anything that's stale
+	// 				if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
+	// 					if (this.ablePlayer.visibleSelectors.length !== tempSelectors.length) {
+	// 						for (i = this.ablePlayer.visibleSelectors.length - 1; i >= 0; i--) {
+	// 							if ((window as any).$.inArray(this.ablePlayer.visibleSelectors[i], tempSelectors) == -1) {
+	// 								(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
+	// 								this.ablePlayer.visibleSelectors.splice(i, 1);
+	// 							}
+	// 						}
+	// 					}
+	// 				}
 
-							}
-						}
-					}
-					// now step through this.visibleSelectors and remove anything that's stale
-					if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
-						if (this.ablePlayer.visibleSelectors.length !== tempSelectors.length) {
-							for (i = this.ablePlayer.visibleSelectors.length - 1; i >= 0; i--) {
-								if ((window as any).$.inArray(this.ablePlayer.visibleSelectors[i], tempSelectors) == -1) {
-									(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
-									this.ablePlayer.visibleSelectors.splice(i, 1);
-								}
-							}
-						}
-					}
+	// 			}
+	// 		}
+	// 	}
+	// 	else {
+	// 		// there is currently no metadata. Empty stale content
+	// 		if (typeof this.ablePlayer.$metaDiv !== 'undefined') {
+	// 			this.ablePlayer.$metaDiv.html('');
+	// 		}
+	// 		if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
+	// 			for (i = 0; i < this.ablePlayer.visibleSelectors.length; i++) {
+	// 				(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
+	// 			}
+	// 			// reset array
+	// 			this.ablePlayer.visibleSelectors = [];
+	// 		}
+	// 		currentMeta = -1;
+	// 	}
+	// }
 
-				}
-			}
-		}
-		else {
-			// there is currently no metadata. Empty stale content
-			if (typeof this.ablePlayer.$metaDiv !== 'undefined') {
-				this.ablePlayer.$metaDiv.html('');
-			}
-			if (this.ablePlayer.visibleSelectors && this.ablePlayer.visibleSelectors.length) {
-				for (i = 0; i < this.ablePlayer.visibleSelectors.length; i++) {
-					(window as any).$(this.ablePlayer.visibleSelectors[i]).hide();
-				}
-				// reset array
-				this.ablePlayer.visibleSelectors = [];
-			}
-			currentMeta = -1;
-		}
-	}
+	
 
 	queryChanged(e: MediaQueryListEvent) {
 		console.log(e);
@@ -713,8 +874,8 @@ export class StoriBook extends FASTElement {
 					// check if video is playing with chapters and advance video
 					if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
 						const cue = this.chapterCues[index];
-						this.ablePlayer?.updateChapter(cue.start);
-						this.ablePlayer?.seekTo(cue.start);
+						// this.ablePlayer?.updateChapter(cue.start);
+						// this.ablePlayer?.seekTo(cue.start);
 					}
 	
 					const oldIndex = this.selectedIndex;
@@ -823,8 +984,8 @@ export class StoriBook extends FASTElement {
 				// check if video is playing with chapters and advance video
 				if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
 					const cue = this.chapterCues[index];
-					this.ablePlayer?.updateChapter(cue.start);
-					this.ablePlayer?.seekTo(cue.start);
+					// this.ablePlayer?.updateChapter(cue.start);
+					// this.ablePlayer?.seekTo(cue.start);
 				}
 
 				const oldIndex = this.selectedIndex;
@@ -925,8 +1086,8 @@ export class StoriBook extends FASTElement {
 					// check if video is playing with chapters and advance video
 					if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
 						const cue = this.chapterCues[index];
-						this.ablePlayer?.updateChapter(cue.start);
-						this.ablePlayer?.seekTo(cue.start);
+						// this.ablePlayer?.updateChapter(cue.start);
+						// this.ablePlayer?.seekTo(cue.start);
 					}
 	
 					const oldIndex = this.selectedIndex;

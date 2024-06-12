@@ -1,0 +1,127 @@
+.vectA-1 {
+    fill: #d6ddfc;
+  }
+
+  .vectA-1,
+  .vectA-2,
+  .vectA-3 {
+    stroke: #808285;
+    stroke-width: 2px;
+  }
+
+  .vectA-1,
+  .vectA-2,
+  .vectA-3,
+  .vectA-4 {
+    stroke-miterlimit: 10;
+  }
+
+  .vectA-2 {
+    fill: #f1f2f2;
+  }
+
+  .vectA-3 {
+    fill: #efb0a4;
+  }
+
+  .vectA-5 {
+    letter-spacing: -.11em;
+  }
+
+  .vectA-4 {
+    fill: none;
+    stroke: #58595b;
+    stroke-width: 4px;
+  }
+
+  .vectA-6 {
+    font-family: ArialMT, Arial;
+    font-size: 14px;
+  }
+
+  .variableCircle:hover,
+  .variableCircle:focus {
+    fill: #676960
+  }
+
+  .vectB-1 {
+    stroke: #1c2e4a;
+  }
+
+  .vectB-1,
+  .vectB-2,
+  .vectB-3,
+  .vectB-4,
+  .vectB-5 {
+    stroke-miterlimit: 10;
+  }
+
+  .vectB-1,
+  .vectB-4 {
+    fill: none;
+    stroke-width: 4px;
+  }
+
+  .vectB-2 {
+    fill: #dddaf2;
+  }
+
+  .vectB-2,
+  .vectB-3,
+  .vectB-5 {
+    stroke: #808285;
+    stroke-width: 2px;
+  }
+
+  .vectB-3 {
+    fill: #efb0a4;
+  }
+
+  .vectB-6 {
+    fill: #6d6e71;
+  }
+
+  .vectB-7,
+  .vectB-8 {
+    font-family: ArialMT, Arial;
+    font-size: 14px;
+  }
+
+  .vectB-7,
+  .vectB-9 {
+    fill: #ed1c24;
+  }
+
+  .vectB-10 {
+    fill: #1c2e4a;
+  }
+
+  .vectB-4 {
+    stroke: #6d6e71;
+  }
+
+  .vectB-5 {
+    fill: #f3eacf;
+  }
+
+
+  .FeatureGroup :not(text, tspan) {
+    opacity: 0;
+  }
+
+  *:focus {
+    outline: 0px solid transparent;
+  }
+
+  .FeatureGroup:hover :not(text, tspan) {
+    opacity: 0.5;
+  }
+
+  .FeatureGroup:focus :not(text, tspan) {
+    opacity: 1;
+  }
+
+  .Description {
+    font-size: 16px;
+    font-family: OpenSans, Open Sans;
+  }
