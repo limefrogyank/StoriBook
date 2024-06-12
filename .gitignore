@@ -1,5 +1,7 @@
 node_modules
-dist/*
+dist
+dist/*.hot-update.js
+dist/*.hot-update.json
 ableplayer
 img
 *.vtt
