@@ -23,6 +23,7 @@ import videojscss from '../videojs/video-js.css';
 
 export const mainStyles = css`
 
+
 :host{
 	display:block;
 	width:100%;
@@ -36,37 +37,65 @@ ${videojscss.toString()}
 	height: 100%;
 	overflow:hidden;
 }
+
+#root:fullscreen {
+	max-height: 100vh;
+}
+
+
+
+
+
+
 .container{
 	display:grid;
 	grid-template-columns: var(--menu-width) auto;
-	grid-template-rows: auto 32px;
+	grid-template-rows: 100%;
+	/*grid-template-rows: calc(100% - 32px) 32px; */
 	height:100%;
-	overflow:hidden;
+	/*overflow:hidden;*/
 }
-.toc{
+
+#toc{
+	overflow-y: auto;
 	background:#EEE;
 	grid-column-start: 1;
 	grid-column-end: 1;
-	overflow:auto;
+	/*overflow:auto;*/
 	height:100%;
 }
+#root:fullscreen #toc {
+	max-height: 100vh;
+	height: 100vh;
+}
+
 #contentWithNavBarOverlay{
 	position:relative;
 	height:100%;
-	overflow:hidden;
 }
 
 #contentWithNavBar{
-	flex-grow: 8;
-	display:flex;
-	flex-direction:column;
+	display:grid;
+	/*grid-template-rows: 60% 32px calc(40% - 32px);*/
+	grid-template-rows: 60% auto 1fr;
+	grid-template-columns: 100%;
 	width:100%;
 	height:100%;
 	overflow:hidden;
 }
+
+#root:fullscreen #contentWithNavBar{
+	max-height: 100vh;
+	height: 100vh;
+}
+/*#root:fullscreen #contentWithNavBar {
+	max-height: 100vh;
+	height: calc(100vh - 80px);
+}*/
+
 #mainContent{
-	grid-column-start: 2;
-	grid-column-end: 2;
+	grid-row-start: 1;
+	grid-row-end: 1;
 	padding:5px;
 	/*height:100%;*/
 	/*height:70vh;*/
@@ -74,14 +103,31 @@ ${videojscss.toString()}
 	flex:5 1 auto;
 	overflow:auto;
 	overscroll-behavior: contain;
+	height:100% ;
 }
+
+
+#root:fullscreen #mainContent{
+	background:#FFF;
+	max-height:none;
+	height:100% !important;
+}
+
 #navbar{
 	width:100%;
+	grid-row-start:2;
+	grid-row-end:2;
 	display:flex;
+	flex-wrap:wrap;
+
 	flex-direction:row;
 	justify-content:space-between;
 	background:#EEE;
 	flex: 0 0 auto;
+}
+
+.mediaSlider{
+	width:180px;
 }
 ::slotted(div) {
 	flex:2 3;
@@ -91,10 +137,14 @@ ${videojscss.toString()}
 }
 
 #transcriptContainer{
+	grid-row-start:3;
+	grid-row-end:3;
 	overflow:hidden;
 	height:100%;
 	flex: 2 2 auto;
 }
+
+
 
 .left-side-navbar{
 	
@@ -102,23 +152,59 @@ ${videojscss.toString()}
 .middle-navbar{
 	display:flex;
 	flex-direction:row;
+	align-items:center;
 }
 .right-side-navbar{
-
+	
 }
 #topMenuBar{
 	display:none; 
-	flex-direction:row;
 	width:100%;
 	background: #EEE;
 	align-items:center;
+	grid-row-start: 1;
+	grid-row-end: 1;
 }
 
 .overlay{
 	display:none;
 }
 
+@media screen and (max-height: 600px){
+
+	.container{
+		display:grid;
+		grid-template-columns: calc(var(--menu-width) - 100px) auto;
+		grid-template-rows: 100%;
+		/*grid-template-rows: calc(100% - 32px) 32px; */
+		height:100%;
+		/*overflow:hidden;*/
+	}
+	
+}
+
+
 @media screen and (max-width: 767px){
+	#contentWithNavBar {
+		/* top menu bar is visible */
+		grid-template-rows: 32px 60% auto 1fr;
+	}
+	#contentWithNavBar #mainContent{
+		grid-row-start: 2;
+		grid-row-end: 2;
+	}
+	#contentWithNavBar #navbar{
+		grid-row-start: 3;
+		grid-row-end: 3;
+	}
+	#contentWithNavBar #transcriptContainer{
+		grid-row-start: 4;
+		grid-row-end: 4;
+	}	
+
+	.mediaSlider{
+		width:100px;
+	}
 	.toc {
 		opacity:0;
 	}
@@ -179,18 +265,26 @@ ${videojscss.toString()}
 		display:none;
 	}
 	.container{
+		height:auto;
 		overflow:inherit;
 		grid-template-columns:0px auto;
 	}
 	#contentWithNavBarOverlay{
 		overflow:inherit;
+		height:auto;
 	}
 	#contentWithNavBar{
+		display:block;
+		height:100%;
 		overflow:inherit;
 	}
 	#mainContent{
 		display:block;
 		overflow: inherit;
+		height:auto;
+	}
+	#transcriptContainer{
+		height: fit-content;
 	}
 	
 }

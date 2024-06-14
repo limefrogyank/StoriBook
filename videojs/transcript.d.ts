@@ -23,6 +23,7 @@ export declare class TranscriptPlugin extends plugin {
     options: TranscriptPluginOptions;
     validTracks: Array<TextTrack>;
     descriptionTracks: Array<TextTrack>;
+    chaptersTracks: Array<TextTrack>;
     currentTrack: TextTrack;
     player: videojs.Player;
     button?: TranscriptButton;
@@ -46,6 +47,7 @@ export declare class TranscriptPlugin extends plugin {
     setCue(time: number): void;
     setTrack(track: TextTrack | string, trackCreated?: boolean): void;
     createTranscriptBody(track: TextTrack | string, trackCreated?: boolean): void;
+    createChapterHeader(cue: TextTrackCue): HTMLDivElement;
     createDescBox(cue: TextTrackCue): HTMLDivElement;
     createLine(cue: TextTrackCue): HTMLDivElement;
     createSpan(cue: TextTrackCue): HTMLSpanElement;

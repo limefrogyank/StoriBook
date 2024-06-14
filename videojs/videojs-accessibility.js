@@ -22,6 +22,18 @@
       }
       return validTracks;
     }
+    function getChaptersTracks(player) {
+      const validTracks = [];
+      let i, track;
+      const tracks = player.textTracks();
+      for (i = 0; i < tracks.length; i++) {
+        track = tracks[i];
+        if (track.kind === 'chapters') {
+          validTracks.push(track);
+        }
+      }
+      return validTracks;
+    }
     function getDescriptionTracks(player) {
       const validTracks = [];
       let i, track;
@@ -240,6 +252,9 @@
         }
         this.validTracks = getTextTrackList(player);
         this.descriptionTracks = getDescriptionTracks(player);
+        this.chaptersTracks = getChaptersTracks(player);
+        console.log('chapters tracks:');
+        console.log(this.chaptersTracks);
         this.currentTrack = getActiveTrack(this.validTracks, Settings.transcriptDefaultLang);
         //this.currentDescriptionTrack = getActiveDescriptionTrack(this.descriptionTracks, this.currentTrack);
         const el = player.el();
@@ -322,6 +337,7 @@
         const header = createElement(this, 'div', '-header');
         el.appendChild(header);
         const headerRight = createElement(this, 'div', '-header-right');
+        headerRight.style.alignItems = 'center';
         header.appendChild(headerRight);
         if (this.options.showTrackSelector) {
           var selector = this.createSelector();
@@ -330,12 +346,15 @@
         this.autoscrollCheckbox = createElement(this, 'input', '-autoscroll-checkbox');
         this.autoscrollCheckbox.type = 'checkbox';
         this.autoscrollCheckbox.id = 'transcript-autoscroll-checkbox';
+        this.autoscrollCheckbox.style.verticalAlign = 'middle';
         this.autoscrollCheckbox.onchange = this.autoscrollChecked.bind(this);
-        headerRight.appendChild(this.autoscrollCheckbox);
         const autoscrollLabel = createElement(this, 'label', '-autoscroll-label');
         autoscrollLabel.htmlFor = 'transcript-autoscroll-checkbox';
         autoscrollLabel.innerText = localize('Auto Scroll');
+        autoscrollLabel.style.marginBottom = '0px';
+        autoscrollLabel.style.marginLeft = '5px';
         headerRight.appendChild(autoscrollLabel);
+        autoscrollLabel.appendChild(this.autoscrollCheckbox);
         // get stored variables and set them
         if (this.originalOptions.autoscroll) {
           this.autoscrollCheckbox.checked = this.originalOptions.autoscroll;
@@ -464,23 +483,26 @@
       // }
       setCue(time) {
         let i, line, begin, end;
-        const lines = this.body ? this.body.children : [];
+        const lines = this.body ? this.body.querySelectorAll('.vjs-transcript-text') : [];
         for (i = 0; i < lines.length; i++) {
           line = lines[i];
-          begin = line.getAttribute('data-begin') == null ? 0 : +line.getAttribute('data-begin');
+          begin = line.getAttribute('data-begin') == null ? Infinity : +line.getAttribute('data-begin');
           if (i < lines.length - 1) {
-            end = lines[i + 1].getAttribute('data-begin') == null ? 0 : +lines[i + 1].getAttribute('data-begin');
+            end = lines[i + 1].getAttribute('data-begin') == null ? Infinity : +lines[i + 1].getAttribute('data-begin');
           } else {
             end = this.player.duration() || Infinity;
           }
-          if (time > begin && time < end) {
+          if (time >= begin && time < end) {
             if (!line.classList.contains('is-active')) {
               // don't update if it hasn't changed
               line.classList.add('is-active');
               if (this.options.autoscroll) {
                 // && !(this.options.stopScrollWhenInUse)) { //&& this.body?.scroll.inUse())) {
-                // line.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                line.scrollIntoView(false);
+                const options = {
+                  block: 'nearest',
+                  behavior: 'smooth'
+                };
+                line.scrollIntoView(options);
               }
             }
           } else {
@@ -514,8 +536,24 @@
         } else {
           const cues = track.cues;
           let descriptionCueIndex = 0;
+          let chaptersCueIndex = [];
+          this.chaptersTracks.forEach((x, i) => chaptersCueIndex.push(0));
           if (cues !== null) {
             for (i = 0; i < cues.length; i++) {
+              // console.log("chapters count: " + this.chaptersTracks.length);
+              this.chaptersTracks.forEach((x, chapterTrackIndex) => {
+                // console.log('checking index: ' + chaptersCueIndex[chapterTrackIndex]);
+                let chapterTrack = x;
+                // if (chapterTrack && chapterTrack.cues && chaptersCueIndex[chapterTrackIndex] < chapterTrack.cues.length){
+                //     console.log('checking time: ' + chapterTrack!.cues![chaptersCueIndex[chapterTrackIndex]].startTime);
+                //     console.log('checking text: ' + (chapterTrack!.cues![chaptersCueIndex[chapterTrackIndex]] as any).text);
+                // }
+                while (chapterTrack != null && chapterTrack.cues != null && chaptersCueIndex[chapterTrackIndex] < chapterTrack.cues.length && chapterTrack.cues[chaptersCueIndex[chapterTrackIndex]].startTime <= cues[i].startTime) {
+                  line = this.createChapterHeader(chapterTrack.cues[chaptersCueIndex[chapterTrackIndex]]);
+                  fragment.appendChild(line);
+                  chaptersCueIndex[chapterTrackIndex]++;
+                }
+              });
               while (descriptionTrack != null && descriptionTrack.cues != null && descriptionCueIndex < descriptionTrack.cues.length && descriptionTrack.cues[descriptionCueIndex].startTime < cues[i].startTime) {
                 line = this.createDescBox(descriptionTrack.cues[descriptionCueIndex++]);
                 fragment.appendChild(line);
@@ -538,6 +576,16 @@
           }
           this.body = body;
         }
+      }
+      createChapterHeader(cue) {
+        const div = createElement(this, 'div', '-chapterHeader');
+        const heading = createElement(this, 'h4', '-chapterText');
+        heading.setAttribute('data-begin', cue.startTime.toString());
+        if (cue.hasOwnProperty('text')) {
+          heading.innerHTML = cue.text;
+        }
+        div.appendChild(heading);
+        return div;
       }
       createDescBox(cue) {
         const border = createElement(this, 'div', '-descBox');
@@ -977,13 +1025,13 @@
         super(player, options);
         player.on('loadedmetadata', () => {
           // do something with the metadata
-          console.log('metadata loaded!');
           var tracks = player.textTracks();
           var metadataTrack;
           for (var i = 0; i < tracks.length; i++) {
             var track = tracks[i];
             // Find the metadata track.
-            if (track.kind === 'metadata') {
+            if (track.kind === 'metadata' && track.label !== 'segment-metadata') {
+              // segment-metadata comes from http streaming info
               track.mode = 'hidden';
               // Store it for usage outside of the loop.
               metadataTrack = track;
@@ -993,7 +1041,13 @@
           metadataTrack === null || metadataTrack === void 0 ? void 0 : metadataTrack.addEventListener('cuechange', ev => {
             var _a, _b;
             for (let i = 0; i < metadataTrack.activeCues.length; i++) {
+              const currentTime = this.player.currentTime();
+              // double check that the "active" cue is actually in time.  
+              // This happened during a manual time change to the exact chapter time triggering "click" twice: once from actual click, and again from metadata rewinding it.
               const cue = metadataTrack.activeCues[i];
+              if (currentTime >= cue.endTime || currentTime <= cue.startTime) {
+                continue;
+              }
               const cueText = cue.text;
               const cueLines = cueText.split('\n');
               let line;

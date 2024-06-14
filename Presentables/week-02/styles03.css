@@ -1,0 +1,61 @@
+.grid2-1{
+  display: grid;
+            width: 100%;
+  height: calc(100% - 5.25rem);
+}
+.grid2-1 .row1 {
+  grid-column: span 1;
+  grid-row: 1;
+  width: 100%;
+  height: 100%;
+}
+.grid2-1 .row2 {
+  grid-column: span 2;
+ grid-row: 2;
+  width: 100%;
+  height: 100%;
+}
+    .grid2-2{
+  display: grid;
+  width: 100%;
+  height: calc(100% - 5.25rem);
+}
+.grid2-2 .row1 {
+  grid-column: span 1;
+  grid-row: 1;
+  width: 100%;
+  height: 100%;
+}
+.grid2-2 .row2 {
+  grid-column: span 1;
+ grid-row: 2;
+  width: 100%;
+  height: 100%;
+}
+
+.as-itext:focus *, .as-itext:hover *{
+color: #005566;
+fill: #005566;
+border: none;
+}
+
+.bars-1 {
+fill: #1c2e4a;
+stroke: #fff;
+stroke-miterlimit: 10;
+}
+
+.bars-2 {
+fill: #1c2e4a;
+}
+.bars-1:hover, .bars-1:focus, .bars-2:hover, .bars-2:focus, .asi:focus .bars-1{
+fill: #676960;
+}
+.table-hover tbody tr:focus {
+color: #212529;
+background-color: rgba(0,0,0,.075);
+}
+thead th:focus      {
+color: white;
+background-color: #676960
+}

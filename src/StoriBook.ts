@@ -72,7 +72,8 @@ const navBarTemplate = html<StoriBook>`
 `;
 
 const mediaControl = html<StoriBook>`
-<fluent-button aria-label="Play/Pause" style="width:40;height:40;" @click="${x=> !x.videoPlayer.hasStarted() || x.videoPlayer.paused() ? x.videoPlayer.play() : x.videoPlayer.pause() }">
+<fluent-button aria-label="Play/Pause" style="width:40;height:40;" appearance="accent"
+	@click="${x=> !x.videoPlayer.hasStarted() || x.videoPlayer.paused() ? x.videoPlayer.play() : x.videoPlayer.pause() }">
 ${when(x => !x.isPlaying, html<StoriBook>`
 	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
 		<path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z"/>
@@ -86,18 +87,19 @@ ${when(x => x.isPlaying, html<StoriBook>`
 </fluent-button>
 <fluent-slider 
 	${ref("slider")}
-	style="margin-top:14px;margin-bottom:-7px;width:180px;" 
+	class='mediaSlider'
+	style="margin-top:14px;margin-bottom:-7px;margin-left:5px;" 
 	step="1" 
 	min="0" 
 	max="${x=>x.duration}" 
 	:value="${x=> x.currentTime}" 
 	@change="${(x,c)=> x.sliderChange(c.event)}">
 </fluent-slider>
-<div style="margin-top:7px; margin-bottom:-7px;">Test</div>
+<div >${x=> x.getTimeDisplay(x.currentTime, x.duration)}</div>
 <fluent-select 
 	${ref("speedSelect")}
 	style="min-width:20px;" 
-	@input="${(x,c)=>{ console.log(c.event); x.videoPlayer.playbackRate(x.speedSelect.value); x.currentSpeed = +x.speedSelect.value; }}">
+	@input="${(x,c)=>{ x.videoPlayer.playbackRate(x.speedSelect.value); x.currentSpeed = +x.speedSelect.value; }}">
 	<fluent-option value="0.5">0.5x</fluent-option>
 	<fluent-option value="1" selected>1.0x</fluent-option>
 	<fluent-option value="1.5">1.5x</fluent-option>
@@ -107,9 +109,9 @@ ${when(x => x.isPlaying, html<StoriBook>`
 
 const audioTemplate = html<StoriBook>`
 <div id="audiobox">
-	<div>
+	<div  style="display:none;">
 
-		<video ${ref('videoElement')} class='video-js' controls='controls'
+		<video ${ref('videoElement')} class='video-js' controls='controls' 
 				data-setup='{ "playbackRates": [0.5, 1, 1.5, 2], "controlBar": {"pictureInPictureToggle":false, "captions":false}}' 
 		 		data-able-player preload="auto" data-transcript-div="aSlideParent"
 				height="auto">
@@ -135,12 +137,12 @@ const template = html<StoriBook>`
 				
 				<br/>
 				<fluent-listbox aria-labelledby="tocLabel" 
-					@keyup="${(x, c) => {console.log('listbox click'); x.buttonClick((c.event.target as Listbox).selectedIndex);}}"
+					@keyup="${(x, c) => {x.buttonClick((c.event.target as Listbox).selectedIndex);}}"
 					style="width:100%;"
 					>
 				${repeat(x => x.pages, html<StoriPage|SubPage>`
 					<fluent-option id="b${(x, c) => c.index + 1}" 
-						@click="${(x, c) => { console.log('listItem click'); c.event.stopPropagation(); c.event.preventDefault(); c.parent.buttonClick(c.index);}}"
+						@click="${(x, c) => { c.event.stopPropagation(); c.event.preventDefault(); c.parent.buttonClick(c.index);}}"
 						selected="${(x, c) => c.parent.selectedIndex == c.index ? "true" : "false"}" 
 						aria-selected="${(x, c) => c.parent.selectedIndex == c.index ? "true" : "false"}" 
 						role="button"
@@ -178,7 +180,7 @@ const template = html<StoriBook>`
 				</div>
 				<div class="" id="mainContent" ${ref('mainContentContainer')} tabindex="0">
 					<slot ${slotted("nodes")}></slot>
-					<div id="transcript" style="height:200px;width:400px;" ${ref('transcriptDiv')}></div>
+					<!-- <div id="transcript" style="height:200px;width:400px;" ${ref('transcriptDiv')}></div> -->
 				</div>
 
 				
@@ -216,7 +218,7 @@ export class StoriBook extends FASTElement {
 	@observable isPlaying:boolean=false;
 	slider!: Slider;
 	@observable duration:number=0;
-	@observable currentTime:number=0;
+	@observable currentTime:number=-1;
 	@observable currentSpeed:number=1;
 	speedSelect!: Select;
 
@@ -235,7 +237,7 @@ export class StoriBook extends FASTElement {
 	chapterCues: ChapterCue[] = [];
 
 	@observable isFullscreen: boolean = false;
-	@observable isNarrow: boolean = false;
+	//@observable isNarrow: boolean = false;
 
 
 	@attr video: string = '';
@@ -302,6 +304,24 @@ export class StoriBook extends FASTElement {
 		}
 	}
 
+	getTimeDisplay(currentTime: number, duration: number){
+		const time = this.formatTime(currentTime);
+		const dur = this.formatTime(duration);
+		return time + "/" + dur;
+	}
+
+	formatTime(inputSeconds: number){
+		let minutes = Math.floor(inputSeconds/60);
+		let hours = 0;
+		if (hours > 0){
+			minutes += (hours*60);
+		}
+		let seconds = Math.floor(inputSeconds % 60).toString();
+		
+		seconds = seconds.padStart(2,'0');
+		return minutes + ':' + seconds;
+	}
+
 	async removeHeadersForPage(page: StoriPage) {
 		if (this.subheaders){
 
@@ -321,6 +341,7 @@ export class StoriBook extends FASTElement {
 	
 	// This reacts to pages being added and sets the appropriate active state on the correct page.
 	nodesChanged(oldValue: Node[], newValue: Node[]) {
+		console.log("NODES CHANGED");
 		const allNodes = this.nodes.filter(x => x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE");
 		const nodesAdded = newValue != null ? newValue.filter(x => !oldValue.includes(x) && x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE") : [];
 		const nodesRemoved = oldValue != null ? oldValue.filter(x => !newValue.includes(x) && x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE") : [];
@@ -387,10 +408,12 @@ export class StoriBook extends FASTElement {
 
 	// Downloads all pages and shows them in sequence when printing.  Also undos this state when done.
 	async preparePrintAsync(donotprint:boolean=false) {
+		const promises = [];
 		for (const page of this.pages) {
 			if (page instanceof StoriPage) {
 				if (page.content === "") {
-					const result = await page.waitForPageLoadAsync();
+					const result = page.waitForPageLoadAsync({expand:true});
+					promises.push(result);
 					if (!result) {
 						console.log(page.error);
 					}
@@ -399,6 +422,9 @@ export class StoriBook extends FASTElement {
 				page.active = true;
 			}
 		}
+		const allDone = await Promise.all(promises);
+		console.log("all DONE: " + allDone);
+
 		window.onafterprint = () => {
 			for (let i = 0; i < this.pages.length; i++) {
 				const page = this.pages[i];
@@ -443,6 +469,7 @@ export class StoriBook extends FASTElement {
 		super.connectedCallback();
 		
 		const videoslot = this.shadowRoot?.querySelector('slot[name=video]') as HTMLSlotElement;
+
 		const transcriptslot = this.shadowRoot?.querySelector('slot[name=transcript]') as HTMLSlotElement;
 
 		const slotChangeHandler = (e : Event)=>{
@@ -452,13 +479,13 @@ export class StoriBook extends FASTElement {
 			const transcriptElement = transcriptslot.assignedElements(); 
 	
 			this.videoPlayer = (window as any).videojs(videoElement[0],
-				{
-					controlBar: {pictureInPictureToggle:false}
-				});
+				{ playbackRates: [0.5, 1, 1.5, 2], controlBar: {pictureInPictureToggle:false, captions:false}});
 				console.log(this.videoPlayer);
 	
 				this.videoPlayer.ready( ()=> {
-	
+					
+					this.videoPlayer.hide();
+
 					var options = {
 						showTitle: false,
 						showTrackSelector: true,
@@ -486,7 +513,7 @@ export class StoriBook extends FASTElement {
 					   }
 
 						this.duration = this.videoPlayer.duration();
-
+					   this.currentTime = 0;
 						
 					});
 					
@@ -494,52 +521,16 @@ export class StoriBook extends FASTElement {
 
 					this.timeupdateRef = this.timeUpdate.bind(this);
 					this.videoPlayer.player().on('timeupdate', this.timeupdateRef);
+
+					// for testing print view
+					// this.preparePrintAsync(true);
 			
 			});
+			console.log(this.videoPlayer);
+
 		};
 		
 		videoslot.addEventListener('slotchange', slotChangeHandler);
-
-		
-
-		// var videos = this.shadowRoot!.firstElementChild!.getElementsByTagName('video');
-		// for (var i=0; i<videos.length; i++) {
-		// 	var video = videos[i];
-
-		// 	if (video.hasAttribute('data-able-player')) {
-		// 		var videoPlayer = (window as any).videojs(video,
-		// 			{
-		// 				controlBar: {pictureInPictureToggle:false}
-		// 			});
-		// 		console.log(videoPlayer);
-
-		// 		videoPlayer.on('pluginsetup', ()=>{
-					
-		// 		});
-	
-
-		// 		videoPlayer.ready( function(this:any) {
-
-		// 			var options = {
-		// 				showTitle: false,
-		// 				showTrackSelector: true,
-		// 			};
-		// 			//var transcript = videoPlayer.transcript(options);
-
-		// 			var metadata = videoPlayer.metadataActions({});
-				
-		// 		videoPlayer.textTracks()[0].mode = 'hidden';
-		// 		videoPlayer.textTracks()[1].mode = 'hidden';
-		// 		//this.qualityLevels();
-		// 		//this.maxQualitySelector();
-
-				
-		// 		//console.log(transcript);
-		// 		//this.el().appendChild(transcript.element()); 
-				
-		// 		});
-		// 	}
-		// }
 
 		this.selectedIndex = this.defaultPageNumber - 1;
 
@@ -581,21 +572,6 @@ export class StoriBook extends FASTElement {
 				this.isFullscreen = false;
 			}
 		});
-
-		//try to add video to able player instances outside of element
-
-		// this.videoElement?.addEventListener('loadedmetadata', ()=>{
-		// 	console.log("CHECKING");
-		// 	console.log(this.ablePlayer.chapters);	
-		// });
-
-		
-		// this.ablePlayer.onMediaNewSourceLoad = ()=> {
-		// 	console.log((window as any).AblePlayerInstances[0].chapters[0]);	
-			// this.ablePlayer.$media.on('timeupdate',(ev : any) => {
-			// 	this.updateMeta(ev); 
-			// }); 
-		// }; //.then(()=>{
 
 	}
 
@@ -663,7 +639,6 @@ export class StoriBook extends FASTElement {
 	// }
 
 	buttonClick(index: number) {
-		console.log("CLICK!1111");
 		this.closeNav();
 		try {
 			// Case where subheaders are present so they can be removed if clicking on a new header
@@ -888,11 +863,9 @@ export class StoriBook extends FASTElement {
 					// check if video is playing with chapters and advance video
 					if (this.chapterCues.length > 0 && this.chapterCues.length > index) {
 						const cue = this.chapterCues[index];
-						console.log(cue.startTime);
-						this.videoPlayer.currentTime(cue.startTime);
-					//this.seekChapter(index);
-						// this.ablePlayer?.updateChapter(cue.start);
-						// this.ablePlayer?.seekTo(cue.start);
+						//console.log(cue.startTime + 0.1);
+						//this.videoPlayer.currentTime(cue.startTime);
+						this.videoPlayer.controlBar.chaptersButton.items[index].handleClick()
 					}
 	
 					const oldIndex = this.selectedIndex;
@@ -900,22 +873,8 @@ export class StoriBook extends FASTElement {
 					this.selectedIndex = index;
 					const newPage = this.pages[this.selectedIndex];
 	
-
-					// if (oldPage instanceof StoriPage) {
-						(oldPage as StoriPage).removeAttribute('active');
-						(newPage as StoriPage).setAttribute('active', 'true');
-						//this.loadHeadersForPageAsync(newPage as StoriPage);
-						//this.removeHeadersForPage(oldPage as StoriPage);
-					// } else {
-					// 	const firstElementChild = (newPage as StoriPage).shadowRoot!.firstElementChild;
-					// 	if (firstElementChild != null && this.mainContentContainer != null) {
-						
-					// 		this.mainContentContainer.scrollTo({ behavior: "smooth", top:0 });
-					// 		//firstElementChild.scrollIntoView();
-					// 	}
-					// 	//(newPage as StoriPage).iframeElement!.contentWindow?.scrollTo(0, 0);
-					// }
-					
+					(oldPage as StoriPage).removeAttribute('active');
+					(newPage as StoriPage).setAttribute('active', 'true');
 				
 				}
 			}
@@ -925,13 +884,13 @@ export class StoriBook extends FASTElement {
 		}
 	}
 
-	seekChapter(chapterIndex: number){
-		const cue = this.chapterCues[chapterIndex];
-		console.log(chapterIndex);
-		console.log(cue);
+	// seekChapter(chapterIndex: number){
+	// 	const cue = this.chapterCues[chapterIndex];
+	// 	console.log(chapterIndex);
+	// 	console.log(cue.startTime + 1);
 
-		this.videoPlayer.currentTime(cue.startTime);
-	}
+	// 	this.videoPlayer.currentTime(cue.startTime + 1);
+	// }
 
 	scrollToSubpageHeader(){
 

@@ -1,0 +1,87 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="/presentAble.css"
+        type="text/css" />
+    <link rel="stylesheet" href="/presentAbleAster.css"
+        type="text/css" />
+
+    <link rel="stylesheet" href="styles.css" type="text/css" />
+
+    <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet">
+    <link rel="stylesheet"
+        href="/videojs/videojs-accessibility.css" />
+
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+
+    <script module src="/videojs/videojs-accessibility.js"></script>
+
+    <script src="/dist/bundle.js"></script>
+
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="col-12 banner-img"><img src="img/banner.jpg" alt="" title="" style="max-width: 100%;"
+                data-d2l-editor-default-img-style="true"></div>
+        <div class="col-sm-10 offset-sm-1">
+            <h1>Intro to Chemistry &amp; the Scientific Method</h1>
+            <p>Introductory text</p>
+            <div class="sr-only">
+                <h2>Screen-Reader Notices</h2>
+                <p>This page includes an audio lecture. Press ctrl+alt+p to play or pause the lecture at any time.
+                </p>
+                <p>The slides on this page are explorable graphics.</p>
+                <p>Slides will automatically advance as the audio plays.</p>
+            </div>
+            <p></p>
+            <hr>
+        </div>
+        <video slot="video" class='video-js' controls='controls'
+            
+            data-able-player preload="auto" data-transcript-div="transcript" height="auto">
+            <source
+                src="https://cdnapisec.kaltura.com/p/823192/sp/0/playManifest/entryId/1_vn9gu97a/format/applehttp/protocol/https/a.m3u8"
+                type="application/x-mpegURL">
+            <track kind="captions" src="1_vn9gu97a.vtt" srclang="en" label="English" default>
+            <track kind="metadata" src="1_vn9gu97a.meta.vtt">
+            <track kind="chapters" src="1_vn9gu97a.chap.vtt">
+        </video>
+        <div slot="transcript" id="transcript"></div>
+        <stori-book>            
+            <stori-page title="Learning Objectives" src="pages/page01.html">Page 1</stori-page>
+            <stori-page title="What is Science?" src="pages/page02.html">Page 2</stori-page>
+            <stori-page title="What is Chemistry?" src="pages/page03.html">Page 3</stori-page>
+            <stori-page title="The Scientific Method" src="pages/page04.html">Page 4</stori-page>
+            <stori-page title="A Practical Example of the Scientific Method" src="pages/page05.html">Page 5</stori-page>
+            <stori-page title="A Chemical Example of the Scientific Method" src="pages/page06.html">Page 6</stori-page>
+            <stori-page title="Theory vs. Law" src="pages/page07.html">Page 7</stori-page>
+            <stori-page title="An Example- Gravitation" src="pages/page08.html">Page 8</stori-page>
+            <stori-page title="An Example from Chemistry" src="pages/page09.html">Page 9</stori-page>
+            <stori-page title="Knowledge Check 1.1" src="pages/page10.html">Page 10</stori-page>
+            <stori-page title="Experiments" src="pages/page11.html">Page 11</stori-page>
+            <stori-page title="Variables" src="pages/page12.html">Page 12</stori-page>
+            <stori-page title="Examples of variables in an Experiment" src="pages/page13.html">Page 13</stori-page>
+            <stori-page title="Types of Data from Experiments" src="pages/page14.html">Page 14</stori-page>
+            <stori-page title="Knowledge Check 1.2" src="pages/page15.html">Page 15</stori-page>
+        </stori-book>
+
+        <script>
+            // Hack: D2L won't allow standard HTML tags inside non-standard HTML.  Start outside, then move it inside.
+            const video = document.querySelector('video.video-js');
+            const transcript = document.querySelector('#transcript');
+            const storibook = document.querySelector('stori-book');
+            video.remove();
+            transcript.remove();
+            storibook.appendChild(video);
+            storibook.appendChild(transcript);
+        </script>
+    </div>
+
+</body>
+
+</html>

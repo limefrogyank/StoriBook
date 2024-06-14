@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@fluentui/web-components": "^2.5.12",
+    "@iframe-resizer/parent": "^5.0.2",
     "@microsoft/fast-components": "^2.30.6",
     "@microsoft/fast-element": "^1.11.0",
     "abletest": "^4.2.0",
