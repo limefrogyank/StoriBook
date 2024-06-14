@@ -119,7 +119,7 @@ ${videojscss.toString()}
 	grid-row-end:2;
 	display:flex;
 	flex-wrap:wrap;
-
+	align-items:center;
 	flex-direction:row;
 	justify-content:space-between;
 	background:#EEE;
