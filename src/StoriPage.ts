@@ -22,13 +22,16 @@ const template = html<StoriPage>`
 
 const styles = css`
 .pageContainer{
-	/*height:100%;*/
+	
 }
 .innerPageContainer{
 	height:100%;
 }
 
 @media print {
+	.pageContainer{
+		height:auto !important;
+	}
 	.innerPageContainer{
 		height:auto;
 	}
@@ -158,6 +161,7 @@ export class StoriPage extends FASTElement {
 												onResized: (data) => {
 													// console.log('resized!!!');
 													// console.log(data.height);
+													
 													resolve2();
 												}
 											}, x);

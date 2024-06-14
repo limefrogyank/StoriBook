@@ -442,7 +442,8 @@ export class StoriBook extends FASTElement {
 				requestAnimationFrame(() => {
 					requestAnimationFrame(() => {
 			if (!donotprint){
-				window.print();
+				setTimeout(() => requestAnimationFrame(() => window.print()), 100);
+				//window.print();
 			}
 		});	});	});	});
 
@@ -523,7 +524,7 @@ export class StoriBook extends FASTElement {
 					this.videoPlayer.player().on('timeupdate', this.timeupdateRef);
 
 					// for testing print view
-					// this.preparePrintAsync(true);
+					//this.preparePrintAsync(true);
 			
 			});
 			console.log(this.videoPlayer);

@@ -1,5 +1,5 @@
-import { Behavior, css, CSSDirective  } from '@microsoft/fast-element';
-import ableplayercss from  '../ableplayer/build/ableplayer.min.css';
+import { Behavior, css, CSSDirective } from '@microsoft/fast-element';
+import ableplayercss from '../ableplayer/build/ableplayer.min.css';
 import videojscss from '../videojs/video-js.css';
 // class RootHeight extends CSSDirective {
 // 	private widthProperty = "--root-width";
@@ -170,11 +170,12 @@ ${videojscss.toString()}
 	display:none;
 }
 
+
 @media screen and (max-height: 600px){
 
 	.container{
 		display:grid;
-		grid-template-columns: calc(var(--menu-width) - 100px) auto;
+		/*grid-template-columns: calc(var(--menu-width) - 100px) auto;*/
 		grid-template-rows: 100%;
 		/*grid-template-rows: calc(100% - 32px) 32px; */
 		height:100%;
@@ -187,7 +188,7 @@ ${videojscss.toString()}
 @media screen and (max-width: 767px){
 	#contentWithNavBar {
 		/* top menu bar is visible */
-		grid-template-rows: 32px 60% auto 1fr;
+		grid-template-rows: 32px 50% auto 1fr;
 	}
 	#contentWithNavBar #mainContent{
 		grid-row-start: 2;
@@ -247,6 +248,24 @@ ${videojscss.toString()}
 	}
 }
 
+@media screen and (max-height: 500px) and (max-width: 767px){
+	#contentWithNavBar{
+		display:grid;
+		grid-template-rows: 32px 1fr auto;
+		grid-template-columns: 1fr 30%;
+		/*grid-template-rows: calc(100% - 32px) 32px; */
+		height:100%;
+		/*overflow:hidden;*/
+	}
+	#contentWithNavBar #transcriptContainer{
+		grid-row-start: 1;
+		grid-row-end: 4;
+		grid-column-start: 2;
+		grid-column-end: 2;
+	}	
+}
+
+
 #toc fast-listbox{
 	width:100%;
 }
@@ -255,6 +274,9 @@ ${videojscss.toString()}
 }
 
 @media print {
+	* {
+    	transition: none !important;
+  	}
 	:host{
 		height:calc(100% + 1000px);
 	}
@@ -282,6 +304,9 @@ ${videojscss.toString()}
 		display:block;
 		overflow: inherit;
 		height:auto;
+	}
+	#transcript{
+		height:fit-content;
 	}
 	#transcriptContainer{
 		height: fit-content;

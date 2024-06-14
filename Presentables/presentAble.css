@@ -7,10 +7,42 @@
 html {
   overscroll-behavior: contain;
 }
+
 body {
   overscroll-behavior: contain;
 }
 
+@media print {
+  * {
+    transition: none !important;
+  }
+
+  /* div.col-12:has(stori-book) {
+    height: fit-content;
+  } */
+  .container-fluid {
+    height: 100%;
+    padding: 0;
+  }
+
+  div.col-12:has(stori-book) {
+    display: block;
+    height: fit-content;
+  }
+
+  div.col-12:has(img) {
+    display: none;
+  }
+
+  #footer {
+    display: none;
+  }
+
+  #transcript {
+    display: block;
+    height: fit-content;
+  }
+}
 
 .aSlideChapters,
 .aSlideContent {
