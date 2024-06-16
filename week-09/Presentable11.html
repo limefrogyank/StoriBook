@@ -1,0 +1,256 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="../presentAble.css" type="text/css" />
+    <link rel="stylesheet" href="../presentAbleAster.css" type="text/css" />
+
+    <link rel="stylesheet" href="styles11.css" type="text/css" />
+
+    <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../videojs/videojs-accessibility.css" />
+
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+
+    <script module src="../videojs/videojs-accessibility.js"></script>
+
+    <script src="../dist/bundle.js"></script>
+
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="col-sm-10 offset-sm-1">
+            <div class="sr-only">
+                <h2>Screen-Reader Notices</h2>
+                <p>This page includes an audio lecture. Press ctrl+alt+p to play or pause the lecture at any time.
+                </p>
+                <p>The slides on this page are explorable graphics.</p>
+                <p>Slides will automatically advance as the audio plays.</p>
+            </div>
+            <p></p>
+            <hr>
+        </div>
+
+        <video slot="video" class='video-js' controls='controls' data-able-player preload="auto"
+            data-transcript-div="transcript" height="auto">
+            <source
+                src="https://cdnapisec.kaltura.com/p/823192/sp/0/playManifest/entryId/1_r7pd0w03/format/applehttp/protocol/https/a.m3u8"
+                type="application/x-mpegURL">
+            <track kind="captions" src="1_r7pd0w03.vtt" srclang="en" label="English" default>
+            <track kind="metadata" src="1_r7pd0w03.meta.vtt">
+            <track kind="chapters" src="1_r7pd0w03.chap.vtt">
+        </video>
+        <div slot="transcript" id="transcript"></div>
+        <stori-book>
+            <stori-page title="Learning Objectives" src="pages11/page01.html">Page 01</stori-page>
+            <stori-page title="Evidence of a Chemical Change" src="pages11/page02.html">Page 02</stori-page>
+            <stori-page title="How do we represent a chemical reaction" src="pages11/page03.html">Page 03</stori-page>
+            <stori-page title="Conservation of Mass" src="pages11/page04.html">Page 04</stori-page>
+            <stori-page title="What does the coefficient mean" src="pages11/page05.html">Page 05</stori-page>
+            <stori-page title="Balancing chemical reaction equations" src="pages11/page06.html">Page 06</stori-page>
+            <stori-page title="Balancing Practice" src="pages11/page07.html">Page 07</stori-page>
+            <stori-page title="More balancing practice with writing formulas" src="pages11/page08.html">Page
+                08</stori-page>
+            <stori-page title="Balancing with Polyatomic ions" src="pages11/page09.html">Page 09</stori-page>
+            <stori-page title="Fractional Coefficients" src="pages11/page10.html">Page 10</stori-page>
+            <stori-page title="Phase Labels" src="pages11/page11.html">Page 11</stori-page>
+            <stori-page title="Knowledge Check 9.1" src="pages11/page12.html">Page 12</stori-page>
+            <stori-page title="Aqueous Solutions" src="pages11/page13.html">Page 13</stori-page>
+            <stori-page title="Solubility Rules" src="pages11/page14.html">Page 14</stori-page>
+            <stori-page title="Practice with Solubility" src="pages11/page15.html">Page 15</stori-page>
+            <stori-page title="Knowledge Check 9.2" src="pages11/page16.html">Page 16</stori-page>
+            <stori-page title="Types of Chemical Reactions" src="pages11/page17.html">Page 17</stori-page>
+            <stori-page title="Combination Reactions" src="pages11/page18.html">Page 18</stori-page>
+            <stori-page title="Decomposition Reactions" src="pages11/page19.html">Page 19</stori-page>
+            <stori-page title="Decomposition Reactions - special type" src="pages11/page20.html">Page 20</stori-page>
+            <stori-page title="Combustion Reactions" src="pages11/page21.html">Page 21</stori-page>
+            <stori-page title="Single Displacement Reactions" src="pages11/page22.html">Page 22</stori-page>
+            <stori-page title="Single Displacement Practice" src="pages11/page23.html">Page 23</stori-page>
+            <stori-page title="Double Displacement Reactions" src="pages11/page24.html">Page 24</stori-page>
+            <stori-page title="Double Displacement Reactions - Acids and Bases" src="pages11/page25.html">Page
+                25</stori-page>
+            <stori-page title="Neutralization 'Exception'" src="pages11/page26.html">Page 26</stori-page>
+            <stori-page title="Double Displacement Practice" src="pages11/page27.html">Page 27</stori-page>
+            <stori-page title="Knowledge Check 9.3" src="pages11/page28.html">Page 28</stori-page>
+        </stori-book>
+
+        <script>
+            // Hack: D2L won't allow standard HTML tags inside non-standard HTML.  Start outside, then move it inside.
+            const video = document.querySelector('video.video-js');
+            const transcript = document.querySelector('#transcript');
+            const storibook = document.querySelector('stori-book');
+            video.remove();
+            transcript.remove();
+            storibook.appendChild(video);
+            storibook.appendChild(transcript);
+        </script>
+    </div>
+
+
+    <script>
+
+        function baleqTabUp(elem) {
+          var newmult = elem.value;
+          var myPart = elem.parentElement;
+          var myColumn = myPart.getAttribute("column");
+          var myEq = myPart.parentElement;
+          var allParts = myEq.getElementsByTagName("eqpart");
+          var colParts = filterParts(allParts, myColumn);
+          // more complicated, but must get shadowRoot of active page
+          var myTab = document.querySelector('stori-page[active]').shadowRoot.getElementById(myEq.getAttribute("mytab"));
+          //var myTab = document.getElementById(myEq.getAttribute("mytab"));
+          var myElems = getElems(colParts);
+          console.log(myElems);
+          var myValues = getValues(myElems, colParts);
+          console.log(myValues);
+          var myRows = myTab.getElementsByTagName("tr");
+          for (let i = 1; i < myRows.length; i++) {
+            var myDex = myElems.indexOf(myRows[i].firstElementChild.innerText);
+            myCells = myRows[i].getElementsByTagName("td");
+            if (myCells[myColumn].firstElementChild.innerText != myValues[myDex]) {
+              myCells[myColumn].firstElementChild.innerText = myValues[myDex];
+            }
+          }
+        }
+  
+        function filterParts(allParts, myColumn) {
+          var myParts = []
+          for (let i = 0; i < allParts.length; i++) {
+            if (allParts[i].getAttribute("column") == myColumn) {
+              myParts.push(allParts[i])
+            }
+          }
+          return myParts
+        }
+  
+        function getElems(parts) {
+          var allparts = "";
+          for (let i = 0; i < parts.length; i++) {
+            allparts += parts[i].innerText
+          }
+          if (allparts.includes("NO₃")) {
+            var allElems = allparts.replace("NO₃", "").replace(/\s/g, '').replace(/[₁-₉]/g, '').replace("(", "").replace(")", "").split(/(?=[A-Z])/);
+            allElems.push("NO₃")
+          }
+          else {
+            var allElems = allparts.replace(/\s/g, '').replace(/[₁-₉]/g, '').replace("(", "").replace(")", "").split(/(?=[A-Z])/);
+          }
+          return ([...new Set(allElems)]);
+        }
+  
+        function getValues(elems, parts) {
+          var myValues = [];
+          for (let i = 0; i < elems.length; i++) {
+            myValues.push(0)
+          }
+  
+          for (let i = 0; i < parts.length; i++) {
+            var myMult = Math.max(parts[i].firstElementChild.value, 1);
+            var myElems;
+            if (parts[i].innerText.includes("(")) {
+              //let's assume only one parenthetical with a 1 diget subscript per part, for now
+              console.log("Part includes a parenthetical");
+              var myPar = parts[i].innerText.split("(")[1].split(")")[0];
+              var parMult = upScript(parts[i].innerText)[parts[i].innerText.indexOf(")") + 1];
+              if (myPar.includes("NO₃")) {
+                console.log("Part includes a NO3");
+                myElems = myPar.replace("NO₃", "").replace(/\s/g, '').split(/(?=[A-Z])/);
+                myElems.push("NO₃");
+              }
+              else {
+                var myElems = myPar.replace(/\s/g, '').split(/(?=[A-Z])/);
+              }
+              console.log(myElems);
+              for (let k = 0; k < myElems.length; k++) {
+                var myDex
+                if (myElems[k] == "NO₃") {
+                  myDex = elems.indexOf(myElems[k]);
+                  myValues[myDex] += (myMult * parMult);
+                }
+                else {
+                  myDex = elems.indexOf(myElems[k].replace(/[₁-₉]/g, ''));
+                  thisElem = upScript(myElems[k]);
+                  thisMult = Math.max(thisElem.replace(/[A-Z]/g, '').replace(/[a-z]/g, ''), 1);
+                  myValues[myDex] += (thisMult * myMult * parMult);
+                }
+  
+              }
+              var myBit = parts[i].innerText.split("(")[0];
+              myBit += parts[i].innerText.split(")")[1].slice(1);
+              if (myBit.includes("NO3")) {
+                myElems = myBit.replace("NO3", "").replace(/\s/g, '').split(/(?=[A-Z])/);
+                myElems.push("NO₃");
+              }
+              else {
+                var myElems = myBit.replace(/\s/g, '').split(/(?=[A-Z])/);
+              }
+              for (let k = 0; k < myElems.length; k++) {
+                var myDex = elems.indexOf(myElems[k].replace(/[₁-₉]/g, ''));
+                thisElem = upScript(myElems[k]);
+                thisMult = Math.max(thisElem.replace(/[A-Z]/g, '').replace(/[a-z]/g, ''), 1);
+                myValues[myDex] += (thisMult * myMult);
+              }
+            }
+            else {
+              console.log("Part does not include a parenthetical");
+              if (parts[i].innerText.includes("NO₃")) {
+                console.log("Part includes NO₃");
+                myElems = parts[i].innerText.replace("NO₃", "").replace(/\s/g, '').split(/(?=[A-Z])/);
+                myElems.push("NO₃")
+              }
+              else {
+                myElems = parts[i].innerText.replace(/\s/g, '').split(/(?=[A-Z])/);
+              }
+              for (let k = 0; k < myElems.length; k++) {
+                var myDex = elems.indexOf(myElems[k].replace(/[₁-₉]/g, ''));
+                if (myElems[k] == "NO₃") {
+                  console.log("Calculating count of NO₃");
+                  myDex = elems.indexOf(myElems[k]);
+                  myValues[myDex] += myMult;
+                }
+                else {
+                  thisElem = upScript(myElems[k]);
+                  thisMult = Math.max(thisElem.replace(/[A-Z]/g, '').replace(/[a-z]/g, ''), 1);
+                  myValues[myDex] += (thisMult * myMult);
+                }
+              }
+            }
+          }
+  
+          return myValues;
+        }
+  
+  
+        function upScript(anElem) {
+          return (anElem.replace("₁", "1").replace("₂", "2").replace("₃", "3").replace("₄", "4").replace("₅", "5").replace("₆", "6").replace("₇", "7").replace("₈", "8").replace("₉", "9"))
+        }
+  
+        function resetEq(el, eqid) {
+          myeq = document.querySelector('stori-page[active]').shadowRoot.getElementById(eqid);
+          //myeq = el.ownerDocument.getElementById(eqid);
+          myParts = myeq.getElementsByTagName("eqpart");
+          for (let i = 0; i < myParts.length; i++) {
+            myParts[i].firstElementChild.value = "";
+          }
+          baleqTabUp(myParts[0].firstElementChild);
+          baleqTabUp(myParts[myParts.length - 1].firstElementChild);
+        }
+        function upMult(label) {
+          myVal = label.parentElement.firstElementChild.value;
+          if (myVal == "") {
+            label.parentElement.firstElementChild.value = 2;
+          }
+          else {
+            label.parentElement.firstElementChild.value = +myVal + 1;
+          }
+          baleqTabUp(label.parentElement.firstElementChild);
+        }
+      </script>
+</body>
+
+</html>

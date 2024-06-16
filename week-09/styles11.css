@@ -1,0 +1,25 @@
+path.grayLine {
+    fill: none;
+    stroke: #c2c2c2;
+    stroke-linejoin: round;
+}
+
+eqpart input {
+    height: 1em;
+    border: none;
+    font-size: inherit;
+    width: 1em;
+}
+
+th,
+td {
+    padding: 1em;
+}
+
+tr .focusReveal {
+    display: none;
+}
+
+tr:focus .focusReveal {
+    display: revert;
+}

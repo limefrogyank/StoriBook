@@ -1,0 +1,194 @@
+.ptab-1,
+.ptab-2,
+.ptab-3,
+.ptab-4,
+.ptab-5,
+.ptab-6,
+.ptab-7,
+.ptab-8,
+.ptab-9,
+.ptab-10,
+.ptab-11 {
+    stroke: #000;
+    stroke-miterlimit: 10;
+}
+
+.ptab-12 {
+    font-family: OpenSans, 'Open Sans';
+    font-size: 16px;
+}
+
+.ptab-13 {
+    font-size: 24px;
+}
+
+.ptab-13,
+.ptab-14 {
+    font-family: OpenSans-Bold, 'Open Sans';
+}
+
+.ptab-2 {
+    fill: #e9e9ec;
+}
+
+.ptab-15,
+.ptab-6 {
+    fill: #efb0a4;
+}
+
+.ptab-3 {
+    fill: #dcfaeb;
+}
+
+.ptab-4 {
+    fill: #e5f5ff;
+}
+
+.ptab-5 {
+    fill: #ffebee;
+}
+
+.ptab-7 {
+    fill: #ffebeb;
+}
+
+.ptab-8 {
+    fill: #fef9e6;
+}
+
+.ptab-9 {
+    fill: #fce7d8;
+}
+
+.ptab-10 {
+    fill: #f1e8f9;
+}
+
+.ptab-11 {
+    fill: #dbf8ff;
+}
+
+.ptab-14 {
+    font-size: 14px;
+}
+
+.Description p {
+    margin-left: 1em;
+    font-size: 25px;
+}
+
+.Description h3 {
+    text-align: center;
+
+}
+
+.FeatureGroup :not(text, tspan, .persists, .persists *, g) {
+    opacity: 0;
+}
+
+*:focus {
+    outline: 0px solid transparent;
+}
+
+.FeatureGroup:hover :not(text, tspan, .persists, .persists *, g) {
+    opacity: 1;
+}
+
+.FeatureGroup:focus :not(text, tspan, .persists, .persists *),
+.persists {
+    opacity: 1;
+}
+
+.ptab-1 {
+    fill: #e5f0ff;
+}
+
+.symb-1 {
+    fill: none;
+    stroke: #000;
+    stroke-miterlimit: 10;
+}
+
+.symb-2 {
+    letter-spacing: 0em;
+}
+
+.symb-3 {
+    font-size: 12px;
+}
+
+.symb-3,
+.symb-4 {
+    font-family: MyriadPro-Regular, 'Myriad Pro';
+}
+
+.symb-5 {
+    fill: #efb0a4;
+}
+
+.symb-6 {
+    letter-spacing: 0em;
+}
+
+.symb-4 {
+    font-size: 46px;
+}
+
+.symb-7 {
+    letter-spacing: 0em;
+}
+
+.symb-8 {
+    letter-spacing: 0em;
+}
+
+.symb-9 {
+    letter-spacing: 0em;
+}
+
+.symb-10 {
+    letter-spacing: 0em;
+}
+
+.table-hover tbody tr:hover,
+.table-hover tbody tr:focus {
+    color: #000;
+    background-color: #DDEBF7;
+}
+
+.FeatureGroup:hover .as-indicator *,
+.FeatureGroup:focus .as-indicator * {
+    color: #FFE78F;
+    stroke: #FFE78F;
+}
+
+#printKey {
+    display: none;
+}
+
+@media print {
+    #printKey {
+        display: inline;
+    }
+}
+
+.symbolGroup :not(.persists) {
+    opacity: 0;
+}
+
+*:focus {
+    outline: 0px solid transparent;
+}
+
+.symbolGroup:hover :not(.persists) {
+    opacity: 0.5;
+}
+
+.symbolGroup:focus :not(.persists) {
+    opacity: 1;
+}
+
+.Description {
+    font-size: 16px;
+    font-family: OpenSans, Open Sans;
+}

@@ -1,0 +1,46 @@
+.drawsIn {
+    stroke-dasharray: 220;
+    stroke-dashoffset: 220;
+}
+
+.fadesIn,
+.fadeOnce {
+    opacity: 0;
+}
+
+.anGroup:hover>.drawsIn,
+.anGroup:focus>.drawsIn,
+.anGroup:focus-within>.drawsIn {
+    animation: drawIn01 2s linear forwards;
+}
+
+.anGroup:hover>.fadesIn,
+.anGroup:focus>.fadesIn,
+.anGroup:focus-within>.fadesIn {
+    animation: fadeIn01 2s linear forwards;
+}
+
+.anGroup:hover>.fadeOnce,
+.anGroup:focus>.fadeOnce {
+    animation: fadeIn01 2s linear forwards;
+}
+
+@keyframes drawIn01 {
+    0% {
+        stroke-dashoffset: 220;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes fadeIn01 {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1
+    }
+}

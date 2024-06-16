@@ -8,6 +8,20 @@ import { SubPage } from './SubPage';
 NavBar;
 StoriPage;
 
+function reveal(el : HTMLElement, rev: string) {
+	
+	const activepage = document.querySelector('stori-page[active]');
+	if (!activepage || !activepage.shadowRoot){
+		return;
+	}
+	let got = activepage.shadowRoot.querySelector('#' + rev) as HTMLElement;
+		
+	let keep = el.innerHTML;
+	el.innerHTML = got.innerHTML;
+	got.innerHTML = keep;
+}
+(window as any).reveal = reveal;
+
 provideFluentDesignSystem().register(
 	fluentListbox(),
 	fluentOption(),
@@ -293,7 +307,6 @@ export class StoriBook extends FASTElement {
 						icon:"",
 						depth: +header.tagName.substring(1) - this.topHeader
 					};
-					console.log(subPage);
 					subPages.push(subPage);
 				});
 				const mainPageIndex = this.pages.indexOf(page);
@@ -343,7 +356,6 @@ export class StoriBook extends FASTElement {
 	
 	// This reacts to pages being added and sets the appropriate active state on the correct page.
 	nodesChanged(oldValue: Node[], newValue: Node[]) {
-		console.log("NODES CHANGED");
 		const allNodes = this.nodes.filter(x => x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE");
 		const nodesAdded = newValue != null ? newValue.filter(x => !oldValue.includes(x) && x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE") : [];
 		const nodesRemoved = oldValue != null ? oldValue.filter(x => !newValue.includes(x) && x.nodeName && x.nodeName.toUpperCase() === "STORI-PAGE") : [];
@@ -391,7 +403,6 @@ export class StoriBook extends FASTElement {
 										icon:"",
 										depth: +header.tagName.substring(1) - this.topHeader
 									};
-									console.log(subPage);
 									subPages.push(subPage);
 								});
 								const mainPageIndex = this.pages.indexOf(capturedStoriPage);
@@ -425,7 +436,6 @@ export class StoriBook extends FASTElement {
 			}
 		}
 		const allDone = await Promise.all(promises);
-		console.log("all DONE: " + allDone);
 
 		window.onafterprint = () => {
 			for (let i = 0; i < this.pages.length; i++) {
@@ -483,7 +493,6 @@ export class StoriBook extends FASTElement {
 	
 			this.videoPlayer = (window as any).videojs(videoElement[0],
 				{ playbackRates: [0.5, 1, 1.5, 2], controlBar: {pictureInPictureToggle:false, captions:false}});
-				console.log(this.videoPlayer);
 	
 				this.videoPlayer.ready( ()=> {
 					
@@ -509,7 +518,7 @@ export class StoriBook extends FASTElement {
 
 
 					this.videoPlayer.one("loadedmetadata", ()=>{
-						console.log("CHECKING");
+
 						if (this.chapterCues.length == 0) {
 							this.processChapterNamesAndCues();
 			   
@@ -529,7 +538,6 @@ export class StoriBook extends FASTElement {
 					//this.preparePrintAsync(true);
 			
 			});
-			console.log(this.videoPlayer);
 
 		};
 		
@@ -569,7 +577,6 @@ export class StoriBook extends FASTElement {
 			// of the property is null.
 			if (document.fullscreenElement) {
 				this.isFullscreen = true;
-				console.log(`Element: ${document.fullscreenElement.id} entered fullscreen mode.`);
 
 			} else {
 				this.isFullscreen = false;
@@ -609,18 +616,14 @@ export class StoriBook extends FASTElement {
 
 
 	processChapterNamesAndCues(){
-		console.log(this.videoPlayer.textTracks());
 		this.videoPlayer.textTracks().tracks_.forEach((v:any)=>{
 			if (v.kind === "chapters"){
-				console.log('found chapters');
-				console.log(v);
 				this.chapterCues = v.cues_;
 			}
 		});
 	}
 
 	queryChanged(e: MediaQueryListEvent) {
-		console.log(e);
 		//this.isNarrow = !e.matches;
 	}
 

@@ -1,0 +1,90 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="../presentAble.css"
+        type="text/css" />
+    <link rel="stylesheet" href="../presentAbleAster.css"
+        type="text/css" />
+
+    <link rel="stylesheet" href="styles02.css" type="text/css" />
+
+    <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet">
+    <link rel="stylesheet"
+        href="../../videojs/videojs-accessibility.css" />
+
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+
+    <script module src="../../videojs/videojs-accessibility.js"></script>
+
+    <script src="../../dist/bundle.js"></script>
+
+    
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="col-sm-10 offset-sm-1">
+            <div class="sr-only">
+                <h2>Screen-Reader Notices</h2>
+                <p>This page includes an audio lecture. Press ctrl+alt+p to play or pause the lecture at any time.
+                </p>
+                <p>The slides on this page are explorable graphics.</p>
+                <p>Slides will automatically advance as the audio plays.</p>
+            </div>
+            <p></p>
+            <hr>
+        </div>
+        <video slot="video" class='video-js' controls='controls' data-able-player preload="auto"
+            data-transcript-div="transcript" height="auto">
+            <source
+                src="https://cdnapisec.kaltura.com/p/823192/sp/0/playManifest/entryId/1_luggcsal/format/applehttp/protocol/https/a.m3u8"
+                type="application/x-mpegURL">
+            <track kind="captions" src="1_luggcsal.vtt" srclang="en" label="English" default>
+            <track kind="metadata" src="1_luggcsal.meta.vtt">
+            <track kind="chapters" src="1_luggcsal.chap.vtt">
+        </video>
+        <div slot="transcript" id="transcript"></div>
+        <stori-book>
+            <stori-page title="Measurements and Significant Figures Part One" src="pages02/page01.html">Page 1</stori-page>
+            <stori-page title="What is a measurement" src="pages02/page02.html">Page 2</stori-page>
+            <stori-page title="Standardized Units" src="pages02/page03.html">Page 3</stori-page>
+            <stori-page title="Common Prefixes in the SI System" src="pages02/page04.html">Page 4</stori-page>
+            <stori-page title="How To Calculate" src="pages02/page05.html">Page 5</stori-page>
+            <stori-page title="Understanding the Prefixes" src="pages02/page06.html">Page 6</stori-page>
+            <stori-page title="Example 1" src="pages02/page07.html">Page 7</stori-page>
+            <stori-page title="Example 2" src="pages02/page08.html">Page 8</stori-page>
+            <stori-page title="Example 3" src="pages02/page09.html">Page 9</stori-page>
+            <stori-page title="Knowledge Check 1" src="pages02/page10.html">Page 10</stori-page>
+            <stori-page title="Very Large and Very Small Numbers" src="pages02/page11.html">Page 11</stori-page>
+            <stori-page title="Scientific Notation" src="pages02/page12.html">Page 12</stori-page>
+            <stori-page title="To Convert a Number to Scientific Notation" src="pages02/page13.html">Page 13</stori-page>
+            <stori-page title="Convert Standard Notation to Scientific Notation" src="pages02/page14.html">Page 14</stori-page>
+            <stori-page title="Positive Exponents" src="pages02/page15.html">Page 15</stori-page>
+            <stori-page title="Negative Exponents" src="pages02/page16.html">Page 16</stori-page>
+            <stori-page title="Knowledge Check 2" src="pages02/page17.html">Page 17</stori-page>
+            <stori-page title="Using the Exponent Key on a Calculator" src="pages02/page18.html">Page 18</stori-page>
+            <stori-page title="Measurement and Significant Figures" src="pages02/page19.html">Page 19</stori-page>
+            <stori-page title="Example Measurements" src="pages02/page20.html">Page 20</stori-page>
+            <stori-page title="Measuring Tools and Precision" src="pages02/page21.html">Page 21</stori-page>
+            <stori-page title="Knowledge Check 3" src="pages02/page22.html">Page 22</stori-page>
+        </stori-book>
+
+        <script>
+            // Hack: D2L won't allow standard HTML tags inside non-standard HTML.  Start outside, then move it inside.
+            const video = document.querySelector('video.video-js');
+            const transcript = document.querySelector('#transcript');
+            const storibook = document.querySelector('stori-book');
+            video.remove();
+            transcript.remove();
+            storibook.appendChild(video);
+            storibook.appendChild(transcript);
+        </script>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="/content/enforced/455830-mcpherson_ideas-sandbox_ou/Presentables/presentAble.css"
+        type="text/css" />
+    <link rel="stylesheet" href="/content/enforced/455830-mcpherson_ideas-sandbox_ou/Presentables/presentAbleAster.css"
+        type="text/css" />
+
+    <link rel="stylesheet" href="styles03.css" type="text/css" />
+
+    <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet">
+    <link rel="stylesheet"
+        href="/content/enforced/455830-mcpherson_ideas-sandbox_ou/videojs/videojs-accessibility.css" />
+
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+
+    <script module src="/content/enforced/455830-mcpherson_ideas-sandbox_ou/videojs/videojs-accessibility.js"></script>
+
+    <script src="/content/enforced/455830-mcpherson_ideas-sandbox_ou/dist/bundle.js"></script>
+
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="col-sm-10 offset-sm-1">
+            <div class="sr-only">
+                <h2>Screen-Reader Notices</h2>
+                <p>This page includes an audio lecture. Press ctrl+alt+p to play or pause the lecture at any time.
+                </p>
+                <p>The slides on this page are explorable graphics.</p>
+                <p>Slides will automatically advance as the audio plays.</p>
+            </div>
+            <p></p>
+            <hr>
+        </div>
+
+        <video slot="video" class='video-js' controls='controls' data-able-player preload="auto"
+            data-transcript-div="transcript" height="auto">
+            <source
+                src="https://cdnapisec.kaltura.com/p/823192/sp/0/playManifest/entryId/1_1ah1b3hi/format/applehttp/protocol/https/a.m3u8"
+                type="application/x-mpegURL">
+            <track kind="captions" src="1_1ah1b3hi.vtt" srclang="en" label="English" default>
+            <track kind="metadata" src="1_1ah1b3hi.meta.vtt">
+            <track kind="chapters" src="1_1ah1b3hi.chap.vtt">
+        </video>
+        <div slot="transcript" id="transcript"></div>
+        <stori-book>
+            <stori-page title="Measurements and Significant Figures Part Two" src="pages03/page01.html">Page 1</stori-page>
+            <stori-page title="Measurement and Significant Figures" src="pages03/page02.html">Page 2</stori-page>
+            <stori-page title="Guideline One" src="pages03/page03.html">Page 3</stori-page>
+            <stori-page title="Guideline Two" src="pages03/page04.html">Page 4</stori-page>
+            <stori-page title="Guideline Three" src="pages03/page05.html">Page 5</stori-page>
+            <stori-page title="Guideline Four" src="pages03/page06.html">Page 6</stori-page>
+            <stori-page title="Guideline Five" src="pages03/page07.html">Page 7</stori-page>
+            <stori-page title="Guideline Six" src="pages03/page08.html">Page 8</stori-page>
+            <stori-page title="Exact and Inexact Numbers" src="pages03/page09.html">Page 9</stori-page>
+            <stori-page title="Determine Sig Figs" src="pages03/page10.html">Page 10</stori-page>
+            <stori-page title="Knowledge Check 2.4" src="pages03/page11.html">Page 11</stori-page>
+            <stori-page title="Significant Figures in Calculations" src="pages03/page12.html">Page 12</stori-page>
+            <stori-page title="Rounding" src="pages03/page13.html">Page 13</stori-page>
+            <stori-page title="Knowledge check 2.5" src="pages03/page14.html">Page 14</stori-page>
+            <stori-page title="Significant Figures for Addition and Subtraction" src="pages03/page15.html">Page 15</stori-page>
+            <stori-page title="Significant Figures for Multiplication and Division" src="pages03/page16.html">Page 16</stori-page>
+            <stori-page title="Knowledge Check 2.6" src="pages03/page17.html">Page 17</stori-page>
+            <stori-page title="Significant Figures in Multiple Operations" src="pages03/page18.html">Page 18</stori-page>
+            <stori-page title="Multiple Operations Sig Figs" src="pages03/page19.html">Page 19</stori-page>
+            <stori-page title="Knowledge Check 2.7" src="pages03/page20.html">Page 20</stori-page>
+            <stori-page title="Significant Figures - Summary" src="pages03/page21.html">Page 21</stori-page>
+        </stori-book>
+
+        <script>
+            // Hack: D2L won't allow standard HTML tags inside non-standard HTML.  Start outside, then move it inside.
+            const video = document.querySelector('video.video-js');
+            const transcript = document.querySelector('#transcript');
+            const storibook = document.querySelector('stori-book');
+            video.remove();
+            transcript.remove();
+            storibook.appendChild(video);
+            storibook.appendChild(transcript);
+        </script>
+    </div>
+
+</body>
+
+</html>

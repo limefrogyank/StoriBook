@@ -1,0 +1,103 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="../presentAble.css" type="text/css" />
+    <link rel="stylesheet" href="../presentAbleAster.css" type="text/css" />
+
+    <link rel="stylesheet" href="styles07.css" type="text/css" />
+
+    <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../videojs/videojs-accessibility.css" />
+
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+
+    <script module src="../videojs/videojs-accessibility.js"></script>
+
+    <script src="../dist/bundle.js"></script>
+
+
+    <script src="../assets/periodicTable.js"></script>
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="col-sm-10 offset-sm-1">
+            <div class="sr-only">
+                <h2>Screen-Reader Notices</h2>
+                <p>This page includes an audio lecture. Press ctrl+alt+p to play or pause the lecture at any time.
+                </p>
+                <p>The slides on this page are explorable graphics.</p>
+                <p>Slides will automatically advance as the audio plays.</p>
+            </div>
+            <p></p>
+            <hr>
+        </div>
+
+        <video slot="video" class='video-js' controls='controls' data-able-player preload="auto"
+            data-transcript-div="transcript" height="auto">
+            <source
+                src="https://cdnapisec.kaltura.com/p/823192/sp/0/playManifest/entryId/1_d4baldno/format/applehttp/protocol/https/a.m3u8"
+                type="application/x-mpegURL">
+            <track kind="captions" src="1_d4baldno.vtt" srclang="en" label="English" default>
+            <track kind="metadata" src="1_d4baldno.meta.vtt">
+            <track kind="chapters" src="1_d4baldno.chap.vtt">
+        </video>
+        <div slot="transcript" id="transcript"></div>
+        <stori-book>
+            <stori-page title="The Periodic Table" src="pages07/page01.html">Page 1</stori-page>
+            <stori-page title="Elements" src="pages07/page02.html">Page 2</stori-page>
+            <stori-page title="Diatomic Elements" src="pages07/page03.html">Page 3</stori-page>
+            <stori-page title="Dmitri Mendeleev" src="pages07/page04.html">Page 4</stori-page>
+            <stori-page title="Predicted Elements" src="pages07/page05.html">Page 5</stori-page>
+            <stori-page title="Modern Periodic Table" src="pages07/page06.html">Page 6</stori-page>
+            <stori-page title="Knowledge Check 5.4" src="pages07/page07.html">Page 7</stori-page>
+            <stori-page title="Metals, Nonmetals and Semimetals (Metalloids)" src="pages07/page08.html">Page 8</stori-page>
+            <stori-page title="Properties of Metals" src="pages07/page09.html">Page 9</stori-page>
+            <stori-page title="Properties of Nonmetals" src="pages07/page10.html">Page 10</stori-page>
+            <stori-page title="Properties of Semimetals" src="pages07/page11.html">Page 11</stori-page>
+            <stori-page title="Knowledge Check 5.5" src="pages07/page12.html">Page 12</stori-page>
+            <stori-page title="Features of the Periodic Table" src="pages07/page13.html">Page 13</stori-page>
+            <stori-page title="Knowledge Check 5.6" src="pages07/page14.html">Page 14</stori-page>
+        </stori-book>
+
+        <script>
+            // Hack: D2L won't allow standard HTML tags inside non-standard HTML.  Start outside, then move it inside.
+            const video = document.querySelector('video.video-js');
+            const transcript = document.querySelector('#transcript');
+            const storibook = document.querySelector('stori-book');
+            video.remove();
+            transcript.remove();
+            storibook.appendChild(video);
+            storibook.appendChild(transcript);
+        </script>
+    </div>
+
+    <script>
+        function flipCard(butt) {
+            var sideA = butt.parentElement.getElementsByClassName("sideA")[0];
+            var sideB = butt.parentElement.getElementsByClassName("sideB")[0];
+            var flipA = butt.parentElement.getElementsByClassName("flipA")[0];
+            var flipB = butt.parentElement.getElementsByClassName("flipB")[0];
+            if (sideA.style.display === "none") {
+                //Slide A is hidden
+                sideA.style.display = "revert";
+                sideB.style.display = "none";
+                flipA.style.display = "revert";
+                flipB.style.display = "none";
+            }
+            else if (sideB.style.display === "none") {
+                //Slide B is hidden
+                sideA.style.display = "none";
+                sideB.style.display = "revert";
+                flipA.style.display = "none";
+                flipB.style.display = "revert";
+            }
+        }
+    </script>
+</body>
+
+</html>

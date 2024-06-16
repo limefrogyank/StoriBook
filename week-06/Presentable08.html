@@ -1,0 +1,98 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="../presentAble.css" type="text/css" />
+    <link rel="stylesheet" href="../presentAbleAster.css" type="text/css" />
+
+    <link rel="stylesheet" href="styles08.css" type="text/css" />
+
+    <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../videojs/videojs-accessibility.css" />
+
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+
+    <script module src="../videojs/videojs-accessibility.js"></script>
+
+    <script src="../dist/bundle.js"></script>
+
+    <script src="../assets/periodicTable.js"></script>
+    
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="col-sm-10 offset-sm-1">
+            <div class="sr-only">
+                <h2>Screen-Reader Notices</h2>
+                <p>This page includes an audio lecture. Press ctrl+alt+p to play or pause the lecture at any time.
+                </p>
+                <p>The slides on this page are explorable graphics.</p>
+                <p>Slides will automatically advance as the audio plays.</p>
+            </div>
+            <p></p>
+            <hr>
+        </div>
+
+        <video slot="video" class='video-js' controls='controls' data-able-player preload="auto"
+            data-transcript-div="transcript" height="auto">
+            <source
+                src="https://cdnapisec.kaltura.com/p/823192/sp/0/playManifest/entryId/1_4ugihdg5/format/applehttp/protocol/https/a.m3u8"
+                type="application/x-mpegURL">
+            <track kind="captions" src="1_4ugihdg5.vtt" srclang="en" label="English" default>
+            <track kind="metadata" src="1_4ugihdg5.meta.vtt">
+            <track kind="chapters" src="1_4ugihdg5.chap.vtt">
+        </video>
+        <div slot="transcript" id="transcript"></div>
+        <stori-book>
+            <stori-page title="Ions, Ionic Bonding, and the Nomenclature of Ionic Compounds" src="pages08/page01.html">Page 1</stori-page>
+            <stori-page title="Types of Bonding" src="pages08/page02.html">Page 2</stori-page>
+            <stori-page title="Electrons" src="pages08/page03.html">Page 3</stori-page>
+            <stori-page title="Determining Valence Electrons and Octet" src="pages08/page04.html">Page 4</stori-page>
+            <stori-page title="Knowledge Check 6.1" src="pages08/page05.html">Page 5</stori-page>
+            <stori-page title="What is an ion" src="pages08/page06.html">Page 6</stori-page>
+            <stori-page title="Cations - ions with a positive charge" src="pages08/page07.html">Page 7</stori-page>
+            <stori-page title="Anions - ions with a negative charge" src="pages08/page08.html">Page 8</stori-page>
+            <stori-page title="Monatomic Ions with only 1 possible charge" src="pages08/page09.html">Page 9</stori-page>
+            <stori-page title="Monatomic Ions with more than 1 possible charge" src="pages08/page10.html">Page 10</stori-page>
+            <stori-page title="Naming nonmetal monatomic ions" src="pages08/page11.html">Page 11</stori-page>
+            <stori-page title="Naming metal cations" src="pages08/page12.html">Page 12</stori-page>
+            <stori-page title="Knowledge Check 6.2" src="pages08/page13.html">Page 13</stori-page>
+            <stori-page title="Ionic Bonding" src="pages08/page14.html">Page 14</stori-page>
+            <stori-page title="Formula Units" src="pages08/page15.html">Page 15</stori-page>
+            <stori-page title="Writing Formulas for Ionic Compounds" src="pages08/page16.html">Page 16</stori-page>
+            <stori-page title="The Basics of Formulas and Names of ionic compounds" src="pages08/page17.html">Page 17</stori-page>
+            <stori-page title="Writing Formulas for ionic compounds - Example 1" src="pages08/page18.html">Page 18</stori-page>
+            <stori-page title="Method 1" src="pages08/page19.html">Page 19</stori-page>
+            <stori-page title="Method 2" src="pages08/page20.html">Page 20</stori-page>
+            <stori-page title="Writing Formulas for ionic compounds - Example 2" src="pages08/page21.html">Page 21</stori-page>
+            <stori-page title="Example 2- Using method 1" src="pages08/page22.html">Page 22</stori-page>
+            <stori-page title="Example 2- Using method 2" src="pages08/page23.html">Page 23</stori-page>
+            <stori-page title="Naming ionic compounds from a formula - Example 1" src="pages08/page24.html">Page 24</stori-page>
+            <stori-page title="Naming ionic compounds from a formula - Example 2" src="pages08/page25.html">Page 25</stori-page>
+            <stori-page title="Ionic Nomenclature Practice" src="pages08/page26.html">Page 26</stori-page>
+            <stori-page title="Knowledge Check 6.3" src="pages08/page27.html">Page 27</stori-page>
+            <stori-page title="Polyatomic Ions" src="pages08/page28.html">Page 28</stori-page>
+            <stori-page title="Writing Formulas with Polyatomic Ions" src="pages08/page29.html">Page 29</stori-page>
+            <stori-page title="Ionic Nomenclature Practice with polyatomic ions" src="pages08/page30.html">Page 30</stori-page>
+            <stori-page title="Knowledge Check 6.4" src="pages08/page31.html">Page 31</stori-page>
+        </stori-book>
+
+        <script>
+            // Hack: D2L won't allow standard HTML tags inside non-standard HTML.  Start outside, then move it inside.
+            const video = document.querySelector('video.video-js');
+            const transcript = document.querySelector('#transcript');
+            const storibook = document.querySelector('stori-book');
+            video.remove();
+            transcript.remove();
+            storibook.appendChild(video);
+            storibook.appendChild(transcript);
+        </script>
+    </div>
+
+</body>
+
+</html>

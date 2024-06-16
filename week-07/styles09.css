@@ -1,0 +1,7 @@
+tr .focusReveal {
+    display: none;
+}
+
+tr:focus .focusReveal {
+    display: revert;
+}

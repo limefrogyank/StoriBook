@@ -1,0 +1,96 @@
+.EQ {
+    font-family: Roboto-Bold, Roboto;
+    font-size: 56px;
+    stroke: #000;
+    stroke-width: 4px;
+}
+
+.whiteBlock {
+    fill: white;
+    stroke: none;
+}
+
+.crossOut {
+    fill: none;
+    stroke: red;
+    stroke-width: 3px;
+}
+
+.drawsIn {
+    stroke-dasharray: 250;
+    stroke-dashoffset: 250;
+}
+
+.fadesIn,
+.fadeOnce {
+    opacity: 0;
+}
+
+*[contenteditable="true"] .drawsIn {
+    stroke-dasharray: revert;
+    stroke-dashoffset: revert;
+}
+
+*[contenteditable="true"] .fadesIn,
+*[contenteditable="true"] .fadeOnce {
+    opacity: revert;
+}
+
+.anGroup:hover>.drawsIn,
+.anGroup:focus>.drawsIn,
+.anGroup:focus-within>.drawsIn {
+    animation: drawIn01 2s linear forwards;
+}
+
+.anGroup:hover>.fadesIn,
+.anGroup:focus>.fadesIn,
+.anGroup:focus-within>.fadesIn {
+    animation: fadeIn01 2s linear forwards;
+}
+
+.anGroup:hover>.fadeOnce,
+.anGroup:focus>.fadeOnce {
+    animation: fadeIn01 2s linear forwards;
+}
+
+
+
+@keyframes drawIn01 {
+    0% {
+        stroke-dashoffset: 220;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes fadeIn01 {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1
+    }
+}
+
+eqpart input {
+    height: 1em;
+    border: none;
+    font-size: inherit;
+    width: 1em;
+}
+
+th,
+td {
+    padding: 1em;
+}
+
+tr .focusReveal {
+    display: none;
+}
+
+tr:focus .focusReveal {
+    display: revert;
+}

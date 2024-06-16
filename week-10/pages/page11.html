@@ -1,0 +1,209 @@
+<svg onload="makeDraggable(evt)" viewbox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g class="moveBox slideHead draggable-group" transform="translate(0 -125)">
+    <g class="scaleBox" style="transform: scale(1 1);"></g>
+    <foreignobject height="200" width="1635" x="144" y="150">
+      <div>
+        <h2>Glucose: CO₂ Produced
+
+        </h2>
+      </div>
+    </foreignobject>
+  </g>
+  <g class="moveBox draggable-group" transform="translate(150 180)">
+    <foreignobject height="150" width="1500" x="0" y="0">
+      <div>
+        <p>Example: The breakdown of glucose provides energy to our bodies
+
+        </p>
+        <p>
+          If 856 g of glucose are consumed, what mass of CO₂ is produced?
+
+        </p>
+      </div>
+    </foreignobject>
+  </g>
+  <g class="moveBox draggable-group" transform="translate(250 300)">
+    <g class="scaleBox" style="transform: scale(1 1)" transform="scale(2 0.25)"></g>
+    <foreignobject height="125" width="1300" x="0" y="0">
+      <div>
+        <p style="font-size: 60px;">
+          <baleq id="baleq01" mytab="eqtab01">
+            <eqpart column="0">
+              <input dir="rtl" id="eq01mult01" min="1" name="eq01mult01" onchange="baleqTabUp(this)" type="number" />
+              <label for="eq01mult01" id="eq01lab01" onclick="upMult(this)">C₆H₁₂O₆</label>
+            </eqpart><sub>(s)</sub>
+            +
+            <eqpart column="0">
+              <input dir="rtl" id="eq01mult02" min="1" name="eq01mult02" onchange="baleqTabUp(this)" type="number" />
+              <label for="eq01mult02" id="eq01lab02" onclick="upMult(this)">O₂</label>
+            </eqpart><sub>(g)</sub>
+            →
+            <eqpart column="1">
+              <input dir="rtl" id="eq01mult03" min="1" name="eq01mult03" onchange="baleqTabUp(this)" type="number" />
+              <label for="eq01mult03" id="eq01lab03" onclick="upMult(this)">CO₂</label>
+            </eqpart><sub>(g)</sub>
+            +
+            <eqpart column="1">
+              <input dir="rtl" id="eq01mult04" min="1" name="eq01mult04" onchange="baleqTabUp(this)" type="number" />
+              <label for="eq01mult04" id="eq01lab04" onclick="upMult(this)">H₂O</label>
+            </eqpart><sub>(l)</sub>
+          </baleq>
+        </p>
+      </div>
+    </foreignobject>
+  </g>
+  <g class="moveBox draggable-group" transform="translate(650 410)">
+    <g class="scaleBox" style="transform: scale(1 1)" transform="scale(2.5 1)"></g>
+    <foreignobject height="600" width="700" x="0" y="0">
+      <div style="
+    text-align: center;
+">
+        <table class="table-bordered table-striped table-hover" id="eqtab01">
+          <thead>
+            <tr class="as-box" style="background: #676960;">
+              <th>
+                <p>Element</p>
+              </th>
+              <th>
+                <p>Reactants</p>
+              </th>
+              <th>
+                <p><span>Products</span></p>
+              </th>
+            </tr>
+          </thead>
+          <tbody style="text-align: center;">
+            <tr>
+              <th scope="row">
+                <p>C
+                </p>
+              </th>
+              <td>
+                <p>6</p>
+              </td>
+              <td>
+                <p>1</p>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <p>H
+                </p>
+              </th>
+              <td>
+                <p>12</p>
+              </td>
+              <td>
+                <p>2</p>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">
+                <p>O
+                </p>
+              </th>
+              <td>
+                <p>8</p>
+              </td>
+              <td>
+                <p>3</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </foreignobject>
+  </g>
+  <g class="moveBox draggable-group" transform="translate(300 550)">
+    <g class="scaleBox" focusable="true" id="eqReset04" onclick="resetEq('baleq01')" role="button"
+      style="transform: scale(1 1)" tabindex="0" title="reset equation" transform="scale(0.25 0.25)">
+      <path class="as-box"
+        d="M465.92,503H34.09C15.24,502.94,0,487.65,0,468.8V34.2C0,15.35,15.24,.06,34.09,0H465.92c18.84,.07,34.08,15.36,34.08,34.2V468.8c0,18.84-15.24,34.13-34.08,34.2Z">
+      </path>
+      <g class="as-icon-box" style="
+    transform: scale(14);
+">
+        <path
+          d="M17.81,30.04l-1.34,2.81c-.32,.64,.38,1.34,1.02,1.02l13.13-6.5-13.13-6.5c-.64-.32-1.34,.38-1.02,1.02l1.34,2.87h-.38c-7.4-1.47-13.2-3.51-13.2-11.16,0-.64-1.47,2.49-1.47,4.97,0,8.16,6.44,10.46,14.47,11.35l.57,.13Z">
+        </path>
+        <path
+          d="M18.19,6.07l1.47-3.06c.26-.57-.32-1.15-.89-.89L5.44,8.75l13.33,6.63c.57,.26,1.15-.32,.89-.89l-1.47-3.06h.38c7.4,1.4,13.2,3.44,13.2,11.16,0,.64,1.47-2.49,1.47-4.97,0-8.22-6.44-10.52-14.47-11.41l-.57-.13Z">
+        </path>
+      </g>
+    </g>
+  </g>
+  <g class="moveBox draggable-group" transform="translate(45 800)">
+    <g class="scaleBox" transform="scale(0.82)"><text class="EQ" transform="translate(19.19 93.55)">856 g
+        C₆H₁₂O₆</text>
+      <g class="EQ anGroup moveBox draggable-group" focusable="true" id="E07A01" tabindex="-1"
+        transform="translate(200 5)"> <text class="fadesIn" transform="translate(179.72 94.34)"> × </text>
+        <g class="fadesIn moveBox transform= draggable-group" transform="translate(20 0)"><text
+            transform="translate(255 58.07)">1 mol C₆H₁₂O₆</text>
+          <foreignobject height="0" width="0" x="0" y="0">
+            <div>
+              <p>over</p>
+            </div>
+          </foreignobject>
+          <line x1="215.67" x2="660" y1="76.88" y2="76.88"> </line><text transform="translate(235.93 136.66)">180.16 g
+            C₆H₁₂O₆</text>
+        </g>
+        <g class="anGroup moveBox draggable-group" focusable="true" id="E07A02" tabindex="-1"
+          transform="translate(-10 10)">
+          <g class="fadesIn moveBox draggable-group" transform="translate(-70 -10)">
+            <line class="crossOut" x1="240" x2="0" y1="43.11" y2="100"> </line>
+          </g>
+          <line class="fadesIn crossOut" x1="690" x2="440" y1="85.4" y2="140"> </line>
+          <g class="anGroup moveBox draggable-group" focusable="true" id="E07A03" tabindex="-1"
+            transform="translate(540 -10)"> <text class="fadesIn" transform="translate(179.72 94.34)"> × </text>
+            <g class="fadesIn moveBox transform= draggable-group" transform="translate(20 0)"><text
+                transform="translate(280 58.07)">6 mol O₂</text>
+              <foreignobject height="0" width="0" x="0" y="0">
+                <div>
+                  <p>over</p>
+                </div>
+              </foreignobject>
+              <line x1="215.67" x2="570" y1="76.88" y2="76.88"> </line><text transform="translate(220 136.66)">1
+                mol C₆H₁₂O₆
+              </text>
+            </g>
+            <g class="anGroup moveBox draggable-group" focusable="true" id="E07A04" tabindex="-1"
+              transform="translate(-30 0)">
+              <g class="fadesIn moveBox draggable-group" transform="translate(-180 -40)">
+                <line class="crossOut" x1="300" x2="0" y1="60" y2="96"> </line>
+              </g>
+              <line class="fadesIn crossOut" x1="610" x2="325" y1="90" y2="140"> </line>
+              <g class="anGroup moveBox draggable-group" focusable="true" id="E07A05" tabindex="-1"
+                transform="translate(465 -5)"> <text class="fadesIn" transform="translate(179.72 94.34)"> × </text>
+                <g class="fadesIn moveBox transform= draggable-group" transform="translate(20 0)"><text
+                    transform="translate(230 58.07)">44.01 g CO₂</text>
+                  <foreignobject height="0" width="0" x="0" y="0">
+                    <div>
+                      <p>over</p>
+                    </div>
+                  </foreignobject>
+                  <line x1="215.67" x2="500" y1="76.88" y2="76.88"> </line><text transform="translate(240 136.66)">1 mol
+                    CO₂</text>
+                </g>
+                <g class="anGroup moveBox draggable-group" focusable="true" id="E07A06" tabindex="-1"
+                  transform="translate(10 0)">
+                  <g class="fadesIn moveBox draggable-group" transform="translate(-60 -40)">
+                    <line class="crossOut" x1="130" x2="-45" y1="60" y2="95"> </line>
+                  </g>
+                  <line class="fadesIn crossOut" x1="475" x2="290" y1="95" y2="140"> </line>
+                  <g class="anGroup moveBox draggable-group" focusable="true" id="E07A07" tabindex="-1"
+                    transform="translate(370 0)"> <text class="fadesIn" transform="translate(179.72 94.34)"> = </text>
+                    <g class="fadesIn moveBox transform= draggable-group" transform="translate(0 40)"><text
+                        transform="translate(235 58.07)">1.25 × 10³ g CO₂
+                      </text>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
